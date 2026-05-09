@@ -24,19 +24,41 @@
 
 ## Установка
 
-Есть три способа — выбирайте, что подходит.
+Четыре пути в зависимости от типа вашего HA.
 
-### 1. HACS plugin (для пользователей HACS)
+### 1. HA Add-on (для HA OS / Supervised — самый простой)
 
-Самый удобный для большинства HA-установок. Glance появляется в боковой панели HA как нативный пункт меню.
+Если у вас Home Assistant OS или Home Assistant Supervised — это самый простой путь. HA сам поднимет Homeglance-сервер и будет им управлять.
 
-1. В HACS → Frontend → Custom repositories → добавить `https://github.com/Ivkaiv/homeglance`, тип Plugin
+1. **Settings** → **Add-ons** → **Add-on Store** → ⋮ (три точки) → **Repositories**
+2. Добавить URL `https://github.com/Ivkaiv/homeglance` → **Add**
+3. Найти **Homeglance** → **Install** → **Start**
+4. Открыть через **Open Web UI** или `http://<homeassistant-ip>:3040`
+
+Подробнее: [`homeglance-addon/README.md`](homeglance-addon/README.md).
+
+### 2. HACS plugin (иконка в сайдбаре HA)
+
+Сам по себе не запускает сервер — это iframe-обёртка для уже запущенного Homeglance (Add-on или Docker). После установки Glance появляется в боковой панели HA как нативный пункт меню.
+
+1. В HACS → Frontend → Custom repositories → добавить `https://github.com/Ivkaiv/homeglance`, тип **Plugin**
 2. Найти **Homeglance** → Install
-3. Перезагрузить HA → в боковой панели появится **Glance**
+3. Добавить в `configuration.yaml`:
+   ```yaml
+   panel_custom:
+     - name: homeglance-panel
+       sidebar_title: Homeglance
+       sidebar_icon: mdi:view-dashboard-variant
+       url_path: homeglance
+       module_url: /hacsfiles/homeglance/homeglance.js
+       config:
+         url: "http://homeassistant.local:3040"
+   ```
+4. Перезагрузить HA → в боковой панели появится **Homeglance**
 
-> **Важно:** HACS plugin работает в режиме iframe и требует, чтобы где-то была запущена сама панель Homeglance — через Add-on, Docker или standalone. См. ниже.
+> **Важно:** HACS plugin требует, чтобы где-то был запущен Homeglance-сервер — Add-on (1) или Docker (3).
 
-### 2. Docker / Docker Compose (любой HA-сценарий)
+### 3. Docker / Docker Compose (любой HA-сценарий)
 
 Подходит для HA Container, HA Core или для вынесения панели на отдельный сервер.
 
@@ -64,7 +86,7 @@ docker compose up -d
 
 Открыть `http://server-ip:3040`, ввести URL HA и Long-Lived Access Token, готово.
 
-### 3. Локальный запуск из исходников (для разработки)
+### 4. Локальный запуск из исходников (для разработки)
 
 ```bash
 git clone https://github.com/Ivkaiv/homeglance.git
