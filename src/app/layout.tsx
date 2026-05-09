@@ -5,6 +5,7 @@ import { ProfilesProvider } from '@/lib/profiles/ProfilesProvider';
 import { PagesProvider } from '@/lib/pages/PagesProvider';
 import { SecurityProvider } from '@/lib/security/SecurityProvider';
 import { I18nProvider } from '@/lib/i18n/I18nProvider';
+import { NotificationsProvider } from '@/lib/notifications/NotificationsProvider';
 import { SwRegister } from '@/components/pwa/SwRegister';
 import '@/styles/globals.css';
 
@@ -50,8 +51,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ProfilesProvider>
                 <PagesProvider>
                   <SecurityProvider>
-                    <div className="min-h-screen w-full safe-area-host">{children}</div>
-                    <SwRegister />
+                    <NotificationsProvider>
+                      <div className="min-h-screen w-full safe-area-host">{children}</div>
+                      <SwRegister />
+                    </NotificationsProvider>
                   </SecurityProvider>
                 </PagesProvider>
               </ProfilesProvider>

@@ -14,6 +14,7 @@ import { loadConnection } from '@/lib/ha/connection-storage';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import { useSecurity } from '@/lib/security/SecurityProvider';
+import { useNotifications } from '@/lib/notifications/NotificationsProvider';
 import { useI18n, useT } from '@/lib/i18n/I18nProvider';
 import { LOCALES, LOCALE_NAMES, type Locale } from '@/lib/i18n/types';
 import { PinPrompt } from '@/components/security/PinPrompt';
@@ -94,6 +95,10 @@ export default function SettingsPage() {
           <LanguageSwitcher />
         </Section>
 
+        <Section title={t('settings.notifications.title')}>
+          <NotificationsSection />
+        </Section>
+
         <Section title={t('settings.sync.title')}>
           <SyncSection />
         </Section>
@@ -150,6 +155,52 @@ export default function SettingsPage() {
           onCancel={() => setPinPromptOpen(false)}
         />
       )}
+    </div>
+  );
+}
+
+function NotificationsSection() {
+  const t = useT();
+  const { permission, enabled, request, disable } = useNotifications();
+
+  return (
+    <div className="text-sm">
+      <p className="text-xs text-text-tertiary leading-relaxed mb-3">
+        {t('settings.notifications.description')}
+      </p>
+
+      {permission === 'unsupported' ? (
+        <div className="text-xs text-text-tertiary px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+          {t('settings.notifications.unsupported')}
+        </div>
+      ) : permission === 'denied' ? (
+        <div className="text-xs text-amber-300 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-300/20">
+          {t('settings.notifications.denied')}
+        </div>
+      ) : enabled && permission === 'granted' ? (
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-xs text-emerald-300">
+            ✓ {t('settings.notifications.granted')}
+          </div>
+          <button
+            onClick={disable}
+            className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-text-secondary text-xs hover:bg-white/10"
+          >
+            {t('settings.notifications.disable')}
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={request}
+          className="w-full px-4 py-2.5 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm hover:bg-accent/30"
+        >
+          {t('settings.notifications.enable')}
+        </button>
+      )}
+
+      <p className="text-xs text-text-tertiary mt-3 leading-relaxed">
+        {t('settings.notifications.example')}
+      </p>
     </div>
   );
 }
