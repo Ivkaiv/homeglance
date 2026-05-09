@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Plus, Trash2, Pencil, Check, ChevronUp, ChevronDown, Eye, EyeOff } from 'lucide-react';
+import { X, Plus, Trash2, Pencil, Check, ChevronUp, ChevronDown, Eye, EyeOff, Download, Upload } from 'lucide-react';
 import { usePages } from '@/lib/pages/PagesProvider';
 import {
   DEFAULT_WEATHER_SECTIONS,
@@ -9,19 +9,64 @@ import {
   type WeatherPageConfig,
   type WeatherPageSections,
 } from '@/lib/pages/types';
+import {
+  serializeLayout,
+  parseLayout,
+  downloadJson,
+  pickJsonFile,
+  makeFilename,
+  ImportError,
+} from '@/lib/pages/import-export';
 import { useStates, useConnection } from '@/lib/ha/ConnectionProvider';
 import { getEntityDisplay } from '@/lib/ha/entity-display';
+import { useT } from '@/lib/i18n/I18nProvider';
 import { SearchableEntitySelect, type EntityOption } from '@/components/ui/SearchableEntitySelect';
 import { ModalSheet } from '@/components/ui/ModalSheet';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 export function PageManagerSheet({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const { pages, addPage, updatePage, deletePage, reorderPages } = usePages();
   const [editing, setEditing] = useState<Page | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Page | null>(null);
+  const [importMessage, setImportMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
 
   function startNew() {
     setEditing({ id: '', title: '', icon: '📄', kind: 'grid', widgets: [] });
+  }
+
+  function exportPage(page: Page) {
+    downloadJson(makeFilename(page.title), serializeLayout([page]));
+  }
+
+  function exportAll() {
+    downloadJson(makeFilename('all-pages'), serializeLayout(pages));
+  }
+
+  async function importLayout() {
+    const text = await pickJsonFile();
+    if (!text) return;
+    try {
+      const data = parseLayout(text);
+      // Импортируем как новые страницы, чтобы не перетереть существующие.
+      // addPage сам разрулит коллизии id (добавит -2/-3 суффикс).
+      let imported = 0;
+      for (const p of data.pages) {
+        addPage({
+          title: p.title,
+          icon: p.icon,
+          kind: p.kind,
+          widgets: p.widgets,
+          weather: p.weather,
+        });
+        imported++;
+      }
+      setImportMessage({ kind: 'success', text: t('pages.manager.importSuccess', { n: imported }) });
+    } catch (e: unknown) {
+      const hint = e instanceof ImportError ? e.hint : undefined;
+      const key = hint ? `pages.manager.importError.${hint}` : 'pages.manager.importError.generic';
+      setImportMessage({ kind: 'error', text: t(key) });
+    }
   }
 
   function save(p: Page) {
@@ -112,6 +157,14 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
                     <ChevronDown size={14} aria-hidden="true" />
                   </button>
                   <button
+                    onClick={() => exportPage(p)}
+                    aria-label={t('pages.manager.exportPage')}
+                    title={t('pages.manager.exportPage')}
+                    className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                  >
+                    <Download size={14} aria-hidden="true" />
+                  </button>
+                  <button
                     onClick={() => setEditing(p)}
                     aria-label={`Редактировать страницу «${p.title}»`}
                     className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
@@ -135,8 +188,37 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
               onClick={startNew}
               className="w-full px-4 py-3 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm flex items-center justify-center gap-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
             >
-              <Plus size={16} aria-hidden="true" /> Создать страницу
+              <Plus size={16} aria-hidden="true" /> {t('pages.manager.add')}
             </button>
+
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              <button
+                onClick={importLayout}
+                className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-text-secondary text-xs flex items-center justify-center gap-1.5 hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+              >
+                <Upload size={14} aria-hidden="true" /> {t('pages.manager.import')}
+              </button>
+              <button
+                onClick={exportAll}
+                disabled={pages.length === 0}
+                className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-text-secondary text-xs flex items-center justify-center gap-1.5 hover:bg-white/10 disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+              >
+                <Download size={14} aria-hidden="true" /> {t('pages.manager.exportAll')}
+              </button>
+            </div>
+
+            {importMessage && (
+              <div
+                role="status"
+                className={`mt-3 text-xs px-3 py-2 rounded-lg border ${
+                  importMessage.kind === 'success'
+                    ? 'text-emerald-300 bg-emerald-500/10 border-emerald-300/20'
+                    : 'text-red-300 bg-red-500/10 border-red-300/20'
+                }`}
+              >
+                {importMessage.text}
+              </div>
+            )}
           </>
         ) : (
           <PageEditor
