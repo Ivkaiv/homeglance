@@ -99,18 +99,64 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
     callService('climate', 'set_swing_mode', entityId, { swing_mode: mode });
 
   const isOff = e.state === 'off';
-  const subtitle = isOff
-    ? 'Выключено'
-    : `${HVAC_LABELS_RU[e.state] ?? e.state}${
-        hvacAction && hvacAction !== e.state ? ` · ${hvacAction}` : ''
-      }`;
+  // hvac_action — что сущность РЕАЛЬНО делает (heating/cooling/drying/fan/idle/off).
+  // hvac_mode (e.state) — какой режим выбран. Они могут расходиться: например
+  // выбран heat, но температура достигнута — action=idle.
+  const isActive =
+    !!hvacAction &&
+    hvacAction !== 'idle' &&
+    hvacAction !== 'off' &&
+    !isOff;
+
+  const ACTION_LABELS_RU: Record<string, string> = {
+    heating: 'греет',
+    cooling: 'охлаждает',
+    drying: 'осушает',
+    fan: 'вентиляция',
+    idle: 'ожидание',
+    off: 'выключено',
+    preheating: 'подогрев',
+    defrosting: 'разморозка',
+  };
+  const ACTION_DOTS: Record<string, string> = {
+    heating: 'bg-orange-400',
+    cooling: 'bg-sky-400',
+    drying: 'bg-amber-400',
+    fan: 'bg-violet-400',
+    preheating: 'bg-orange-400',
+    defrosting: 'bg-sky-400',
+  };
+
+  const subtitleNode = isOff ? (
+    <span>Выключено</span>
+  ) : (
+    <span className="inline-flex items-center gap-2">
+      {isActive && (
+        <span
+          className={`inline-block w-2 h-2 rounded-full animate-pulse ${
+            ACTION_DOTS[hvacAction] ?? 'bg-emerald-400'
+          }`}
+          aria-hidden="true"
+        />
+      )}
+      <span>{HVAC_LABELS_RU[e.state] ?? e.state}</span>
+      {hvacAction && hvacAction !== e.state && (
+        <span className="text-text-tertiary">·</span>
+      )}
+      {hvacAction && hvacAction !== e.state && (
+        <span className={isActive ? 'text-text-secondary' : 'text-text-tertiary'}>
+          {ACTION_LABELS_RU[hvacAction] ?? hvacAction}
+        </span>
+      )}
+    </span>
+  );
 
   return (
     <ModalSheet
       open={open}
       onClose={onClose}
       title={friendlyName}
-      subtitle={subtitle}
+      subtitle={subtitleNode}
       ariaLabel={`Управление ${friendlyName}`}
     >
       {/* Целевая температура — большой блок с +/- по бокам. */}

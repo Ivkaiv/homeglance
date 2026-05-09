@@ -516,6 +516,13 @@ export function RoomHubWidget({ params }: { params: Params }) {
               c.state === 'heat' || c.state === 'auto' || c.state === 'heat_cool';
             const isCooling = c.state === 'cool';
 
+            // hvac_action — РЕАЛЬНОЕ действие (heating/cooling/idle/off).
+            // Отделяем «выбран heat но температура достигнута → idle» от
+            // «реально греется» — пилюля пульсирует только в active-состоянии.
+            const action = (c.attributes.hvac_action as string | undefined) ?? '';
+            const isActive =
+              action !== '' && action !== 'idle' && action !== 'off' && c.state !== 'off';
+
             const stateIcon = isHeating ? '🔥' : isCooling ? '❄️' : '💧';
             const pillClass = isHeating
               ? 'bg-orange-500/20 border-orange-300/25'
@@ -530,11 +537,22 @@ export function RoomHubWidget({ params }: { params: Params }) {
               : isCooling
                 ? 'text-sky-700 dark:text-sky-100'
                 : 'text-text-secondary';
+            // Когда работает — двукратное свечение для «живого» индикатора;
+            // когда idle — приглушённое статичное.
             const glow = isHeating
-              ? '0 0 14px rgba(249, 115, 22, 0.22)'
+              ? isActive
+                ? '0 0 18px rgba(249, 115, 22, 0.55)'
+                : '0 0 12px rgba(249, 115, 22, 0.18)'
               : isCooling
-                ? '0 0 14px rgba(56, 189, 248, 0.22)'
+                ? isActive
+                  ? '0 0 18px rgba(56, 189, 248, 0.55)'
+                  : '0 0 12px rgba(56, 189, 248, 0.18)'
                 : undefined;
+            const dotClass = isHeating
+              ? 'bg-orange-400'
+              : isCooling
+                ? 'bg-sky-400'
+                : 'bg-emerald-400';
             // Высота пилюли = высота кнопок (btnSize), чтобы они выровнялись в ряду.
             // Внутренняя круглая кнопка -/+ — на 4px меньше.
             const pillH = btnSize;
@@ -567,7 +585,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
                 <button
                   type="button"
                   onClick={() => setClimateSheetEntity(cid)}
-                  aria-label={`Открыть настройки ${label}`}
+                  aria-label={`Открыть настройки ${label}${isActive ? ' (работает)' : ''}`}
                   title={`Открыть настройки ${label}`}
                   className={clsx(
                     'tabular-nums text-center flex items-center justify-center gap-0.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70',
@@ -577,7 +595,14 @@ export function RoomHubWidget({ params }: { params: Params }) {
                     valueClass
                   )}
                 >
-                  <span aria-hidden="true">{stateIcon}</span>
+                  {isActive ? (
+                    <span
+                      aria-hidden="true"
+                      className={clsx('inline-block w-1.5 h-1.5 rounded-full animate-pulse', dotClass)}
+                    />
+                  ) : (
+                    <span aria-hidden="true">{stateIcon}</span>
+                  )}
                   {target !== undefined ? `${Math.round(target)}°` : '—'}
                 </button>
                 <PressButton
