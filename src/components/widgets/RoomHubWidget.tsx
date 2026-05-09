@@ -11,6 +11,7 @@ import { SensorChip } from './SensorChip';
 import { SensorIconBadge } from './SensorIconBadge';
 import { SensorHistoryButton } from '@/components/charts/SensorHistoryButton';
 import { MediaPlayerSheet } from './MediaPlayerSheet';
+import { ClimateSheet } from './ClimateSheet';
 import { useImageAccent } from '@/lib/useImageAccent';
 import { detectSensorType, getSensorPreset } from '@/lib/sensor/presets';
 
@@ -50,6 +51,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
   const [ref, size] = useWidgetSize();
   const tier = sizeTier(size);
   const [mediaSheetOpen, setMediaSheetOpen] = useState(false);
+  const [climateSheetEntity, setClimateSheetEntity] = useState<string | null>(null);
 
   // Цвет, извлечённый из обложки текущего трека — подкрашивает мини-плеер
   // (рамка, кнопка play). Хук вызываем тут, в основном теле — нельзя внутри
@@ -562,9 +564,13 @@ export function RoomHubWidget({ params }: { params: Params }) {
                 >
                   <Minus size={Math.round(innerBtn * 0.45)} aria-hidden="true" />
                 </PressButton>
-                <span
+                <button
+                  type="button"
+                  onClick={() => setClimateSheetEntity(cid)}
+                  aria-label={`Открыть настройки ${label}`}
+                  title={`Открыть настройки ${label}`}
                   className={clsx(
-                    'tabular-nums text-center flex items-center justify-center gap-0.5',
+                    'tabular-nums text-center flex items-center justify-center gap-0.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70',
                     compactClimate
                       ? 'text-xs font-semibold px-0.5'
                       : 'text-sm font-semibold min-w-[44px] px-1',
@@ -573,7 +579,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
                 >
                   <span aria-hidden="true">{stateIcon}</span>
                   {target !== undefined ? `${Math.round(target)}°` : '—'}
-                </span>
+                </button>
                 <PressButton
                   onClick={() => setTemp(+step)}
                   disabled={isUnavail || target === undefined}
@@ -593,6 +599,13 @@ export function RoomHubWidget({ params }: { params: Params }) {
           entityId={params.mediaPlayerEntity}
           open={mediaSheetOpen}
           onClose={() => setMediaSheetOpen(false)}
+        />
+      )}
+      {climateSheetEntity && (
+        <ClimateSheet
+          entityId={climateSheetEntity}
+          open={true}
+          onClose={() => setClimateSheetEntity(null)}
         />
       )}
     </div>
