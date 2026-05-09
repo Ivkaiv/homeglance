@@ -19,6 +19,7 @@ import { useI18n, useT } from '@/lib/i18n/I18nProvider';
 import { LOCALES, LOCALE_NAMES, type Locale } from '@/lib/i18n/types';
 import { PinPrompt } from '@/components/security/PinPrompt';
 import { SyncSection } from '@/components/sync/SyncSection';
+import { ExternalWidgetsSection } from '@/components/sync/ExternalWidgetsSection';
 import type { HAConnection } from '@/lib/ha/types';
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0';
@@ -136,6 +137,10 @@ export default function SettingsPage() {
               {t('settings.connection.connectButton')}
             </button>
           )}
+        </Section>
+
+        <Section title={t('settings.external.title')}>
+          <ExternalWidgetsSection />
         </Section>
 
         <Section title={t('settings.about.title')}>

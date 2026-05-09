@@ -6,6 +6,7 @@ import { PagesProvider } from '@/lib/pages/PagesProvider';
 import { SecurityProvider } from '@/lib/security/SecurityProvider';
 import { I18nProvider } from '@/lib/i18n/I18nProvider';
 import { NotificationsProvider } from '@/lib/notifications/NotificationsProvider';
+import { SDKBootstrap } from '@/lib/sdk/SDKBootstrap';
 import { SwRegister } from '@/components/pwa/SwRegister';
 import '@/styles/globals.css';
 
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <NotificationsProvider>
                       <div className="min-h-screen w-full safe-area-host">{children}</div>
                       <SwRegister />
+                      <SDKBootstrap />
                     </NotificationsProvider>
                   </SecurityProvider>
                 </PagesProvider>

@@ -124,6 +124,14 @@ export const en: Dictionary = {
   'settings.sync.error.generic': 'Sync failed: {message}',
   'settings.sync.confirmPull': 'Pull from HA? Local layouts and profiles will be replaced with what is on HA.',
 
+  'settings.external.title': 'External widgets',
+  'settings.external.description': 'Third-party widgets are .js files that register new widget types via the Homeglance SDK. Only add sources you trust — the code runs inside the panel.',
+  'settings.external.add': 'Add URL',
+  'settings.external.placeholder': 'https://example.com/my-widget.js',
+  'settings.external.empty': 'No external widgets connected.',
+  'settings.external.reloadHint': 'Reload the page after adding or removing a URL.',
+  'settings.external.docs': 'Developer docs',
+
   'settings.about.title': 'About',
   'settings.about.body1': 'Glance v{version} — modern, mobile-first dashboard for Home Assistant.',
   'settings.about.body2': 'Open-source, MIT license. Makes no changes to HA — talks via the standard API only.',

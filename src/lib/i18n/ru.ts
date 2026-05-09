@@ -124,6 +124,14 @@ export const ru: Dictionary = {
   'settings.sync.error.generic': 'Не удалось синхронизировать: {message}',
   'settings.sync.confirmPull': 'Загрузить из HA? Локальные раскладки и профили будут заменены данными из HA.',
 
+  'settings.external.title': 'Внешние виджеты',
+  'settings.external.description': 'Сторонние виджеты — это .js-файлы, которые регистрируют новые типы виджетов через Homeglance SDK. Добавляйте только те источники, которым доверяете: код выполняется в контексте панели.',
+  'settings.external.add': 'Добавить URL',
+  'settings.external.placeholder': 'https://example.com/my-widget.js',
+  'settings.external.empty': 'Внешние виджеты не подключены.',
+  'settings.external.reloadHint': 'После добавления или удаления URL — перезагрузите страницу.',
+  'settings.external.docs': 'Документация для разработчиков',
+
   'settings.about.title': 'О панели',
   'settings.about.body1': 'Glance v{version} — modern, mobile-first dashboard для Home Assistant.',
   'settings.about.body2': 'Open-source, MIT license. Не вносит изменений в HA — общается только через стандартный API.',
