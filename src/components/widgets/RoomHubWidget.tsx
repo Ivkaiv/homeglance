@@ -612,10 +612,10 @@ export function RoomHubWidget({ params }: { params: Params }) {
                   aria-label={`Открыть настройки ${label}${isActive ? ' (работает)' : ''}`}
                   title={`Открыть настройки ${label}`}
                   className={clsx(
-                    'tabular-nums text-center flex items-center justify-center gap-0.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70',
+                    'tabular-nums text-center flex items-center justify-center gap-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70',
                     compactClimate
-                      ? 'text-xs font-semibold px-0.5'
-                      : 'text-sm font-semibold min-w-[44px] px-1',
+                      ? 'text-xs font-semibold px-1'
+                      : 'text-sm font-semibold min-w-[44px] px-1.5',
                     valueClass
                   )}
                 >
