@@ -4,12 +4,14 @@
  */
 
 import type { Page } from './types';
+import { apiUrl } from '@/lib/api-url';
 
 export async function loadPages(profileId: string): Promise<Page[]> {
   try {
-    const r = await fetch(`/api/glance/pages?profileId=${encodeURIComponent(profileId)}`, {
-      cache: 'no-store',
-    });
+    const r = await fetch(
+      apiUrl(`/api/glance/pages?profileId=${encodeURIComponent(profileId)}`),
+      { cache: 'no-store' }
+    );
     if (!r.ok) return defaultPages();
     const data = await r.json();
     if (Array.isArray(data?.pages) && data.pages.length > 0) return data.pages;
@@ -18,7 +20,7 @@ export async function loadPages(profileId: string): Promise<Page[]> {
 }
 
 export async function savePages(profileId: string, pages: Page[]): Promise<void> {
-  await fetch('/api/glance/pages', {
+  await fetch(apiUrl('/api/glance/pages'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profileId, pages }),

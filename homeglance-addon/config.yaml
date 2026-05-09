@@ -20,5 +20,6 @@ panel_title: Homeglance
 panel_admin: false
 homeassistant_api: false
 hassio_api: false
-ingress: false
+ingress: true
+ingress_port: 3040
 image: ghcr.io/ivkaiv/{arch}-homeglance

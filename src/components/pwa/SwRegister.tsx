@@ -12,8 +12,11 @@ export function SwRegister() {
     if (typeof window === 'undefined') return;
     if (!('serviceWorker' in navigator)) return;
     if (process.env.NODE_ENV !== 'production') return;
+    // Под HA Ingress URL имеет динамический префикс — абсолютные `/sw.js`
+    // и scope `/` указывают на корень HA, не на add-on. Используем
+    // относительные пути: SW регистрируется в текущем «каталоге» URL.
     navigator.serviceWorker
-      .register('/sw.js', { scope: '/' })
+      .register('sw.js', { scope: './' })
       .catch((err) => console.warn('SW register failed:', err));
   }, []);
   return null;

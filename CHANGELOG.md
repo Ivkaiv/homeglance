@@ -7,6 +7,20 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.6] — 2026-05-09
+
+### Added
+- **HA Ingress** в add-on: `ingress: true` + `ingress_port: 3040` в config.yaml. После установки Homeglance автоматически появляется в боковой панели HA через HA-проксирование (`/api/hassio_ingress/<token>/...`). HACS plugin больше не обязателен.
+
+### Changed
+- **Все URL в HTML — относительные.** Чтобы работать за HA-прокси с динамическим префиксом:
+  - `next.config.js`: `assetPrefix: '.'`, `trailingSlash: true`
+  - `app/layout.tsx`: PWA-метаданные (`manifest`, `icons`) теперь `'manifest.json'` вместо `'/manifest.json'`
+  - SwRegister: `register('sw.js', { scope: './' })` вместо `/sw.js` `/`
+  - API-fetch'и через helper `apiUrl()` (drops leading slash) — `lib/api-url.ts`
+
+В standalone-инсталляции (Docker Compose, отдельный сервер) URL'ы работают как обычно — relative paths резолвятся от `origin/`. За HA Ingress — резолвятся от `<token>/` префикса.
+
 ## [0.1.0-alpha.5] — 2026-05-09
 
 ### Added

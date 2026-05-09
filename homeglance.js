@@ -12,7 +12,7 @@
  */
 'use strict';
 
-const PLUGIN_VERSION = '0.1.0-alpha.4';
+const PLUGIN_VERSION = '0.1.0-alpha.6';
 
 class HomeglancePanel extends HTMLElement {
   // Properties, которые HA проставляет автоматически.

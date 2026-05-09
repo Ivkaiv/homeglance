@@ -4,6 +4,7 @@
  */
 
 import type { HAConnection } from './types';
+import { apiUrl } from '@/lib/api-url';
 
 interface ApiResponse {
   configured: boolean;
@@ -13,7 +14,7 @@ interface ApiResponse {
 
 export async function loadConnection(): Promise<HAConnection | null> {
   try {
-    const r = await fetch('/api/glance/connection', { cache: 'no-store' });
+    const r = await fetch(apiUrl('/api/glance/connection'), { cache: 'no-store' });
     if (!r.ok) return null;
     const data: ApiResponse = await r.json();
     if (data.configured && data.url && data.token) {
@@ -24,7 +25,7 @@ export async function loadConnection(): Promise<HAConnection | null> {
 }
 
 export async function saveConnection(conn: HAConnection): Promise<void> {
-  await fetch('/api/glance/connection', {
+  await fetch(apiUrl('/api/glance/connection'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(conn),
@@ -32,5 +33,5 @@ export async function saveConnection(conn: HAConnection): Promise<void> {
 }
 
 export async function clearConnection(): Promise<void> {
-  await fetch('/api/glance/connection', { method: 'DELETE' });
+  await fetch(apiUrl('/api/glance/connection'), { method: 'DELETE' });
 }

@@ -5,12 +5,13 @@
  */
 
 import type { Profile } from './types';
+import { apiUrl } from '@/lib/api-url';
 
 const ACTIVE_KEY = 'glance:active-profile-v1';
 
 export async function loadProfiles(): Promise<Profile[]> {
   try {
-    const r = await fetch('/api/glance/profiles', { cache: 'no-store' });
+    const r = await fetch(apiUrl('/api/glance/profiles'), { cache: 'no-store' });
     if (!r.ok) return [];
     const data = await r.json();
     return Array.isArray(data?.profiles) ? data.profiles : [];
@@ -20,7 +21,7 @@ export async function loadProfiles(): Promise<Profile[]> {
 }
 
 export async function saveProfiles(profiles: Profile[]): Promise<void> {
-  await fetch('/api/glance/profiles', {
+  await fetch(apiUrl('/api/glance/profiles'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profiles }),

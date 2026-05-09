@@ -13,21 +13,23 @@ import '@/styles/globals.css';
 export const metadata: Metadata = {
   title: 'Glance',
   description: 'Modern, mobile-first dashboard for Home Assistant',
-  manifest: '/manifest.json',
+  // Все public-asset URL'ы — относительные. Под HA Ingress абсолютные `/...`
+  // ломаются: токен в URL динамический, путь не указывает на add-on, а на HA.
+  manifest: 'manifest.json',
   applicationName: 'Glance',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'Glance',
-    startupImage: ['/icons/icon-512.png'],
+    startupImage: ['icons/icon-512.png'],
   },
   formatDetection: { telephone: false },
   icons: {
     icon: [
-      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: '/icons/icon-512.png',
+    apple: 'icons/icon-512.png',
   },
 };
 
