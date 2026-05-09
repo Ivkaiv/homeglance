@@ -1,5 +1,6 @@
 name: Homeglance
 version: "0.1.0-alpha.5"
+
 slug: homeglance
 description: Modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.
 url: "https://github.com/Ivkaiv/homeglance"

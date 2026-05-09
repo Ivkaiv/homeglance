@@ -7,6 +7,24 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.5] — 2026-05-09
+
+### Added
+- **HA Add-on** для Home Assistant OS / Supervised: одно-кликовая установка через Settings → Add-ons → Repositories. Запускает Homeglance-сервер прямо внутри Supervisor, не требует отдельного Docker-хоста.
+- **First-run wizard**: при первом запуске нового профиля показывает welcome-экран с тремя путями (auto-pilot / 5 шаблонов / пустая страница). Auto-pilot создаёт «Главную» + страницу per-area HA + «Инфо». Шаблоны: Минимум, Семейная, Студия, Спальня, Только мониторинг.
+- **ClimateSheet**: bottom-sheet управления климат-сущностями. Большие +/- для целевой температуры, цветные chips для HVAC mode / fan / preset / swing. Открывается тапом на ClimateWidget или на пилюлю в RoomHubWidget.
+- **Activity indicator у climate**: пилюля светится и пульсирует только когда сущность реально работает (по hvac_action), idle — нейтральная. Иконки берутся из самой HA-сущности (mdi:water-boiler, mdi:radiator…).
+
+### Fixed
+- HACS structure: hacs.json и homeglance.js перенесены в корень репо (HACS не умеет искать в подпапках)
+- ConfirmDialog danger-кнопка читаема в светлой теме
+- HVAC chips: иконка и текст выровнены по baseline
+- Drag/resize-handle: единый стиль, видно в обеих темах
+
+### Changed
+- Release workflow билдит три image-name: multi-arch + amd64-homeglance + aarch64-homeglance (для HA Add-on)
+- README install-section перепорядочен: Add-on → HACS plugin → Docker Compose → source
+
 ## [0.1.0-alpha.4] — 2026-05-09
 
 ### Added — Phase 8 закрыт
