@@ -113,6 +113,7 @@ bun dev
 - [Repository Layout](docs/12-repo.md)
 - [HACS Distribution](docs/13-hacs.md)
 - [Contributing](docs/14-contributing.md)
+- [HACS Plugin](docs/16-hacs-plugin.md)
 
 ## Технологии
 

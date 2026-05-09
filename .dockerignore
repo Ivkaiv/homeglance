@@ -25,3 +25,6 @@ tests
 Dockerfile
 docker-compose.yml
 .dockerignore
+# HACS plugin (только для GitHub release, не для Docker-образа)
+hacs.json
+homeglance.js
