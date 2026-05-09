@@ -7,6 +7,25 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.3] — 2026-05-09
+
+### Added — Phase 8 (Sync, Lovelace import, themes, notifications)
+- Sync через HA frontend_storage: ручные кнопки Push/Pull в Settings, snapshot всех профилей+страниц одним ключом
+- Импорт устройств из HA Lovelace: рекурсивный обход cards, извлечение entity_id, фильтрация через states, mapping по domain → виджеты
+- Custom theme accent: 5 пресетов (emerald/indigo/sky/rose/amber) с тонировкой под dark/light темы
+- Foreground notifications: подписка на persistent_notification.* state_changed → Web Notification API
+
+### Added — экспорт/импорт раскладок JSON
+- Schema homeglance.layout/1, per-page и all-pages варианты
+- Кнопки в PageManagerSheet с валидацией ошибок
+
+### Fixed — UX
+- drag-handle теперь полоска 36px только сверху виджета (не весь виджет) — страница скроллится в edit-mode
+- header на mobile в edit-mode: кнопки в иконки, заголовок страницы скрыт
+- PageManagerSheet rows на mobile: title на отдельной строке, actions wrap'ом
+- ConfirmDialog danger-кнопка читаема в светлой теме (text-red-700 вместо text-red-200)
+- Resize-handle цвета приведены к стилю drag-handle
+
 ## [0.1.0-alpha.2] — 2026-05-09
 
 ### Added — i18n (Phase 8 / A)
