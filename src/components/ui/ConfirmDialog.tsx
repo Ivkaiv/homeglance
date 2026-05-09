@@ -29,10 +29,13 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  // Цвета подобраны контрастными для обеих тем: насыщенный красный текст
+  // в светлой теме (был text-red-200 — невидим на белой модалке), приглушённый
+  // в тёмной.
   const confirmClass =
     variant === 'danger'
-      ? 'bg-red-500/25 border-red-400/50 text-red-200 hover:bg-red-500/35'
-      : 'bg-accent/25 border-accent/50 text-accent hover:bg-accent/35';
+      ? 'bg-red-500/15 dark:bg-red-500/25 border-red-500/40 dark:border-red-400/50 text-red-700 dark:text-red-200 hover:bg-red-500/25 dark:hover:bg-red-500/35'
+      : 'bg-accent/15 dark:bg-accent/25 border-accent/50 text-accent hover:bg-accent/25 dark:hover:bg-accent/35';
 
   return (
     <ModalSheet
