@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.4] — 2026-05-09
+
+### Added — Phase 8 закрыт
+- **Custom widgets API (G):** `window.Homeglance` глобальный SDK для community-разработчиков. Внешний `.js`-файл регистрирует новый виджет через `registerWidget(entry)`. Доступны те же hooks что у встроенных виджетов (useEntity / useStates / useCallService). Управление URL'ами в Settings → External widgets. Документация в `docs/15-sdk.md` с примером ClockWidget.
+
+### Fixed
+- ConfirmDialog danger-кнопка читаема на светлой теме (text-red-700 dark:text-red-200)
+- Resize-handle в стиле drag-handle: stroke-width 4, bg-black/30 light, bg-white/40 dark, дуга вдоль угла
+- Drag-handle убрана чёрная подложка, осталась только полоска
+
 ## [0.1.0-alpha.3] — 2026-05-09
 
 ### Added — Phase 8 (Sync, Lovelace import, themes, notifications)
