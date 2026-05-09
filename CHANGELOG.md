@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.7] — 2026-05-09
+
+### Fixed
+- **HA Ingress 404**: HA Supervisor НЕ переписывает path при проксировании в add-on — запрос приходит на `/api/hassio_ingress/<token>/...`, и Next.js не находит этот route. Добавлен middleware (`src/middleware.ts`), который читает `X-Ingress-Path` header и переписывает URL обратно на корень. Теперь add-on отвечает корректно через ingress.
+
 ## [0.1.0-alpha.6] — 2026-05-09
 
 ### Added
