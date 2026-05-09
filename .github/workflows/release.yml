@@ -41,6 +41,7 @@ jobs:
             type=ref,event=branch
             type=raw,value=latest,enable={{is_default_branch}}
 
+      # Multi-arch image для Docker Compose / standalone-инсталляций.
       - uses: docker/build-push-action@v5
         with:
           context: .
@@ -48,6 +49,45 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Архитектурно-разделённые образы для HA Add-on. Supervisor подставляет
+      # {arch} в image name из config.yaml — поэтому нужны отдельные тэги
+      # ghcr.io/ivkaiv/amd64-homeglance и ghcr.io/ivkaiv/aarch64-homeglance.
+      - id: addon-meta-amd64
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/amd64-homeglance
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.addon-meta-amd64.outputs.tags }}
+          labels: ${{ steps.addon-meta-amd64.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - id: addon-meta-aarch64
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/aarch64-homeglance
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.addon-meta-aarch64.outputs.tags }}
+          labels: ${{ steps.addon-meta-aarch64.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
