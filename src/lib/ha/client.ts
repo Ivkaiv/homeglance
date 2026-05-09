@@ -297,6 +297,28 @@ export class HAClient {
     return result || {};
   }
 
+  /**
+   * Frontend storage HA — облачно-нейтральный JSON-кэш на пользователя HA.
+   * Доступен из любого устройства, где этот же пользователь авторизован.
+   *
+   * @see https://www.home-assistant.io/integrations/frontend/#websocket-api
+   */
+  async getUserData<T = unknown>(key: string): Promise<T | null> {
+    try {
+      const result = await this.callWS<{ value: T | null }>({
+        type: 'frontend/get_user_data',
+        key,
+      });
+      return result?.value ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async setUserData<T = unknown>(key: string, value: T): Promise<void> {
+    await this.callWS({ type: 'frontend/set_user_data', key, value });
+  }
+
   /** ───── Private send / wait ───── */
 
   private send(msg: any): void {

@@ -12,6 +12,7 @@ import { useSecurity } from '@/lib/security/SecurityProvider';
 import { useI18n, useT } from '@/lib/i18n/I18nProvider';
 import { LOCALES, LOCALE_NAMES, type Locale } from '@/lib/i18n/types';
 import { PinPrompt } from '@/components/security/PinPrompt';
+import { SyncSection } from '@/components/sync/SyncSection';
 import type { HAConnection } from '@/lib/ha/types';
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0';
@@ -82,6 +83,10 @@ export default function SettingsPage() {
 
         <Section title={t('settings.language.title')}>
           <LanguageSwitcher />
+        </Section>
+
+        <Section title={t('settings.sync.title')}>
+          <SyncSection />
         </Section>
 
         <Section title={t('settings.security.title')}>
