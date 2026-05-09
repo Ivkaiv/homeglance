@@ -341,11 +341,14 @@ export function Dashboard() {
                   с эмодзи-захватом.
                 */}
                 <div
-                  className="rgl-drag-area absolute top-0 left-9 right-9 h-9 z-10 cursor-grab active:cursor-grabbing rounded-t-2xl flex items-center justify-center bg-black/40 backdrop-blur-sm"
+                  className="rgl-drag-area absolute top-0 left-9 right-9 h-9 z-10 cursor-grab active:cursor-grabbing flex items-start justify-center pt-1.5"
                   style={{ touchAction: 'none' }}
                   title={t('common.edit')}
                 >
-                  <span className="block w-8 h-1 rounded-full bg-white/40" aria-hidden="true" />
+                  <span
+                    className="block w-9 h-1 rounded-full bg-white/35"
+                    aria-hidden="true"
+                  />
                 </div>
                 <button
                   onClick={() => setConfirmRemoveId(item.i)}
