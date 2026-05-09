@@ -314,22 +314,21 @@
 .react-grid-item > .react-resizable-handle::before {
   content: '';
   position: absolute;
-  /* Элемент 50×50 со сдвигом -10 — даёт место полоске немного выйти
-     за пределы виджета. */
+  /* Элемент 50×50 со сдвигом -10 — даёт место «червяку» немного выйти
+     за пределы виджета в обе стороны от его кривой угла. */
   right: -10px;
   bottom: -10px;
   width: 50px;
   height: 50px;
-  /* Цвет/прозрачность ровно как у drag-handle (тёмная тема — bg-white/40). */
+  /* Цвет/прозрачность как у drag-handle: bg-white/40 dark, bg-black/30 light. */
   background: rgba(255, 255, 255, 0.4);
-  /* SVG-mask: короткая диагональная полоска stroke-width=4, длина ~22px,
-     round-caps — визуально совпадает с drag-handle сверху виджета. */
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'><path d='M 24 40 L 40 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round'/></svg>") center / contain no-repeat;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'><path d='M 24 40 L 40 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round'/></svg>") center / contain no-repeat;
+  /* SVG-mask: дуга stroke-width=4 (как drag-handle h-1) с round-caps —
+     тонкий «червяк» вдоль кривой угла виджета. */
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'><path d='M 40 20 A 20 20 0 0 1 20 40' fill='none' stroke='black' stroke-width='4' stroke-linecap='round'/></svg>") center / contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'><path d='M 40 20 A 20 20 0 0 1 20 40' fill='none' stroke='black' stroke-width='4' stroke-linecap='round'/></svg>") center / contain no-repeat;
   pointer-events: none;
 }
 [data-theme='light'] .react-grid-item > .react-resizable-handle::before {
-  /* В светлой теме — bg-black/30, как drag-handle. */
   background: rgba(0, 0, 0, 0.3);
 }
 .react-grid-item.resizing > .react-resizable-handle::before,
