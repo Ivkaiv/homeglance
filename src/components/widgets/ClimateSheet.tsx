@@ -206,7 +206,7 @@ function ChipGroup({
             <button
               key={o}
               onClick={() => onChange(o)}
-              className={`px-3 py-1.5 rounded-full border text-xs transition ${
+              className={`inline-flex items-center justify-center px-3 py-1.5 rounded-full border text-xs leading-none transition ${
                 active ? activeTone : idleTone
               } focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70`}
             >

@@ -1,6 +1,6 @@
 // Минимальный service worker для PWA-установки Glance.
 // Кэширует статические ассеты, остальное идёт сетью с фолбэком на кэш.
-const CACHE = 'glance-v2';
+const CACHE = 'glance-v3';
 const STATIC = [
   '/',
   '/manifest.json',
