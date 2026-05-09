@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a3530"/>
+      <stop offset="50%" stop-color="#0a1e1a"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.55"/>
+      <stop offset="50%" stop-color="#34d399" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#a7f3d0"/>
+      <stop offset="60%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#065f46"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="100" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="240" fill="url(#glow)"/>
+
+  <!-- Eye-shape: «glance» -->
+  <path
+    d="M 78 256 Q 256 96 434 256 Q 256 416 78 256 Z"
+    fill="none"
+    stroke="url(#ring)"
+    stroke-width="14"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <circle cx="256" cy="256" r="76" fill="url(#iris)"/>
+  <circle cx="232" cy="232" r="20" fill="#ffffff" opacity="0.9"/>
+  <circle cx="270" cy="280" r="10" fill="#ffffff" opacity="0.5"/>
+</svg>

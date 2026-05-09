@@ -1,0 +1,38 @@
+# Зависимости и билд
+node_modules/
+.next/
+out/
+dist/
+
+# Server-side хранилище — содержит HA-токен пользователя, никогда в репо.
+data/
+
+# Бэкап-файлы (после правок конфигов).
+*.bak-*
+
+# Env-файлы. .env.example — единственный, который коммитится.
+.env
+.env.local
+.env*.local
+
+# Lockfile: коммитится bun.lock (текстовый), .lockb — нет.
+bun.lockb
+
+# TypeScript / Tools
+*.tsbuildinfo
+
+# Claude Code и AI-агенты — служебное, не для публичного репо.
+.agents/
+.claude/
+skills-lock.json
+
+# Vercel / dev-кэш / coverage / IDE
+.vercel
+coverage/
+.idea/
+.vscode/
+.DS_Store
+
+# Lighthouse/bundle отчёты
+.next/analyze/
+lighthouse-report.html

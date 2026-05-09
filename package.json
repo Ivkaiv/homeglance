@@ -1,0 +1,45 @@
+{
+  "name": "homeglance",
+  "version": "0.1.0-alpha.1",
+  "description": "A modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.",
+  "license": "MIT",
+  "homepage": "https://github.com/Ivkaiv/homeglance",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ivkaiv/homeglance.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ivkaiv/homeglance/issues"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3040",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3040",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mdi/js": "^7.4.47",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.11.0",
+    "lucide-react": "^0.456.0",
+    "next": "14.2.18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-grid-layout": "1.4.4"
+  },
+  "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.6",
+    "@tailwindcss/postcss": "^4.2.4",
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/react-grid-layout": "1.x",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.18",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^5.6.3"
+  }
+}

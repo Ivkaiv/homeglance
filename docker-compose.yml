@@ -1,0 +1,29 @@
+# Homeglance — standalone установка через Docker Compose.
+# Запуск:    docker compose up -d
+# Логи:      docker compose logs -f
+# Обновить:  docker compose pull && docker compose up -d
+# Остановка: docker compose down
+#
+# Данные (профили, раскладки, токен HA) хранятся в named volume `homeglance-data`.
+# Если хотите видеть JSON-файлы на хосте — замените volume на bind-mount,
+# например: ./data:/app/data
+
+services:
+  homeglance:
+    image: ghcr.io/ivkaiv/homeglance:latest
+    container_name: homeglance
+    restart: unless-stopped
+    ports:
+      - "3040:3040"
+    volumes:
+      - homeglance-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3040
+    # Раскомментируйте чтобы билдить локально, а не пуллить из ghcr:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+
+volumes:
+  homeglance-data:

@@ -1,0 +1,498 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+@theme {
+  --color-bg-primary: rgb(var(--bg-primary));
+  --color-bg-secondary: rgb(var(--bg-secondary));
+
+  --color-text-primary: rgb(var(--text-primary));
+  --color-text-secondary: rgb(var(--text-secondary));
+  --color-text-tertiary: rgb(var(--text-tertiary));
+
+  --color-accent: rgb(var(--accent));
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, SF Pro Display, Inter, system-ui,
+    sans-serif;
+  --font-mono: SF Mono, JetBrains Mono, monospace;
+
+  --radius-4xl: 2rem;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility glass {
+  background: rgb(var(--glass-bg));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur))
+    saturate(var(--glass-saturate));
+  border: 1px solid rgb(var(--border-subtle));
+  border-radius: 1.5rem;
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  /* Без transition по умолчанию: иначе при mount/смене страницы видна анимация
+       background/border. Состояние on/off мы переключаем мгновенно — это нормально. */
+}
+/* Светлая тема — заменяем агрессивную тёмную тень на мягкую,
+   плюс добавляем тонкий gradient-overlay изнутри для глубины. */
+[data-theme='light'] .glass {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 4px 16px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-blend-mode: overlay;
+}
+
+@utility glass-active {
+  background: rgb(var(--glass-bg-active));
+  border-color: rgb(var(--border-default));
+}
+
+@utility glass-tight {
+  background: rgb(var(--glass-bg));
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgb(var(--border-subtle));
+  border-radius: 1rem;
+}
+
+/* Кнопки внутри стеклянных карточек (off-state).
+   На тёмной теме glass-фон тёмный, и `bg-white/10` хорошо виден.
+   На светлой теме glass-фон светлый — `bg-white/10` сливается; даём
+   контрастный полупрозрачный чёрный.
+   Используется в RoomHubWidget / ControlPanelWidget когда кнопка off. */
+@utility ctrl-btn {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+[data-theme='light'] .ctrl-btn {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.10);
+}
+@utility ctrl-btn-pressed {
+  background: rgba(255, 255, 255, 0.22);
+}
+[data-theme='light'] .ctrl-btn-pressed {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* Скроллбар внутри docka-навбара — скрываем визуально, но оставляем
+   нативный horizontal-скролл (свайпом или wheel). Snap-align гарантирует,
+   что иконка останавливается «прицельно». */
+.dock-scroll {
+  scroll-behavior: smooth;
+  /* Firefox */
+  scrollbar-width: none;
+}
+.dock-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Унифицированный press-feedback: легкое сжатие при нажатии для любой
+   интерактивной кнопки. PressButton уже это делает явно, но этот класс
+   позволяет применить тот же эффект к произвольным элементам. */
+.press-feedback {
+  transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.press-feedback:active {
+  transform: scale(0.96);
+}
+@media (prefers-reduced-motion: reduce) {
+  .press-feedback { transition: none !important; }
+  .press-feedback:active { transform: none !important; }
+}
+
+@layer utilities {
+  /* ─── Темы (CSS-переменные) ───────────────────────────────────────────── */
+
+  :root,
+  [data-theme='dark'] {
+    /* Backgrounds */
+    --bg-primary: 10 14 26; /* #0a0e1a */
+    --bg-secondary: 21 23 42; /* #15172a */
+    --bg-tertiary-rgba: 255 255 255 / 0.04;
+
+    /* Text */
+    --text-primary: 255 255 255; /* alpha applied via opacity */
+    --text-primary-alpha: 0.92;
+    --text-secondary: 255 255 255;
+    --text-secondary-alpha: 0.55;
+    --text-tertiary: 255 255 255;
+    --text-tertiary-alpha: 0.4;
+
+    /* Borders */
+    --border-subtle: 255 255 255 / 0.08;
+    --border-default: 255 255 255 / 0.12;
+
+    /* Accent */
+    --accent: 52 211 153; /* #34d399 */
+    --accent-soft: 52 211 153 / 0.15;
+
+    /* Semantic */
+    --success: 52 211 153;
+    --warning: 251 191 36;
+    --danger: 239 68 68;
+    --info: 96 165 250;
+
+    /* Effects */
+    --glass-blur: 20px;
+    --glass-saturate: 140%;
+    --glass-bg: 255 255 255 / 0.05;
+    --glass-bg-active: 255 255 255 / 0.1;
+
+    color-scheme: dark;
+  }
+
+  [data-theme='light'] {
+    --bg-primary: 244 245 247;
+    --bg-secondary: 255 255 255;
+    --bg-tertiary-rgba: 0 0 0 / 0.04;
+
+    --text-primary: 0 0 0;
+    --text-primary-alpha: 0.88;
+    --text-secondary: 0 0 0;
+    --text-secondary-alpha: 0.55;
+    --text-tertiary: 0 0 0;
+    --text-tertiary-alpha: 0.4;
+
+    --border-subtle: 0 0 0 / 0.08;
+    --border-default: 0 0 0 / 0.12;
+
+    --accent: 5 150 105; /* эмеральд для светлой темы потемнее */
+
+    --glass-bg: 255 255 255 / 0.55;
+    --glass-bg-active: 255 255 255 / 0.75;
+
+    color-scheme: light;
+  }
+
+  /* ─── Базовый body ──────────────────────────────────────────────────── */
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background:
+      radial-gradient(
+        ellipse at top right,
+        rgba(42, 31, 77, 0.6) 0%,
+        transparent 50%
+      ),
+      rgb(var(--bg-primary));
+    background-attachment: fixed;
+    color: rgb(var(--text-primary) / var(--text-primary-alpha));
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui,
+      sans-serif;
+    transition:
+      background-color 0.3s,
+      color 0.3s;
+  }
+
+  [data-theme='light'] body {
+    background:
+      radial-gradient(
+        ellipse at top right,
+        rgba(99, 102, 241, 0.08) 0%,
+        transparent 50%
+      ),
+      rgb(var(--bg-primary));
+    background-attachment: fixed;
+  }
+
+  /* iOS safe-area — отступы кладём на корневой контейнер,
+   а не на body (см. lessons-learned из ha-pwa) */
+  .safe-area-host {
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* ─── Glass-эффекты ──────────────────────────────────────────────────── */
+}
+
+/* react-grid-layout — наши настройки поверх стандартных */
+.react-grid-item {
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.react-grid-item.react-draggable-dragging,
+.react-grid-item.react-grid-placeholder {
+  transition: none !important;
+}
+/* Placeholder = «куда упадёт виджет»: полупрозрачный акцентный прямоугольник */
+.react-grid-item.react-grid-placeholder {
+  background: rgb(var(--accent) / 0.18) !important;
+  border: 2px dashed rgb(var(--accent) / 0.45);
+  border-radius: 1.25rem;
+  opacity: 1;
+}
+.react-grid-item.react-draggable-dragging {
+  opacity: 0.85;
+  cursor: grabbing;
+  z-index: 50;
+}
+/* Полностью гасим стандартный SVG-arrow иконки react-resizable. */
+.react-resizable-handle,
+.react-resizable-handle-se,
+.react-resizable-handle-sw,
+.react-resizable-handle-nw,
+.react-resizable-handle-ne,
+.react-resizable-handle-n,
+.react-resizable-handle-s,
+.react-resizable-handle-w,
+.react-resizable-handle-e {
+  background: none !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+/* RGL добавляет свой собственный ::after-«уголок» из CSS-border на handle —
+   эта мелкая чёрная L-палочка. Убиваем её через display:none. */
+.react-grid-item > .react-resizable-handle::after {
+  content: none !important;
+  display: none !important;
+  border: none !important;
+}
+.react-grid-item > .react-resizable-handle {
+  width: 50px !important;
+  height: 50px !important;
+  cursor: nwse-resize;
+  z-index: 25;
+}
+/* Hander должен качаться вместе с виджетом. Вешаем ту же анимацию, что и
+   на .rgl-cell-wiggle, синхронно. Но handle торчит из родителя, поэтому
+   его нужно крутить вокруг центра ВИДЖЕТА — а это сложно. Проще: применяем
+   к самому handle такой же поворот относительно его собственного нижнего
+   правого угла, синхронно по времени — визуально handle качается «в такт». */
+.react-grid-item:has(> .rgl-cell-wiggle) > .react-resizable-handle {
+  animation: rgl-wiggle 0.5s ease-in-out infinite;
+  transform-origin: bottom right;
+}
+.react-grid-item.react-draggable-dragging > .react-resizable-handle,
+.react-grid-item.resizing > .react-resizable-handle {
+  animation: none;
+}
+/* Уголок-«закладка»: матовая стеклянная плашка в правом нижнем углу с
+   сильно скруглённой внутренней (top-left) гранью. Без масок — никакого
+   «прорезающего» чёрного, потому что фон сплошной opaque. */
+/* Уголок-«полумесяц» (банан/crescent) как у iOS:
+   - Внешний контур повторяет радиус виджета (1.25rem ≈ 20px)
+   - Внутренний контур — большой радиус, образующий вогнутую кривую
+   - Между ними получается узкий лунный полумесяц
+   Реализуем через clip-path: path() с двумя SVG-арками. */
+.react-grid-item > .react-resizable-handle::before {
+  content: '';
+  position: absolute;
+  /* Элемент 50×50 со сдвигом -10 — даёт место «червяку» бульк выходить
+     за пределы виджета в обе стороны от его кривой угла. */
+  right: -10px;
+  bottom: -10px;
+  width: 50px;
+  height: 50px;
+  /* Тон в тон с виджетом, но светлее (на тёмной теме) — slate-400-ish. */
+  background: rgba(148, 163, 184, 0.55);
+  backdrop-filter: blur(12px) saturate(170%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  /* SVG-mask: дуга stroke-width=9 с round-caps — тонкий «червяк» вдоль
+     кривой угла виджета. */
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'><path d='M 40 20 A 20 20 0 0 1 20 40' fill='none' stroke='black' stroke-width='7' stroke-linecap='round'/></svg>") center / contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'><path d='M 40 20 A 20 20 0 0 1 20 40' fill='none' stroke='black' stroke-width='7' stroke-linecap='round'/></svg>") center / contain no-repeat;
+  pointer-events: none;
+}
+[data-theme='light'] .react-grid-item > .react-resizable-handle::before {
+  /* В светлой теме — тон в тон с виджетом, но темнее на пару градаций
+     (slate-400-ish, ~30% opacity). */
+  background: rgba(100, 116, 139, 0.45);
+}
+.react-grid-item.resizing > .react-resizable-handle::before,
+[data-theme='light'] .react-grid-item.resizing > .react-resizable-handle::before {
+  background: rgb(var(--accent) / 0.85);
+  box-shadow: 0 0 24px rgb(var(--accent) / 0.9);
+}
+
+/* iOS-style «wiggle»: вся ячейка (.rgl-cell) покачивается. Включает в себя
+   и виджет, и resize-handle (он внутри .react-grid-item — родителя rgl-cell —
+   но оба в одной системе координат, см. .react-resizable-handle ниже). */
+@keyframes rgl-wiggle {
+  0% { transform: rotate(-0.4deg); }
+  50% { transform: rotate(0.4deg); }
+  100% { transform: rotate(-0.4deg); }
+}
+.rgl-cell-wiggle {
+  animation: rgl-wiggle 0.5s ease-in-out infinite;
+  transform-origin: center;
+}
+/* Не качаем то что прямо сейчас драгают или ресайзят — иначе двойная анимация */
+.react-grid-item.react-draggable-dragging .rgl-cell-wiggle,
+.react-grid-item.resizing .rgl-cell-wiggle {
+  animation: none;
+}
+
+/* Бесконечная горизонтальная прокрутка для длинного текста (MarqueeText) */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.glance-marquee {
+  animation: marquee-scroll var(--marquee-duration, 15s) linear infinite;
+  padding-right: 2rem;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* ─── Accordion smooth open/close ─────────────────────────────────────
+   Хитрость с grid-template-rows: 0fr → 1fr — единственный CSS-способ
+   плавно разворачивать элемент с динамической высотой без JS-измерений. */
+.accordion-row {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.accordion-row.is-open {
+  grid-template-rows: 1fr;
+}
+.accordion-row > .accordion-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ─── Fade-in для страниц и виджетов при mount ─────────────────────── */
+@keyframes glance-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-fade-in {
+  animation: glance-fade-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes glance-widget-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.widget-fade-in {
+  animation: glance-widget-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Skeleton shimmer для loading-стейта виджетов */
+@keyframes skeleton-shimmer-kf {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton-shimmer {
+  animation: skeleton-shimmer-kf 1.5s linear infinite;
+}
+
+/* Reduce-motion: убираем все наши пользовательские входные анимации */
+@media (prefers-reduced-motion: reduce) {
+  .page-fade-in, .widget-fade-in, .skeleton-shimmer { animation: none !important; }
+  .accordion-row { transition: none !important; }
+}
+
+/* Уважение к настройке ОС «уменьшить движение» (WCAG 2.3.3, vestibular safety):
+   wiggle, marquee и любые «крутящиеся» эффекты убираются. Тактильные
+   transform на нажатие (PressButton) — оставляем, они короткие и
+   не циклические. */
+@media (prefers-reduced-motion: reduce) {
+  .rgl-cell-wiggle,
+  .react-grid-item:has(> .rgl-cell-wiggle) > .react-resizable-handle,
+  .glance-marquee {
+    animation: none !important;
+  }
+  .react-grid-item {
+    transition: none !important;
+  }
+}
+
+/* ─── Container queries по высоте (для адаптивных виджетов) ──────────────
+   Tailwind v4 ships только width-based @-классы (@[Xpx]:, @max-[Xpx]:).
+   Виджеты, которые сильно зависят от высоты (Climate, Weather,
+   MediaPlayer, WeatherRoom), сами включают container-type: size
+   на root-элементе через `style={{ containerType: 'size' }}` — после
+   этого работают эти classNames.
+
+   Конвенция: ch-{display}-min-{N} / ch-{display}-max-{N}
+     ch-flex-min-90: display:flex когда container-height >= 90
+     ch-block-min-90: display:block когда container-height >= 90
+     ch-flex-max-90: display:flex когда container-height <  90
+     ch-block-max-90: display:block когда container-height <  90
+   По умолчанию все скрыты (display:none). */
+
+.ch-flex-max-90, .ch-block-max-90,
+.ch-flex-min-90, .ch-block-min-90,
+.ch-block-min-110,
+.ch-flex-min-130, .ch-block-min-130,
+.ch-block-min-160,
+.ch-flex-min-180,
+.ch-flex-min-240 {
+  display: none !important;
+}
+@container (max-height: 89.99px) {
+  .ch-flex-max-90 { display: flex !important; }
+  .ch-block-max-90 { display: block !important; }
+}
+@container (min-height: 90px) {
+  .ch-flex-min-90 { display: flex !important; }
+  .ch-block-min-90 { display: block !important; }
+}
+@container (min-height: 110px) {
+  .ch-block-min-110 { display: block !important; }
+}
+@container (min-height: 130px) {
+  .ch-flex-min-130 { display: flex !important; }
+  .ch-block-min-130 { display: block !important; }
+}
+@container (min-height: 160px) {
+  .ch-block-min-160 { display: block !important; }
+}
+@container (min-height: 180px) {
+  .ch-flex-min-180 { display: flex !important; }
+}
+@container (min-height: 240px) {
+  .ch-flex-min-240 { display: flex !important; }
+}
+
+/* Подавить «жёлтый» автозаполнения */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: rgb(var(--text-primary)) !important;
+  -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.08) inset !important;
+  caret-color: rgb(var(--text-primary)) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
