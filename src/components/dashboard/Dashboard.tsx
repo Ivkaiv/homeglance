@@ -10,6 +10,7 @@ import type { WidgetConfig } from '@/lib/widgets/types';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
 import { WidgetSkeleton } from '@/components/widgets/_states';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
+import { useT } from '@/lib/i18n/I18nProvider';
 import { usePages } from '@/lib/pages/PagesProvider';
 import { DockBar } from './DockBar';
 import { ProfileSwitcher } from '@/components/profile/ProfileSwitcher';
@@ -67,6 +68,7 @@ function useResponsiveCols() {
 }
 
 export function Dashboard() {
+  const t = useT();
   const { current, setWidgets } = usePages();
   const { isReady, states, registries } = useConnection();
   const [magicMessage, setMagicMessage] = useState<string | null>(null);
@@ -195,8 +197,8 @@ export function Dashboard() {
           <ProfileSwitcher />
           <Link
             href="/settings"
-            title="Настройки"
-            aria-label="Настройки"
+            title={t('dashboard.settings')}
+            aria-label={t('dashboard.settings')}
             className="px-2.5 py-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-xs flex items-center hover:text-text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
           >
             <Sliders size={14} aria-hidden="true" />
@@ -207,14 +209,14 @@ export function Dashboard() {
                 onClick={() => setManagingPages(true)}
                 className="px-3 py-2 rounded-full bg-sky-500/15 border border-sky-300/25 text-sky-100 text-xs flex items-center gap-1.5"
               >
-                <LayoutGrid size={14} /> Страницы
+                <LayoutGrid size={14} /> {t('dashboard.pages')}
               </button>
               {current.kind !== 'weather' && (
                 <button
                   onClick={() => setAdding(true)}
                   className="px-3 py-2 rounded-full bg-accent/20 border border-accent/40 text-accent text-xs flex items-center gap-1.5"
                 >
-                  <Plus size={14} /> Виджет
+                  <Plus size={14} /> {t('dashboard.addWidget')}
                 </button>
               )}
             </>
@@ -227,7 +229,7 @@ export function Dashboard() {
                 : 'bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary'
             }`}
           >
-            <Cog size={14} /> {editing ? 'Готово' : 'Редактировать'}
+            <Cog size={14} /> {editing ? t('dashboard.doneButton') : t('dashboard.editButton')}
           </button>
         </div>
       </header>
@@ -243,7 +245,9 @@ export function Dashboard() {
           style={{ minHeight: 'calc(100vh - 200px)' }}
         >
           <div className="text-6xl mb-3">{current.icon}</div>
-          <div className="mb-4 text-sm">Страница «{current.title}» пустая</div>
+          <div className="mb-4 text-sm">
+            {t('dashboard.empty.title', { title: current.title })}
+          </div>
           <div className="flex flex-col items-center gap-3">
             <button
               onClick={() => {
@@ -256,10 +260,10 @@ export function Dashboard() {
               }}
               disabled={!isReady}
               className="px-5 py-2.5 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-400 dark:text-purple-300 text-sm flex items-center gap-2 hover:bg-purple-500/30 disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-purple-400/70"
-              title="Собрать страницу автоматически из устройств этой зоны Home Assistant"
+              title={t('dashboard.empty.autoFillTooltip')}
             >
               <Wand2 size={14} aria-hidden="true" />
-              Собрать автоматически
+              {t('dashboard.empty.autoFill')}
             </button>
             <button
               onClick={() => {
@@ -268,7 +272,7 @@ export function Dashboard() {
               }}
               className="px-5 py-2.5 rounded-full bg-accent/20 border border-accent/40 text-accent text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
             >
-              + Добавить виджет вручную
+              {t('dashboard.empty.addManual')}
             </button>
             {magicMessage && (
               <div className="mt-3 max-w-sm text-xs text-text-tertiary px-4 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
@@ -298,7 +302,7 @@ export function Dashboard() {
                 </WidgetErrorBoundary>
               ) : (
                 <div className="glass h-full p-4 text-text-tertiary text-sm">
-                  Неизвестный виджет: {w.type}
+                  {t('dashboard.unknownWidget', { type: w.type })}
                 </div>
               );
               // В edit-mode RGL уже накрывает виджет drag-overlay'ем — long-press
@@ -324,16 +328,16 @@ export function Dashboard() {
                 />
                 <button
                   onClick={() => setConfirmRemoveId(item.i)}
-                  aria-label="Удалить виджет"
-                  title="Удалить виджет"
+                  aria-label={t('common.delete')}
+                  title={t('common.delete')}
                   className="no-drag absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center shadow-lg z-20 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
                 >
                   <X size={14} aria-hidden="true" />
                 </button>
                 <button
                   onClick={() => setConfiguring(item.i)}
-                  aria-label="Настроить виджет"
-                  title="Настроить виджет"
+                  aria-label={t('configSheet.title')}
+                  title={t('configSheet.title')}
                   className="no-drag absolute top-1 left-1 w-7 h-7 rounded-full bg-black/60 backdrop-blur-md text-white/70 text-xs flex items-center justify-center z-20 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
                 >
                   <Settings size={13} aria-hidden="true" />
@@ -357,10 +361,10 @@ export function Dashboard() {
       )}
       <ConfirmDialog
         open={!!confirmRemoveId}
-        title="Удалить виджет?"
-        message="Виджет исчезнет с этой страницы. Действие нельзя отменить."
-        confirmLabel="Удалить"
-        cancelLabel="Оставить"
+        title={t('dashboard.removeWidget.title')}
+        message={t('dashboard.removeWidget.body')}
+        confirmLabel={t('dashboard.removeWidget.confirm')}
+        cancelLabel={t('dashboard.removeWidget.cancel')}
         variant="danger"
         onConfirm={() => {
           if (confirmRemoveId) removeWidget(confirmRemoveId);

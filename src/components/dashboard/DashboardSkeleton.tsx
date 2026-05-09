@@ -1,6 +1,7 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface DashboardSkeletonProps {
   /** Опциональная подсказка снизу — «Подключаюсь…», «Загрузка профилей…». */
@@ -13,9 +14,10 @@ interface DashboardSkeletonProps {
  * не было «прыжка макета», когда придут реальные данные.
  */
 export function DashboardSkeleton({ hint }: DashboardSkeletonProps) {
+  const t = useT();
   return (
     <div className="min-h-screen pb-32" role="status" aria-busy="true" aria-live="polite">
-      <span className="sr-only">{hint ?? 'Загрузка'}</span>
+      <span className="sr-only">{hint ?? t('common.loading')}</span>
 
       <header className="sticky top-0 z-10 backdrop-blur-md bg-bg-primary/80 border-b border-black/5 dark:border-white/5 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">

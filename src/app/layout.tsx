@@ -4,6 +4,7 @@ import { ConnectionProvider } from '@/lib/ha/ConnectionProvider';
 import { ProfilesProvider } from '@/lib/profiles/ProfilesProvider';
 import { PagesProvider } from '@/lib/pages/PagesProvider';
 import { SecurityProvider } from '@/lib/security/SecurityProvider';
+import { I18nProvider } from '@/lib/i18n/I18nProvider';
 import { SwRegister } from '@/components/pwa/SwRegister';
 import '@/styles/globals.css';
 
@@ -41,20 +42,22 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>
-          <ConnectionProvider>
-            <ProfilesProvider>
-              <PagesProvider>
-                <SecurityProvider>
-                  <div className="min-h-screen w-full safe-area-host">{children}</div>
-                  <SwRegister />
-                </SecurityProvider>
-              </PagesProvider>
-            </ProfilesProvider>
-          </ConnectionProvider>
-        </ThemeProvider>
+        <I18nProvider>
+          <ThemeProvider>
+            <ConnectionProvider>
+              <ProfilesProvider>
+                <PagesProvider>
+                  <SecurityProvider>
+                    <div className="min-h-screen w-full safe-area-host">{children}</div>
+                    <SwRegister />
+                  </SecurityProvider>
+                </PagesProvider>
+              </ProfilesProvider>
+            </ConnectionProvider>
+          </ThemeProvider>
+        </I18nProvider>
       </body>
     </html>
   );

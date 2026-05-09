@@ -1,3 +1,5 @@
+const pkg = require('./package.json');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -5,6 +7,10 @@ const nextConfig = {
   // подтянутыми только нужными node_modules. Используется в Dockerfile,
   // чтобы итоговый образ был ~150 MB вместо 1+ GB.
   output: 'standalone',
+  // Прокидываем версию из package.json в client-bundle через NEXT_PUBLIC_*.
+  env: {
+    NEXT_PUBLIC_APP_VERSION: pkg.version,
+  },
   experimental: {
     // Tree-shake — Next режет неиспользуемые модули из этих пакетов вместо
     // того, чтобы тащить весь индекс. Особенно эффективно для lucide-react

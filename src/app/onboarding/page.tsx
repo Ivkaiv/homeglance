@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ChevronRight, Key, Globe, ExternalLink } from 'lucide-react';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const t = useT();
   const { connectTo } = useConnection();
   const [url, setUrl] = useState('');
   const [token, setToken] = useState('');
@@ -21,10 +23,10 @@ export default function OnboardingPage() {
     try {
       const cleanUrl = url.trim().replace(/\/$/, '');
       if (!cleanUrl.match(/^https?:\/\//)) {
-        throw new Error('URL должен начинаться с http:// или https://');
+        throw new Error(t('onboarding.error.invalidUrlScheme'));
       }
       if (!token.trim()) {
-        throw new Error('Введи Long-lived access token');
+        throw new Error(t('onboarding.error.tokenRequired'));
       }
 
       // Проверяем подключение через WebSocket (CORS не применяется к WS-handshake).
@@ -37,7 +39,7 @@ export default function OnboardingPage() {
           if (settled) return;
           settled = true;
           try { ws.close(); } catch {}
-          reject(new Error('Таймаут — HA не отвечает по WebSocket. Проверь URL и доступность.'));
+          reject(new Error(t('onboarding.error.timeout')));
         }, 8000);
 
         ws.onmessage = (ev) => {
@@ -55,7 +57,7 @@ export default function OnboardingPage() {
               settled = true;
               clearTimeout(timeout);
               try { ws.close(); } catch {}
-              reject(new Error('Токен неверный или истёк'));
+              reject(new Error(t('onboarding.error.invalidToken')));
             }
           } catch {}
         };
@@ -64,7 +66,7 @@ export default function OnboardingPage() {
           if (settled) return;
           settled = true;
           clearTimeout(timeout);
-          reject(new Error('Не удалось подключиться. Проверь URL и доступность HA.'));
+          reject(new Error(t('onboarding.error.connect')));
         };
       });
 
@@ -88,29 +90,28 @@ export default function OnboardingPage() {
         {step === 'welcome' && (
           <div className="glass p-8 text-center">
             <div className="text-6xl mb-4">✨</div>
-            <h1 className="text-3xl font-light mb-2">Glance</h1>
+            <h1 className="text-3xl font-light mb-2">{t('common.appName')}</h1>
             <p className="text-text-secondary text-sm mb-8">
-              Современная dashboard-панель для твоего Home Assistant.
-              Без YAML, без сложностей.
+              {t('onboarding.welcome.subtitle')}
             </p>
             <button
               onClick={() => setStep('connect')}
               className="w-full px-5 py-3 rounded-full bg-accent/20 border border-accent/40 text-accent flex items-center justify-center gap-2 hover:bg-accent/30 transition"
             >
-              Подключить Home Assistant <ChevronRight size={16} />
+              {t('onboarding.welcome.connectButton')} <ChevronRight size={16} />
             </button>
           </div>
         )}
 
         {step === 'connect' && (
           <div className="glass p-6">
-            <h2 className="text-xl font-medium mb-1">Подключение</h2>
+            <h2 className="text-xl font-medium mb-1">{t('onboarding.connect.title')}</h2>
             <p className="text-text-secondary text-xs mb-5">
-              Введи адрес твоего HA и долго-живущий токен.
+              {t('onboarding.connect.subtitle')}
             </p>
 
             <div className="space-y-4">
-              <Field label="URL Home Assistant" icon={<Globe size={14} />}>
+              <Field label={t('onboarding.haUrl.label')} icon={<Globe size={14} />}>
                 <input
                   type="text"
                   value={url}
@@ -122,7 +123,7 @@ export default function OnboardingPage() {
                 />
               </Field>
 
-              <Field label="Long-lived access token" icon={<Key size={14} />}>
+              <Field label={t('onboarding.token.label')} icon={<Key size={14} />}>
                 <input
                   type="password"
                   value={token}
@@ -135,7 +136,7 @@ export default function OnboardingPage() {
                   onClick={() => setStep('help')}
                   className="text-xs text-text-tertiary mt-1.5 underline hover:text-text-secondary inline-flex items-center gap-1"
                 >
-                  Как создать токен? <ExternalLink size={11} />
+                  {t('onboarding.token.howTo')} <ExternalLink size={11} />
                 </button>
               </Field>
 
@@ -150,7 +151,7 @@ export default function OnboardingPage() {
                 disabled={busy}
                 className="w-full px-5 py-3 rounded-full bg-accent/20 border border-accent/40 text-accent flex items-center justify-center gap-2 hover:bg-accent/30 transition disabled:opacity-40"
               >
-                {busy ? '⏳ Подключаюсь...' : 'Подключить'}
+                {busy ? t('onboarding.connect.busy') : t('onboarding.connect.button')}
               </button>
             </div>
           </div>
@@ -158,51 +159,27 @@ export default function OnboardingPage() {
 
         {step === 'help' && (
           <div className="glass p-6">
-            <h2 className="text-xl font-medium mb-1">Как создать токен</h2>
+            <h2 className="text-xl font-medium mb-1">{t('onboarding.help.title')}</h2>
             <p className="text-text-secondary text-xs mb-5">
-              Токен нужен, чтобы Glance общался с твоим HA.
+              {t('onboarding.help.subtitle')}
             </p>
 
             <ol className="space-y-3 text-sm">
-              <li className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-medium">
-                  1
-                </span>
-                <div>
-                  Открой свой <strong>Home Assistant</strong>, кликни на свой
-                  аватар внизу слева
-                </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-medium">
-                  2
-                </span>
-                <div>
-                  Прокрути до раздела <strong>Long-lived access tokens</strong>
-                </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-medium">
-                  3
-                </span>
-                <div>
-                  Нажми <strong>CREATE TOKEN</strong>, назови «Glance», скопируй полученный
-                  токен
-                </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-medium">
-                  4
-                </span>
-                <div>Вставь его сюда</div>
-              </li>
+              {[1, 2, 3, 4].map((n) => (
+                <li key={n} className="flex gap-3">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-medium">
+                    {n}
+                  </span>
+                  <div>{t(`onboarding.help.step${n}`)}</div>
+                </li>
+              ))}
             </ol>
 
             <button
               onClick={() => setStep('connect')}
               className="mt-6 w-full px-5 py-3 rounded-full glass text-sm hover:bg-white/10 transition"
             >
-              ← Назад к подключению
+              {t('onboarding.help.back')}
             </button>
           </div>
         )}

@@ -9,11 +9,16 @@ import { loadConnection } from '@/lib/ha/connection-storage';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import { useSecurity } from '@/lib/security/SecurityProvider';
+import { useI18n, useT } from '@/lib/i18n/I18nProvider';
+import { LOCALES, LOCALE_NAMES, type Locale } from '@/lib/i18n/types';
 import { PinPrompt } from '@/components/security/PinPrompt';
 import type { HAConnection } from '@/lib/ha/types';
 
+const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0';
+
 export default function SettingsPage() {
   const router = useRouter();
+  const t = useT();
   const { mode, setMode, effective } = useTheme();
   const { forget } = useConnection();
   const { enabled: securityEnabled } = useSecurity();
@@ -25,7 +30,7 @@ export default function SettingsPage() {
   }, []);
 
   async function disconnect() {
-    if (!confirm('Отключить от Home Assistant? Это сбросит подключение для ВСЕХ устройств. Раскладки сохранятся.')) {
+    if (!confirm(t('settings.connection.confirmDisconnect'))) {
       return;
     }
     if (securityEnabled) {
@@ -43,14 +48,17 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen pb-12">
       <header className="sticky top-0 z-20 backdrop-blur-md bg-bg-primary/80 border-b border-white/5 px-4 py-3 flex items-center gap-3">
-        <Link href="/" className="text-text-secondary hover:text-text-primary inline-flex items-center gap-1 text-sm">
-          <ChevronLeft size={18} /> Главная
+        <Link
+          href="/"
+          className="text-text-secondary hover:text-text-primary inline-flex items-center gap-1 text-sm"
+        >
+          <ChevronLeft size={18} /> {t('settings.home')}
         </Link>
-        <h1 className="text-base font-medium ml-2">⚙️ Настройки</h1>
+        <h1 className="text-base font-medium ml-2">⚙️ {t('settings.title')}</h1>
       </header>
 
       <main className="max-w-xl mx-auto p-4 sm:p-6 flex flex-col gap-5">
-        <Section title="Тема">
+        <Section title={t('settings.theme.title')}>
           <div className="grid grid-cols-3 gap-2">
             {(['light', 'dark', 'auto'] as ThemeMode[]).map((m) => (
               <button
@@ -62,38 +70,42 @@ export default function SettingsPage() {
                     : 'bg-white/5 border-white/10 text-text-secondary hover:bg-white/10'
                 }`}
               >
-                {m === 'light' && '☀️ Светлая'}
-                {m === 'dark' && '🌙 Тёмная'}
-                {m === 'auto' && '🌗 Авто'}
+                {t(`settings.theme.${m}`)}
               </button>
             ))}
           </div>
           <div className="text-xs text-text-tertiary mt-2">
-            Сейчас применена: <strong>{effective}</strong>
-            {mode === 'auto' && ' (по системе)'}
+            {t('settings.theme.currentlyApplied')}: <strong>{effective}</strong>
+            {mode === 'auto' && ` ${t('settings.theme.bySystem')}`}
           </div>
         </Section>
 
-        <Section title="Защита">
+        <Section title={t('settings.language.title')}>
+          <LanguageSwitcher />
+        </Section>
+
+        <Section title={t('settings.security.title')}>
           <SecurityStatus />
         </Section>
 
-        <Section title="Home Assistant">
+        <Section title={t('settings.connection.title')}>
           {conn ? (
             <>
               <div className="text-sm">
-                <div className="text-text-tertiary text-xs">URL</div>
+                <div className="text-text-tertiary text-xs">{t('settings.connection.url')}</div>
                 <div className="font-mono text-xs break-all">{conn.url}</div>
               </div>
               <div className="text-sm mt-3">
-                <div className="text-text-tertiary text-xs">Token</div>
-                <div className="font-mono text-xs">{conn.token.slice(0, 12)}…{conn.token.slice(-8)}</div>
+                <div className="text-text-tertiary text-xs">{t('settings.connection.token')}</div>
+                <div className="font-mono text-xs">
+                  {conn.token.slice(0, 12)}…{conn.token.slice(-8)}
+                </div>
               </div>
               <button
                 onClick={disconnect}
                 className="mt-4 w-full px-4 py-2.5 rounded-xl bg-red-500/15 border border-red-300/25 text-red-200 text-sm flex items-center justify-center gap-2"
               >
-                <RotateCcw size={14} /> Отключить и настроить заново
+                <RotateCcw size={14} /> {t('settings.connection.disconnectAndReconfigure')}
                 {securityEnabled && <Lock size={12} />}
               </button>
             </>
@@ -102,32 +114,24 @@ export default function SettingsPage() {
               onClick={() => router.push('/onboarding')}
               className="w-full px-4 py-2.5 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm"
             >
-              Подключить Home Assistant
+              {t('settings.connection.connectButton')}
             </button>
           )}
         </Section>
 
-        <Section title="О панели">
+        <Section title={t('settings.about.title')}>
           <div className="text-xs text-text-secondary leading-relaxed">
-            <p>
-              <strong>Glance v0.1.0-alpha.0</strong> — modern, mobile-first dashboard для Home Assistant.
-            </p>
-            <p className="mt-2">
-              Проект open-source, MIT license. Никаких изменений в HA не вносит — общается только
-              через стандартный API.
-            </p>
-            <p className="mt-2 text-text-tertiary">
-              На этом этапе доступен только базовый каркас. Виджеты, страницы и редактирование появятся
-              в следующих фазах разработки.
-            </p>
+            <p>{t('settings.about.body1', { version: APP_VERSION })}</p>
+            <p className="mt-2">{t('settings.about.body2')}</p>
+            <p className="mt-2 text-text-tertiary">{t('settings.about.body3')}</p>
           </div>
         </Section>
       </main>
 
       {pinPromptOpen && (
         <PinPrompt
-          title="Подтверди отключение"
-          description="Введи PIN администратора, чтобы отключить Home Assistant"
+          title={t('settings.connection.pinTitle')}
+          description={t('settings.connection.pinDescription')}
           onConfirm={doDisconnect}
           onCancel={() => setPinPromptOpen(false)}
         />
@@ -136,9 +140,32 @@ export default function SettingsPage() {
   );
 }
 
+function LanguageSwitcher() {
+  const { locale, setLocale } = useI18n();
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {LOCALES.map((code) => (
+        <button
+          key={code}
+          onClick={() => setLocale(code as Locale)}
+          className={`px-4 py-3 rounded-xl text-sm transition border ${
+            locale === code
+              ? 'bg-accent/20 border-accent/40 text-accent'
+              : 'bg-white/5 border-white/10 text-text-secondary hover:bg-white/10'
+          }`}
+        >
+          {LOCALE_NAMES[code]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function SecurityStatus() {
+  const t = useT();
   const { enabled } = useSecurity();
   const { active } = useProfiles();
+  const name = active?.name ?? '—';
   return (
     <div className="text-sm">
       <div
@@ -149,16 +176,11 @@ function SecurityStatus() {
         {enabled ? <ShieldCheck size={16} /> : <ShieldOff size={16} />}
         <span>
           {enabled
-            ? `Защита включена — действует PIN профиля «${active?.name}». Удаление профиля и отключение HA требуют его ввода.`
-            : `Защита выключена. У профиля «${active?.name ?? '—'}» нет PIN, поэтому удаление и отключение работают без подтверждения.`}
+            ? t('settings.security.enabled', { name })
+            : t('settings.security.disabled', { name })}
         </span>
       </div>
-      <div className="text-xs text-text-tertiary mt-3">
-        Чтобы задать или сменить PIN, нажми на свой аватар в правом верхнем углу
-        → выйди из профиля → выбери профиль на экране входа и в его карточке нажми
-        иконку 🔒. PIN — общий для входа в профиль и для подтверждения опасных
-        действий.
-      </div>
+      <div className="text-xs text-text-tertiary mt-3">{t('settings.security.changePinHint')}</div>
     </div>
   );
 }
