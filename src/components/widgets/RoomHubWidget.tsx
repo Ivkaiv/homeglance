@@ -512,47 +512,70 @@ export function RoomHubWidget({ params }: { params: Params }) {
               callService('climate', 'set_temperature', cid, { temperature: target + delta });
             };
             const label = c.attributes.friendly_name || cid;
-            const isHeating =
-              c.state === 'heat' || c.state === 'auto' || c.state === 'heat_cool';
-            const isCooling = c.state === 'cool';
+            const isOff = c.state === 'off';
 
-            // hvac_action — РЕАЛЬНОЕ действие (heating/cooling/idle/off).
-            // Отделяем «выбран heat но температура достигнута → idle» от
-            // «реально греется» — пилюля пульсирует только в active-состоянии.
+            // hvac_action — РЕАЛЬНОЕ действие (heating/cooling/idle/off/...).
+            // Покраска и свечение пилюли — ИСКЛЮЧИТЕЛЬНО по action: «выбрано heat
+            // но идёт idle» = пилюля нейтральная. Это совпадает с тем, как
+            // пользователь воспринимает работу — «греется или нет».
             const action = (c.attributes.hvac_action as string | undefined) ?? '';
             const isActive =
-              action !== '' && action !== 'idle' && action !== 'off' && c.state !== 'off';
+              !isOff && action !== '' && action !== 'idle' && action !== 'off';
 
-            const stateIcon = isHeating ? '🔥' : isCooling ? '❄️' : '💧';
-            const pillClass = isHeating
-              ? 'bg-orange-500/20 border-orange-300/25'
-              : isCooling
-                ? 'bg-sky-500/20 border-sky-300/25'
-                : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10';
-            // Цвет цифры — тёплый/холодный, **с инверсией для светлой темы**
-            // (bg-orange/20 на светлой теме = пастельно-оранжевый, белый текст
-            // на нём становится невидимым → берём dark-orange-700 для контраста).
-            const valueClass = isHeating
-              ? 'text-orange-700 dark:text-orange-100'
-              : isCooling
-                ? 'text-sky-700 dark:text-sky-100'
-                : 'text-text-secondary';
-            // Когда работает — двукратное свечение для «живого» индикатора;
-            // когда idle — приглушённое статичное.
-            const glow = isHeating
-              ? isActive
-                ? '0 0 18px rgba(249, 115, 22, 0.55)'
-                : '0 0 12px rgba(249, 115, 22, 0.18)'
-              : isCooling
-                ? isActive
-                  ? '0 0 18px rgba(56, 189, 248, 0.55)'
-                  : '0 0 12px rgba(56, 189, 248, 0.18)'
-                : undefined;
-            const dotClass = isHeating
-              ? 'bg-orange-400'
-              : isCooling
-                ? 'bg-sky-400'
-                : 'bg-emerald-400';
+            // Иконка из самой сущности — HA уже знает какой это девайс
+            // (mdi:water-boiler / mdi:radiator / mdi:air-conditioner).
+            // Если HA не задал — нейтральный термометр.
+            const haIcon = (c.attributes.icon as string | undefined) || 'thermometer';
+
+            // Тон по action: heating/preheating → orange, cooling/defrosting →
+            // sky, drying → amber, fan → violet. В idle/off — нет тона.
+            const tone: 'orange' | 'sky' | 'amber' | 'violet' | null = isActive
+              ? action === 'heating' || action === 'preheating'
+                ? 'orange'
+                : action === 'cooling' || action === 'defrosting'
+                  ? 'sky'
+                  : action === 'drying'
+                    ? 'amber'
+                    : action === 'fan'
+                      ? 'violet'
+                      : null
+              : null;
+
+            // Базовая нейтральная пилюля — как обычные кнопки в RoomHub.
+            // Когда active — окрашиваемся в action-цвет с заметным свечением.
+            // Off — приглушаем opacity, остальное нейтрально.
+            const PILL_TONES: Record<NonNullable<typeof tone>, { bg: string; glow: string; text: string; dot: string }> = {
+              orange: {
+                bg: 'bg-orange-500/20 border-orange-300/30',
+                glow: '0 0 18px rgba(249, 115, 22, 0.55)',
+                text: 'text-orange-700 dark:text-orange-100',
+                dot: 'bg-orange-400',
+              },
+              sky: {
+                bg: 'bg-sky-500/20 border-sky-300/30',
+                glow: '0 0 18px rgba(56, 189, 248, 0.55)',
+                text: 'text-sky-700 dark:text-sky-100',
+                dot: 'bg-sky-400',
+              },
+              amber: {
+                bg: 'bg-amber-500/20 border-amber-300/30',
+                glow: '0 0 18px rgba(251, 191, 36, 0.55)',
+                text: 'text-amber-700 dark:text-amber-100',
+                dot: 'bg-amber-400',
+              },
+              violet: {
+                bg: 'bg-violet-500/20 border-violet-300/30',
+                glow: '0 0 18px rgba(167, 139, 250, 0.55)',
+                text: 'text-violet-700 dark:text-violet-100',
+                dot: 'bg-violet-400',
+              },
+            };
+            const neutralBg = 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10';
+            const palette = tone ? PILL_TONES[tone] : null;
+            const pillClass = palette ? palette.bg : neutralBg;
+            const valueClass = palette ? palette.text : 'text-text-secondary';
+            const glow = palette ? palette.glow : undefined;
+            const dotClass = palette?.dot ?? 'bg-emerald-400';
             // Высота пилюли = высота кнопок (btnSize), чтобы они выровнялись в ряду.
             // Внутренняя круглая кнопка -/+ — на 4px меньше.
             const pillH = btnSize;
@@ -562,8 +585,9 @@ export function RoomHubWidget({ params }: { params: Params }) {
               <div
                 key={cid}
                 className={clsx(
-                  'inline-flex items-center gap-1 rounded-full border',
-                  pillClass
+                  'inline-flex items-center gap-1 rounded-full border transition',
+                  pillClass,
+                  isOff && 'opacity-60'
                 )}
                 style={{
                   height: pillH,
@@ -598,10 +622,18 @@ export function RoomHubWidget({ params }: { params: Params }) {
                   {isActive ? (
                     <span
                       aria-hidden="true"
-                      className={clsx('inline-block w-1.5 h-1.5 rounded-full animate-pulse', dotClass)}
+                      className={clsx(
+                        'inline-block w-1.5 h-1.5 rounded-full animate-pulse',
+                        dotClass
+                      )}
                     />
                   ) : (
-                    <span aria-hidden="true">{stateIcon}</span>
+                    <GlanceIcon
+                      value={haIcon}
+                      size={compactClimate ? 11 : 13}
+                      className="opacity-70"
+                      aria-hidden="true"
+                    />
                   )}
                   {target !== undefined ? `${Math.round(target)}°` : '—'}
                 </button>
