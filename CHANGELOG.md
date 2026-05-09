@@ -7,6 +7,20 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.2] — 2026-05-09
+
+### Added — i18n (Phase 8 / A)
+- Самописный i18n (без next-intl): `src/lib/i18n/{ru,en}.ts` + `I18nProvider` + `useT()`
+- Language switcher в Settings (RU / English)
+- Autodetect по navigator.language, override через `localStorage('glance:locale')`
+- Переведены: Onboarding (welcome → connect → help), Settings (тема/язык/защита/HA/about), Auth-failed, page/global/widget error boundaries, Dashboard header, empty page, remove-widget confirm
+- Версия приложения подкидывается из package.json через `NEXT_PUBLIC_APP_VERSION`
+
+### Pending
+- i18n для widget meta (15 виджетов) и модалок (AddWidget/Config/PageManager/ProfilePicker/ProfileEditor)
+
+## [0.1.0-alpha.1] — public alpha (Phase 6 + 7)
+
 ### Added — Phase 6 (Polish & Performance)
 - React Error Boundaries: общий, виджет-уровень, Next.js error.tsx + global-error.tsx
 - WidgetSkeleton/DashboardSkeleton вместо эмодзи-загрузчиков
