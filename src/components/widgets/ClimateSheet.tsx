@@ -149,9 +149,11 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
       {hvacModes.length > 0 && (
         <ChipGroup label="Режим" value={e.state} onChange={setMode} options={hvacModes}
           renderLabel={(m) => (
-            <span className="inline-flex items-center gap-1.5">
-              {HVAC_ICONS[m] ?? <Activity size={14} aria-hidden="true" />}
-              {HVAC_LABELS_RU[m] ?? m}
+            <span className="inline-flex items-center gap-1.5 leading-none">
+              <span className="inline-flex items-center justify-center w-3.5 h-3.5">
+                {HVAC_ICONS[m] ?? <Activity size={14} aria-hidden="true" />}
+              </span>
+              <span className="leading-none">{HVAC_LABELS_RU[m] ?? m}</span>
             </span>
           )}
           tones={HVAC_TONES}
