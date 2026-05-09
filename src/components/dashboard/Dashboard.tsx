@@ -185,15 +185,18 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen pb-32">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-bg-primary/80 border-b border-black/5 dark:border-white/5 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-3xl shrink-0 leading-none">{current.icon}</span>
-          <div className="min-w-0">
-            <div className="text-lg font-medium truncate leading-tight">{current.title}</div>
-            <div className="text-[10px] text-text-tertiary">Glance</div>
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-bg-primary/80 border-b border-black/5 dark:border-white/5 px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
+        {/* Левый блок (название страницы) уступает кнопкам в edit-mode на mobile,
+            чтобы хватило ширины для всех кнопок. В обычном режиме показываем
+            полностью. */}
+        <div className={`flex items-center gap-2.5 min-w-0 ${editing ? 'shrink' : ''}`}>
+          <span className="text-2xl sm:text-3xl shrink-0 leading-none">{current.icon}</span>
+          <div className={`min-w-0 ${editing ? 'hidden sm:block' : ''}`}>
+            <div className="text-base sm:text-lg font-medium truncate leading-tight">{current.title}</div>
+            <div className="text-[10px] text-text-tertiary hidden sm:block">Glance</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <ProfileSwitcher />
           <Link
             href="/settings"
@@ -207,29 +210,40 @@ export function Dashboard() {
             <>
               <button
                 onClick={() => setManagingPages(true)}
-                className="px-3 py-2 rounded-full bg-sky-500/15 border border-sky-300/25 text-sky-100 text-xs flex items-center gap-1.5"
+                aria-label={t('dashboard.pages')}
+                title={t('dashboard.pages')}
+                className="px-2.5 sm:px-3 py-2 rounded-full bg-sky-500/15 border border-sky-300/25 text-sky-100 text-xs flex items-center gap-1.5"
               >
-                <LayoutGrid size={14} /> {t('dashboard.pages')}
+                <LayoutGrid size={14} aria-hidden="true" />
+                <span className="hidden sm:inline">{t('dashboard.pages')}</span>
               </button>
               {current.kind !== 'weather' && (
                 <button
                   onClick={() => setAdding(true)}
-                  className="px-3 py-2 rounded-full bg-accent/20 border border-accent/40 text-accent text-xs flex items-center gap-1.5"
+                  aria-label={t('dashboard.addWidget')}
+                  title={t('dashboard.addWidget')}
+                  className="px-2.5 sm:px-3 py-2 rounded-full bg-accent/20 border border-accent/40 text-accent text-xs flex items-center gap-1.5"
                 >
-                  <Plus size={14} /> {t('dashboard.addWidget')}
+                  <Plus size={14} aria-hidden="true" />
+                  <span className="hidden sm:inline">{t('dashboard.addWidget')}</span>
                 </button>
               )}
             </>
           )}
           <button
             onClick={() => setEditing((v) => !v)}
-            className={`px-3 py-2 rounded-full text-xs flex items-center gap-1.5 transition ${
+            aria-label={editing ? t('dashboard.doneButton') : t('dashboard.editButton')}
+            title={editing ? t('dashboard.doneButton') : t('dashboard.editButton')}
+            className={`px-2.5 sm:px-3 py-2 rounded-full text-xs flex items-center gap-1.5 transition ${
               editing
                 ? 'bg-black/15 dark:bg-white/15 border border-black/30 dark:border-white/30 text-text-primary'
                 : 'bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary'
             }`}
           >
-            <Cog size={14} /> {editing ? t('dashboard.doneButton') : t('dashboard.editButton')}
+            <Cog size={14} aria-hidden="true" />
+            <span className="hidden sm:inline">
+              {editing ? t('dashboard.doneButton') : t('dashboard.editButton')}
+            </span>
           </button>
         </div>
       </header>
@@ -319,13 +333,20 @@ export function Dashboard() {
             }}
             renderControls={(item) => (
               <>
-                {/* Прозрачный overlay перехватывает все клики и служит drag-handle
-                    для RGL. Виджет под ним «заморожен» — кнопки внутри не сработают. */}
+                {/*
+                  Drag-handle — только верхняя полоса 36px шириной. Раньше overlay
+                  закрывал весь виджет и блокировал scroll: палец на любом месте
+                  виджета сразу запускал drag. Теперь основная площадь виджета
+                  пропускает touch на scroll, а перетаскивать можно за «ручку»
+                  с эмодзи-захватом.
+                */}
                 <div
-                  className="rgl-drag-area absolute inset-0 z-10 cursor-grab active:cursor-grabbing rounded-2xl"
+                  className="rgl-drag-area absolute top-0 left-9 right-9 h-9 z-10 cursor-grab active:cursor-grabbing rounded-t-2xl flex items-center justify-center bg-black/40 backdrop-blur-sm"
                   style={{ touchAction: 'none' }}
-                  title="Перетащить"
-                />
+                  title={t('common.edit')}
+                >
+                  <span className="block w-8 h-1 rounded-full bg-white/40" aria-hidden="true" />
+                </div>
                 <button
                   onClick={() => setConfirmRemoveId(item.i)}
                   aria-label={t('common.delete')}

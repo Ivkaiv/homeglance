@@ -115,71 +115,73 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
               {pages.map((p, idx) => (
                 <div
                   key={p.id}
-                  className={`px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center gap-2 text-sm ${
+                  className={`px-3 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm ${
                     p.hidden ? 'opacity-60' : ''
                   }`}
                 >
-                  <span className="text-xl" aria-hidden="true">{p.icon}</span>
-                  <span className="flex-1 truncate">
-                    {p.title}
-                    {p.kind === 'weather' && (
-                      <span className="text-[10px] text-amber-300/80 ml-2">погода</span>
-                    )}
-                    {p.hidden && (
-                      <span className="text-[10px] text-text-tertiary ml-2">скрыта</span>
-                    )}
-                    {p.protected && (
-                      <span className="text-[10px] text-text-tertiary ml-2">базовая</span>
-                    )}
-                  </span>
-                  <button
-                    onClick={() => updatePage(p.id, { hidden: !p.hidden })}
-                    title={p.hidden ? 'Показать в dock-баре' : 'Скрыть из dock-бара'}
-                    aria-label={p.hidden ? `Показать «${p.title}» в dock-баре` : `Скрыть «${p.title}» из dock-бара`}
-                    className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                  >
-                    {p.hidden ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
-                  </button>
-                  <button
-                    onClick={() => moveUp(idx)}
-                    disabled={idx === 0}
-                    aria-label="Переместить вверх"
-                    className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary disabled:opacity-20 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                  >
-                    <ChevronUp size={14} aria-hidden="true" />
-                  </button>
-                  <button
-                    onClick={() => moveDown(idx)}
-                    disabled={idx >= pages.length - 1}
-                    aria-label="Переместить вниз"
-                    className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary disabled:opacity-20 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                  >
-                    <ChevronDown size={14} aria-hidden="true" />
-                  </button>
-                  <button
-                    onClick={() => exportPage(p)}
-                    aria-label={t('pages.manager.exportPage')}
-                    title={t('pages.manager.exportPage')}
-                    className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                  >
-                    <Download size={14} aria-hidden="true" />
-                  </button>
-                  <button
-                    onClick={() => setEditing(p)}
-                    aria-label={`Редактировать страницу «${p.title}»`}
-                    className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-text-secondary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                  >
-                    <Pencil size={14} aria-hidden="true" />
-                  </button>
-                  {!p.protected && (
-                    <button
-                      onClick={() => setConfirmDelete(p)}
-                      aria-label={`Удалить страницу «${p.title}»`}
-                      className="p-1.5 rounded-md hover:bg-red-500/20 text-red-300/85 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-300"
+                  {/* Title row — занимает всю ширину на mobile, чтобы actions
+                      ушли на вторую строку и не давили друг на друга. */}
+                  <div className="flex items-center gap-2 min-w-0 flex-1 basis-full sm:basis-auto">
+                    <span className="text-xl shrink-0" aria-hidden="true">{p.icon}</span>
+                    <span className="flex-1 truncate">
+                      {p.title}
+                      {p.kind === 'weather' && (
+                        <span className="text-[10px] text-amber-300/80 ml-2">погода</span>
+                      )}
+                      {p.hidden && (
+                        <span className="text-[10px] text-text-tertiary ml-2">скрыта</span>
+                      )}
+                      {p.protected && (
+                        <span className="text-[10px] text-text-tertiary ml-2">базовая</span>
+                      )}
+                    </span>
+                  </div>
+                  {/* Actions row — компактные иконки, фиксированный размер 32×32. */}
+                  <div className="flex items-center gap-0.5 ml-auto">
+                    <ActionIcon
+                      onClick={() => updatePage(p.id, { hidden: !p.hidden })}
+                      title={p.hidden ? 'Показать в dock-баре' : 'Скрыть из dock-бара'}
+                      aria-label={p.hidden ? `Показать «${p.title}» в dock-баре` : `Скрыть «${p.title}» из dock-бара`}
                     >
-                      <Trash2 size={14} aria-hidden="true" />
-                    </button>
-                  )}
+                      {p.hidden ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+                    </ActionIcon>
+                    <ActionIcon
+                      onClick={() => moveUp(idx)}
+                      disabled={idx === 0}
+                      aria-label="Переместить вверх"
+                    >
+                      <ChevronUp size={14} aria-hidden="true" />
+                    </ActionIcon>
+                    <ActionIcon
+                      onClick={() => moveDown(idx)}
+                      disabled={idx >= pages.length - 1}
+                      aria-label="Переместить вниз"
+                    >
+                      <ChevronDown size={14} aria-hidden="true" />
+                    </ActionIcon>
+                    <ActionIcon
+                      onClick={() => exportPage(p)}
+                      aria-label={t('pages.manager.exportPage')}
+                      title={t('pages.manager.exportPage')}
+                    >
+                      <Download size={14} aria-hidden="true" />
+                    </ActionIcon>
+                    <ActionIcon
+                      onClick={() => setEditing(p)}
+                      aria-label={`Редактировать страницу «${p.title}»`}
+                    >
+                      <Pencil size={14} aria-hidden="true" />
+                    </ActionIcon>
+                    {!p.protected && (
+                      <ActionIcon
+                        onClick={() => setConfirmDelete(p)}
+                        aria-label={`Удалить страницу «${p.title}»`}
+                        variant="danger"
+                      >
+                        <Trash2 size={14} aria-hidden="true" />
+                      </ActionIcon>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -719,5 +721,40 @@ function MultiEntitySelect({
         )}
       </div>
     </div>
+  );
+}
+
+function ActionIcon({
+  onClick,
+  disabled,
+  title,
+  "aria-label": ariaLabel,
+  children,
+  variant = "default",
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  title?: string;
+  "aria-label": string;
+  children: React.ReactNode;
+  variant?: "default" | "danger";
+}) {
+  const base =
+    "w-8 h-8 rounded-md flex items-center justify-center disabled:opacity-20 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-bg-secondary";
+  const tone =
+    variant === "danger"
+      ? "text-red-300/85 hover:bg-red-500/20 focus-visible:ring-red-300"
+      : "text-text-secondary hover:bg-black/10 dark:hover:bg-white/10 focus-visible:ring-accent/70";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      title={title ?? ariaLabel}
+      className={`${base} ${tone}`}
+    >
+      {children}
+    </button>
   );
 }
