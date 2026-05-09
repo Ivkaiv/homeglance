@@ -1,20 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
+import { usePages } from '@/lib/pages/PagesProvider';
 import { useT } from '@/lib/i18n/I18nProvider';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 import { ProfilePicker } from '@/components/profile/ProfilePicker';
+import { FirstRunWizard } from '@/components/wizard/FirstRunWizard';
+import { shouldShowWizard } from '@/lib/wizard/firstRun';
 import { AlertCircle } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
   const t = useT();
-  const { hasCredentials, initialized, status } = useConnection();
+  const { hasCredentials, initialized, status, isReady } = useConnection();
   const { active, loaded: profilesLoaded } = useProfiles();
+  const { pages } = usePages();
+  const [wizardDismissed, setWizardDismissed] = useState(false);
 
   useEffect(() => {
     // Не редиректим, пока не прочитали localStorage — иначе теряем сессию на refresh
@@ -57,6 +62,18 @@ export default function HomePage() {
 
   if (!active) {
     return <ProfilePicker />;
+  }
+
+  // First-run wizard — показываем если профиль свежий, HA подключён,
+  // и пользователь ещё не закрыл его в этой сессии. Сам wizard ставит
+  // флаг «done» по завершению любого пути (auto-pilot/templates/skip).
+  if (
+    !wizardDismissed &&
+    isReady &&
+    pages.length > 0 &&
+    shouldShowWizard(active.id, pages)
+  ) {
+    return <FirstRunWizard onFinish={() => setWizardDismissed(true)} />;
   }
 
   return <Dashboard />;
