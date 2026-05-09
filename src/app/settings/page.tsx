@@ -4,7 +4,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ChevronLeft, RotateCcw, Lock, ShieldCheck, ShieldOff } from 'lucide-react';
-import { useTheme, ThemeMode } from '@/lib/theme/ThemeProvider';
+import {
+  useTheme,
+  ThemeMode,
+  ACCENT_PRESETS,
+  type AccentPreset,
+} from '@/lib/theme/ThemeProvider';
 import { loadConnection } from '@/lib/ha/connection-storage';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
@@ -81,6 +86,10 @@ export default function SettingsPage() {
           </div>
         </Section>
 
+        <Section title={t('settings.accent.title')}>
+          <AccentSwitcher />
+        </Section>
+
         <Section title={t('settings.language.title')}>
           <LanguageSwitcher />
         </Section>
@@ -141,6 +150,40 @@ export default function SettingsPage() {
           onCancel={() => setPinPromptOpen(false)}
         />
       )}
+    </div>
+  );
+}
+
+function AccentSwitcher() {
+  const t = useT();
+  const { accent, setAccent } = useTheme();
+  const presets = Object.keys(ACCENT_PRESETS) as AccentPreset[];
+  return (
+    <div className="flex flex-wrap gap-2">
+      {presets.map((p) => {
+        const swatch = ACCENT_PRESETS[p].swatch;
+        const active = accent === p;
+        return (
+          <button
+            key={p}
+            onClick={() => setAccent(p)}
+            aria-label={t(`settings.accent.${p}`)}
+            title={t(`settings.accent.${p}`)}
+            className={`relative w-10 h-10 rounded-full transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary ${
+              active
+                ? 'ring-2 ring-offset-2 ring-offset-bg-secondary ring-text-primary'
+                : 'hover:scale-110'
+            }`}
+            style={{ background: swatch }}
+          >
+            {active && (
+              <span className="absolute inset-0 flex items-center justify-center text-white text-base">
+                ✓
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
