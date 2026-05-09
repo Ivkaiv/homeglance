@@ -346,7 +346,7 @@ export function Dashboard() {
                   title={t('common.edit')}
                 >
                   <span
-                    className="block w-9 h-1 rounded-full bg-white/35"
+                    className="block w-9 h-1 rounded-full bg-black/30 dark:bg-white/40"
                     aria-hidden="true"
                   />
                 </div>
