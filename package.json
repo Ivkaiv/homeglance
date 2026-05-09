@@ -1,6 +1,6 @@
 {
   "name": "homeglance",
-  "version": "0.1.0-alpha.8",
+  "version": "0.1.0-alpha.9",
   "description": "A modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.",
   "license": "MIT",
   "homepage": "https://github.com/Ivkaiv/homeglance",
@@ -15,7 +15,7 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3040",
     "build": "next build",
-    "start": "next start -H 0.0.0.0 -p 3040",
+    "start": "PORT=${PORT:-3040} HOSTNAME=${HOSTNAME:-0.0.0.0} node .next/standalone/server.js",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
