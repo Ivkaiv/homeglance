@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Plus, Trash2, Pencil, Check, ChevronUp, ChevronDown, Eye, EyeOff, Download, Upload } from 'lucide-react';
+import { X, Plus, Trash2, Pencil, Check, ChevronUp, ChevronDown, Eye, EyeOff, Download, Upload, Cloud } from 'lucide-react';
 import { usePages } from '@/lib/pages/PagesProvider';
+import { extractEntities, buildImportPlan } from '@/lib/lovelace/import';
 import {
   DEFAULT_WEATHER_SECTIONS,
   type Page,
@@ -27,9 +28,11 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 export function PageManagerSheet({ onClose }: { onClose: () => void }) {
   const t = useT();
   const { pages, addPage, updatePage, deletePage, reorderPages } = usePages();
+  const { client, states, isReady } = useConnection();
   const [editing, setEditing] = useState<Page | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Page | null>(null);
   const [importMessage, setImportMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const [lovelaceBusy, setLovelaceBusy] = useState(false);
 
   function startNew() {
     setEditing({ id: '', title: '', icon: '📄', kind: 'grid', widgets: [] });
@@ -66,6 +69,58 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
       const hint = e instanceof ImportError ? e.hint : undefined;
       const key = hint ? `pages.manager.importError.${hint}` : 'pages.manager.importError.generic';
       setImportMessage({ kind: 'error', text: t(key) });
+    }
+  }
+
+  async function importFromLovelace() {
+    if (!isReady) {
+      setImportMessage({ kind: 'error', text: t('pages.manager.importLovelace.error.notReady') });
+      return;
+    }
+    setLovelaceBusy(true);
+    setImportMessage(null);
+    try {
+      // Берём дефолтный dashboard (url_path=null). Если у пользователя
+      // несколько dashboards — добавим выбор отдельной итерацией.
+      const config = await client.getLovelaceConfig(null);
+      if (!config) {
+        setImportMessage({
+          kind: 'error',
+          text: t('pages.manager.importLovelace.error.noConfig'),
+        });
+        return;
+      }
+      const found = extractEntities(config);
+      const plan = buildImportPlan(found, states, 9);
+      if (plan.widgets.length === 0) {
+        setImportMessage({
+          kind: 'error',
+          text: t('pages.manager.importLovelace.error.empty'),
+        });
+        return;
+      }
+      const created = addPage({
+        title: 'Из HA',
+        icon: '🏠',
+        kind: 'grid',
+        widgets: plan.widgets,
+      });
+      setImportMessage({
+        kind: 'success',
+        text: t('pages.manager.importLovelace.success', {
+          title: created.title,
+          n: plan.widgets.length,
+          total: plan.validCount,
+        }),
+      });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      setImportMessage({
+        kind: 'error',
+        text: t('pages.manager.importError.generic') + ': ' + message,
+      });
+    } finally {
+      setLovelaceBusy(false);
     }
   }
 
@@ -208,6 +263,15 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
                 <Download size={14} aria-hidden="true" /> {t('pages.manager.exportAll')}
               </button>
             </div>
+
+            <button
+              onClick={importFromLovelace}
+              disabled={!isReady || lovelaceBusy}
+              className="mt-2 w-full px-3 py-2.5 rounded-xl bg-purple-500/15 border border-purple-400/30 text-purple-300 text-xs flex items-center justify-center gap-1.5 hover:bg-purple-500/25 disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-purple-400/70"
+            >
+              <Cloud size={14} aria-hidden="true" />
+              {lovelaceBusy ? t('pages.manager.importLovelace.busy') : t('pages.manager.importLovelace')}
+            </button>
 
             {importMessage && (
               <div

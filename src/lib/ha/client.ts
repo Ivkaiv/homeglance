@@ -319,6 +319,35 @@ export class HAClient {
     await this.callWS({ type: 'frontend/set_user_data', key, value });
   }
 
+  /**
+   * Список Lovelace-дашбордов пользователя. Включая дефолтный (без url_path).
+   */
+  async listLovelaceDashboards(): Promise<
+    Array<{ id: string; url_path: string | null; title: string; icon?: string }>
+  > {
+    try {
+      return await this.callWS({ type: 'lovelace/dashboards/list' });
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Конфиг конкретного дашборда. url_path = null — дефолтный («overview»).
+   * `force` — заставить HA отдать YAML-конфиг даже если включён storage-mode.
+   */
+  async getLovelaceConfig(urlPath: string | null = null): Promise<any | null> {
+    try {
+      return await this.callWS({
+        type: 'lovelace/config',
+        url_path: urlPath,
+        force: false,
+      });
+    } catch {
+      return null;
+    }
+  }
+
   /** ───── Private send / wait ───── */
 
   private send(msg: any): void {
