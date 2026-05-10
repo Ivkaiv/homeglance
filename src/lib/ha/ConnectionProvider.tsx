@@ -46,13 +46,31 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     loadConnection()
-      .then((conn) => {
+      .then(async (conn) => {
         if (cancelled) return;
         if (conn) {
           setHasCredentials(true);
           client.connect(conn.url, conn.token);
+          setInitialized(true);
+          return;
         }
-        setInitialized(true);
+        // Под HA Ingress (homeassistant_api: true) Supervisor выдаёт
+        // SUPERVISOR_TOKEN — пробуем подключиться автоматически, чтобы
+        // пользователю не приходилось вводить url+token вручную.
+        try {
+          const r = await fetch('api/glance/auto-config');
+          if (r.ok) {
+            const data = await r.json();
+            if (data?.available && data?.token) {
+              const url = data.url || window.location.origin;
+              await saveConnection({ url, token: data.token });
+              if (cancelled) return;
+              setHasCredentials(true);
+              client.connect(url, data.token);
+            }
+          }
+        } catch {}
+        if (!cancelled) setInitialized(true);
       })
       .catch(() => {
         if (!cancelled) setInitialized(true);
