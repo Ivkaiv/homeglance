@@ -1,6 +1,6 @@
 // Минимальный service worker для PWA-установки Glance.
 // Кэширует статические ассеты, остальное идёт сетью с фолбэком на кэш.
-const CACHE = 'glance-v3';
+const CACHE = 'glance-v4';
 const STATIC = [
   '/',
   '/manifest.json',
@@ -9,12 +9,32 @@ const STATIC = [
   '/icons/icon-maskable-512.png',
 ];
 
+// Под HA Ingress SW не нужен и вреден (см. SwRegister.tsx). Если SW
+// установился из под ingress (предыдущие версии) — на activate выгружаем
+// сами себя и стираем все кэши, чтобы не отдавать stale 404 поверх
+// обновлений add-on.
+const isIngress = self.registration.scope.includes('/api/hassio_ingress/');
+
 self.addEventListener('install', (e) => {
+  if (isIngress) {
+    self.skipWaiting();
+    return;
+  }
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(STATIC).catch(() => {})));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
+  if (isIngress) {
+    e.waitUntil(
+      caches
+        .keys()
+        .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+        .then(() => self.registration.unregister())
+        .then(() => self.clients.matchAll().then((cs) => cs.forEach((c) => c.navigate(c.url))))
+    );
+    return;
+  }
   e.waitUntil(
     caches
       .keys()
@@ -25,6 +45,8 @@ self.addEventListener('activate', (e) => {
 
 // Network-first для HTML/API, cache-first для статики.
 self.addEventListener('fetch', (e) => {
+  // Под ingress SW обнуляется на activate — на всякий случай не перехватываем.
+  if (isIngress) return;
   const url = new URL(e.request.url);
 
   // Не трогаем WebSocket и API-эндпоинты — они не должны кэшироваться.
