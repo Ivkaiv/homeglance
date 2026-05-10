@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { nav } from '@/lib/ingress/nav';
+import { useState } from 'react';
+import OnboardingPage from './onboarding/page';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
+import { nav } from '@/lib/ingress/nav';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import { usePages } from '@/lib/pages/PagesProvider';
 import { useT } from '@/lib/i18n/I18nProvider';
@@ -20,16 +21,15 @@ export default function HomePage() {
   const { pages } = usePages();
   const [wizardDismissed, setWizardDismissed] = useState(false);
 
-  useEffect(() => {
-    // Не редиректим, пока не прочитали localStorage — иначе теряем сессию на refresh
-    if (initialized && !hasCredentials) nav('/onboarding');
-  }, [initialized, hasCredentials]);
-
   if (!initialized) {
     return <DashboardSkeleton />;
   }
 
-  if (!hasCredentials) return null;
+  // Под HA Ingress sandbox iframe навигация через window.location ломается,
+  // поэтому показываем onboarding inline. Когда connectTo() обновит state в
+  // ConnectionProvider, hasCredentials станет true и компонент перерендерится
+  // в Dashboard — без навигации между URL.
+  if (!hasCredentials) return <OnboardingPage />;
 
   if (status.status === 'connecting' || status.status === 'idle') {
     return <DashboardSkeleton hint={t('connection.connecting')} />;
