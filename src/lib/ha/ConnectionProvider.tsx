@@ -54,22 +54,10 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           setInitialized(true);
           return;
         }
-        // Под HA Ingress (homeassistant_api: true) Supervisor выдаёт
-        // SUPERVISOR_TOKEN. RootLayout встраивает его в meta-тег, читаем
-        // синхронно — fetch не используем (мог не доходить в WebView).
-        const ready = document
-          .querySelector<HTMLMetaElement>('meta[name="hg-supervisor-ready"]')
-          ?.content;
-        const supToken = document
-          .querySelector<HTMLMetaElement>('meta[name="hg-supervisor-token"]')
-          ?.content;
-        if (ready === '1' && supToken) {
-          const url = window.location.origin;
-          await saveConnection({ url, token: supToken });
-          if (cancelled) return;
-          setHasCredentials(true);
-          client.connect(url, supToken);
-        }
+        // Авто-подключение через SUPERVISOR_TOKEN не работает: HA WebSocket
+        // его отвергает (auth_invalid). Оставляем manual onboarding —
+        // OnboardingPage под ingress подставляет URL=window.location.origin
+        // автоматически, пользователю остаётся только вставить LLT-токен.
         if (!cancelled) setInitialized(true);
       })
       .catch(() => {

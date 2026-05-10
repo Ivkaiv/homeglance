@@ -16,7 +16,7 @@ import { AlertCircle } from 'lucide-react';
 
 export default function HomePage() {
   const t = useT();
-  const { hasCredentials, initialized, status, isReady } = useConnection();
+  const { hasCredentials, initialized, status, isReady, forget } = useConnection();
   const { active, loaded: profilesLoaded } = useProfiles();
   const { pages } = usePages();
   const [wizardDismissed, setWizardDismissed] = useState(false);
@@ -45,7 +45,7 @@ export default function HomePage() {
           </div>
           <div className="text-sm text-text-secondary">{t('connection.authFailed.body')}</div>
           <button
-            onClick={() => nav('/onboarding')}
+            onClick={() => forget()}
             className="mt-1 px-5 py-2.5 rounded-full bg-accent/20 border border-accent/40 text-accent text-sm hover:bg-accent/30"
           >
             {t('connection.authFailed.action')}

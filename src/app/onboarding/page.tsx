@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { nav } from '@/lib/ingress/nav';
 import { motion } from 'framer-motion';
 import { ChevronRight, Key, Globe, ExternalLink } from 'lucide-react';
@@ -12,6 +12,15 @@ export default function OnboardingPage() {
   const { connectTo } = useConnection();
   const [url, setUrl] = useState('');
   const [token, setToken] = useState('');
+
+  // Под HA Ingress URL уже известен — это origin, на котором работает сам
+  // HA. Подставляем автоматически, чтобы пользователю не пришлось искать
+  // и копировать. Под прямым доступом поле остаётся пустым.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isIngress = window.location.pathname.includes('/api/hassio_ingress/');
+    if (isIngress) setUrl(window.location.origin);
+  }, []);
   const [step, setStep] = useState<'welcome' | 'connect' | 'help'>('welcome');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
