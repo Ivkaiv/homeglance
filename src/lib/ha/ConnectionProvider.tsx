@@ -55,27 +55,20 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
           return;
         }
         // Под HA Ingress (homeassistant_api: true) Supervisor выдаёт
-        // SUPERVISOR_TOKEN — пробуем подключиться автоматически, чтобы
-        // пользователю не приходилось вводить url+token вручную.
-        try {
-          // Абсолютный URL через <base href>, чтобы под ingress fetch шёл
-          // на правильный префикс /api/hassio_ingress/<token>/...
-          const base = document.querySelector('base')?.getAttribute('href') ?? '/';
-          const r = await fetch(base + 'api/glance/auto-config', { cache: 'no-store' });
-          console.log('[auto-config] fetch status:', r.status);
-          if (r.ok) {
-            const data = await r.json();
-            console.log('[auto-config] response:', data);
-            if (data?.available && data?.token) {
-              const url = data.url || window.location.origin;
-              await saveConnection({ url, token: data.token });
-              if (cancelled) return;
-              setHasCredentials(true);
-              client.connect(url, data.token);
-            }
-          }
-        } catch (e) {
-          console.warn('[auto-config] fetch failed:', e);
+        // SUPERVISOR_TOKEN. RootLayout встраивает его в meta-тег, читаем
+        // синхронно — fetch не используем (мог не доходить в WebView).
+        const ready = document
+          .querySelector<HTMLMetaElement>('meta[name="hg-supervisor-ready"]')
+          ?.content;
+        const supToken = document
+          .querySelector<HTMLMetaElement>('meta[name="hg-supervisor-token"]')
+          ?.content;
+        if (ready === '1' && supToken) {
+          const url = window.location.origin;
+          await saveConnection({ url, token: supToken });
+          if (cancelled) return;
+          setHasCredentials(true);
+          client.connect(url, supToken);
         }
         if (!cancelled) setInitialized(true);
       })

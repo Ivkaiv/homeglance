@@ -52,10 +52,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // Под прямым доступом база = `/`, под HA Ingress = `<ingress>/`.
   const ingressPath = headers().get('x-ingress-path') ?? '';
   const baseHref = ingressPath ? `${ingressPath}/` : '/';
+
+  // Под HA Ingress (homeassistant_api: true) Supervisor выдаёт
+  // SUPERVISOR_TOKEN. Встраиваем его прямо в HTML (через meta-тег) —
+  // ConnectionProvider потом читает синхронно, без fetch на сервер.
+  // Это надёжнее: fetch может не дойти из-за SW-кэша, race condition'а
+  // или особенностей WebView, а meta-тег приходит вместе с HTML.
+  const supervisorToken = process.env.SUPERVISOR_TOKEN ?? process.env.HASSIO_TOKEN ?? '';
+  const supervisorReady = ingressPath && supervisorToken ? '1' : '0';
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <base href={baseHref} />
+        <meta name="hg-supervisor-ready" content={supervisorReady} />
+        {supervisorReady === '1' && (
+          <meta name="hg-supervisor-token" content={supervisorToken} />
+        )}
       </head>
       <body>
         <I18nProvider>
