@@ -20,10 +20,18 @@ export const runtime = 'nodejs';
  */
 export async function GET() {
   const ingressPath = headers().get('x-ingress-path');
-  const supervisorToken = process.env.SUPERVISOR_TOKEN;
+  const supervisorToken = process.env.SUPERVISOR_TOKEN ?? process.env.HASSIO_TOKEN;
+
+  // Диагностика — пишем в stdout add-on'а, видно в Supervisor → Logs.
+  console.log(
+    `[auto-config] request: hasIngress=${!!ingressPath} hasSupToken=${!!process.env.SUPERVISOR_TOKEN} hasHassioToken=${!!process.env.HASSIO_TOKEN}`,
+  );
 
   if (!ingressPath || !supervisorToken) {
-    return NextResponse.json({ available: false });
+    return NextResponse.json({
+      available: false,
+      debug: { hasIngress: !!ingressPath, hasSupToken: !!supervisorToken },
+    });
   }
 
   return NextResponse.json({

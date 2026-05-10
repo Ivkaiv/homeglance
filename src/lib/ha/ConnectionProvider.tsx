@@ -58,9 +58,14 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
         // SUPERVISOR_TOKEN — пробуем подключиться автоматически, чтобы
         // пользователю не приходилось вводить url+token вручную.
         try {
-          const r = await fetch('api/glance/auto-config');
+          // Абсолютный URL через <base href>, чтобы под ingress fetch шёл
+          // на правильный префикс /api/hassio_ingress/<token>/...
+          const base = document.querySelector('base')?.getAttribute('href') ?? '/';
+          const r = await fetch(base + 'api/glance/auto-config', { cache: 'no-store' });
+          console.log('[auto-config] fetch status:', r.status);
           if (r.ok) {
             const data = await r.json();
+            console.log('[auto-config] response:', data);
             if (data?.available && data?.token) {
               const url = data.url || window.location.origin;
               await saveConnection({ url, token: data.token });
@@ -69,7 +74,9 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
               client.connect(url, data.token);
             }
           }
-        } catch {}
+        } catch (e) {
+          console.warn('[auto-config] fetch failed:', e);
+        }
         if (!cancelled) setInitialized(true);
       })
       .catch(() => {
