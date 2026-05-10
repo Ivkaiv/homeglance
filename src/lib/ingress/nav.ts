@@ -19,9 +19,7 @@ export function nav(target: string): void {
   if (typeof window === 'undefined') return;
   const path = target.replace(/^\//, '');
   const base = document.querySelector('base')?.getAttribute('href') ?? '/';
-  if (base === './' || base === '/') {
-    window.location.assign('/' + path);
-  } else {
-    window.location.assign(base + path);
-  }
+  // base всегда абсолютный (`/` или `/api/hassio_ingress/<token>/`),
+  // поэтому простая конкатенация даёт корректный URL под обоим случаям.
+  window.location.assign(base + path);
 }

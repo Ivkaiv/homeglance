@@ -46,13 +46,12 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Под HA Ingress URL имеет динамический префикс /api/hassio_ingress/<token>.
-  // Без этого <base> относительные `./_next/static/...` (assetPrefix='.')
-  // резолвятся относительно текущего URL — а если HA даёт URL без trailing
-  // slash, путь «уходит на уровень выше токена» и отдаётся 404 на статику.
-  // <base> явно фиксирует базу как «корень add-on под текущим ingress».
+  // <base> — абсолютный, иначе относительные `./_next/static/...`
+  // (от assetPrefix='.') ломаются на вложенных URL: на /onboarding/
+  // они бы резолвились как /onboarding/_next/static/... → 404.
+  // Под прямым доступом база = `/`, под HA Ingress = `<ingress>/`.
   const ingressPath = headers().get('x-ingress-path') ?? '';
-  const baseHref = ingressPath ? `${ingressPath}/` : './';
+  const baseHref = ingressPath ? `${ingressPath}/` : '/';
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
