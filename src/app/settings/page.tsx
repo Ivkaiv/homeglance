@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { nav } from '@/lib/ingress/nav';
 import { useEffect, useState } from 'react';
 import { ChevronLeft, RotateCcw, Lock, ShieldCheck, ShieldOff } from 'lucide-react';
 import {
@@ -25,7 +25,6 @@ import type { HAConnection } from '@/lib/ha/types';
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.0.0';
 
 export default function SettingsPage() {
-  const router = useRouter();
   const t = useT();
   const { mode, setMode, effective } = useTheme();
   const { forget } = useConnection();
@@ -50,7 +49,7 @@ export default function SettingsPage() {
 
   async function doDisconnect() {
     await forget();
-    router.push('/onboarding');
+    nav('/onboarding');
   }
 
   return (
@@ -131,7 +130,7 @@ export default function SettingsPage() {
             </>
           ) : (
             <button
-              onClick={() => router.push('/onboarding')}
+              onClick={() => nav('/onboarding')}
               className="w-full px-4 py-2.5 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm"
             >
               {t('settings.connection.connectButton')}

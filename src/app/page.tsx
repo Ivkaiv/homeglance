@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { nav } from '@/lib/ingress/nav';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import { usePages } from '@/lib/pages/PagesProvider';
@@ -14,7 +14,6 @@ import { shouldShowWizard } from '@/lib/wizard/firstRun';
 import { AlertCircle } from 'lucide-react';
 
 export default function HomePage() {
-  const router = useRouter();
   const t = useT();
   const { hasCredentials, initialized, status, isReady } = useConnection();
   const { active, loaded: profilesLoaded } = useProfiles();
@@ -23,8 +22,8 @@ export default function HomePage() {
 
   useEffect(() => {
     // Не редиректим, пока не прочитали localStorage — иначе теряем сессию на refresh
-    if (initialized && !hasCredentials) router.replace('/onboarding');
-  }, [initialized, hasCredentials, router]);
+    if (initialized && !hasCredentials) nav('/onboarding');
+  }, [initialized, hasCredentials]);
 
   if (!initialized) {
     return <DashboardSkeleton />;
@@ -46,7 +45,7 @@ export default function HomePage() {
           </div>
           <div className="text-sm text-text-secondary">{t('connection.authFailed.body')}</div>
           <button
-            onClick={() => router.push('/onboarding')}
+            onClick={() => nav('/onboarding')}
             className="mt-1 px-5 py-2.5 rounded-full bg-accent/20 border border-accent/40 text-accent text-sm hover:bg-accent/30"
           >
             {t('connection.authFailed.action')}

@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { nav } from '@/lib/ingress/nav';
 import { motion } from 'framer-motion';
 import { ChevronRight, Key, Globe, ExternalLink } from 'lucide-react';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
 import { useT } from '@/lib/i18n/I18nProvider';
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const t = useT();
   const { connectTo } = useConnection();
   const [url, setUrl] = useState('');
@@ -71,7 +70,7 @@ export default function OnboardingPage() {
       });
 
       connectTo(cleanUrl, token.trim());
-      router.push('/');
+      nav('/');
     } catch (e: any) {
       setError(e.message || String(e));
     } finally {
