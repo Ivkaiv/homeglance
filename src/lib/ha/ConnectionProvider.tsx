@@ -48,17 +48,34 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     loadConnection()
       .then(async (conn) => {
         if (cancelled) return;
-        if (conn) {
+
+        // Под HA Ingress с proxy-mode авто-подключаемся к add-on,
+        // который сам проксирует к HA через supervisor (токен в браузер
+        // не выдаём, server.js подменяет auth). Это override любой
+        // saved connection — то, что сохранилось от прошлых попыток
+        // (например, битый supervisor token из alpha.16) игнорируется.
+        const proxyReady =
+          typeof document !== 'undefined' &&
+          document
+            .querySelector<HTMLMetaElement>('meta[name="hg-proxy-ready"]')
+            ?.content === '1';
+
+        if (proxyReady) {
+          const baseHref = document.querySelector('base')?.getAttribute('href') ?? '/';
+          const baseUrl = new URL(baseHref, window.location.href);
+          const wsUrl = new URL('api/glance/ha-ws', baseUrl).href.replace(/^http/, 'ws');
+          const restUrl = new URL('api/glance/ha-rest', baseUrl).href.replace(/\/$/, '');
           setHasCredentials(true);
-          client.connect(conn.url, conn.token);
+          client.connect(window.location.origin, 'supervisor-proxied', { wsUrl, restUrl });
           setInitialized(true);
           return;
         }
-        // Авто-подключение через SUPERVISOR_TOKEN не работает: HA WebSocket
-        // его отвергает (auth_invalid). Оставляем manual onboarding —
-        // OnboardingPage под ingress подставляет URL=window.location.origin
-        // автоматически, пользователю остаётся только вставить LLT-токен.
-        if (!cancelled) setInitialized(true);
+
+        if (conn) {
+          setHasCredentials(true);
+          client.connect(conn.url, conn.token);
+        }
+        setInitialized(true);
       })
       .catch(() => {
         if (!cancelled) setInitialized(true);

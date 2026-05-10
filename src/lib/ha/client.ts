@@ -39,12 +39,23 @@ export class HAClient {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private shouldReconnect = false;
 
-  /** Установить URL и token, запустить соединение. */
-  connect(url: string, token: string): void {
+  /**
+   * Установить URL и token, запустить соединение.
+   *
+   * `overrides` позволяет подменить wsUrl/restUrl — нужно для режима
+   * Ingress proxy, когда клиент идёт не на сам HA, а на add-on
+   * (`/api/glance/ha-ws`, `/api/glance/ha-rest`), а supervisor токен
+   * подставляется server-side.
+   */
+  connect(
+    url: string,
+    token: string,
+    overrides?: { wsUrl?: string; restUrl?: string },
+  ): void {
     this.url = url.replace(/\/$/, '');
     this.token = token;
-    this.wsUrl = this.url.replace(/^http/, 'ws') + '/api/websocket';
-    this.restUrl = this.url + '/api';
+    this.wsUrl = overrides?.wsUrl ?? this.url.replace(/^http/, 'ws') + '/api/websocket';
+    this.restUrl = overrides?.restUrl ?? this.url + '/api';
     this.shouldReconnect = true;
     this.openSocket();
   }

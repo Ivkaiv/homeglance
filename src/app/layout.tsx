@@ -52,10 +52,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // Под прямым доступом база = `/`, под HA Ingress = `<ingress>/`.
   const ingressPath = headers().get('x-ingress-path') ?? '';
   const baseHref = ingressPath ? `${ingressPath}/` : '/';
+
+  // proxy-mode: под HA Ingress с homeassistant_api: true add-on проксирует
+  // HA REST/WS через себя (см. server.js + app/api/glance/ha-rest).
+  // Клиент детектит meta-tag и подключается к proxy без supervisor токена
+  // в браузере. Безопасно: токен остаётся server-side.
+  const supToken = process.env.SUPERVISOR_TOKEN ?? process.env.HASSIO_TOKEN ?? '';
+  const proxyReady = ingressPath && supToken ? '1' : '0';
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <base href={baseHref} />
+        <meta name="hg-proxy-ready" content={proxyReady} />
       </head>
       <body>
         <I18nProvider>

@@ -1,6 +1,6 @@
 {
   "name": "homeglance",
-  "version": "0.1.0-alpha.17",
+  "version": "0.1.0-alpha.18",
   "description": "A modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.",
   "license": "MIT",
   "homepage": "https://github.com/Ivkaiv/homeglance",
@@ -27,7 +27,8 @@
     "next": "14.2.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-grid-layout": "1.4.4"
+    "react-grid-layout": "1.4.4",
+    "ws": "^8"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.6",
@@ -36,6 +37,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-grid-layout": "1.x",
+    "@types/ws": "^8.18.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.18",
     "postcss": "^8.4.49",

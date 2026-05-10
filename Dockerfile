@@ -34,6 +34,16 @@ COPY --chown=nextjs:nodejs --from=builder /app/.next/standalone ./
 COPY --chown=nextjs:nodejs --from=builder /app/.next/static ./.next/static
 COPY --chown=nextjs:nodejs --from=builder /app/public ./public
 
+# Standalone-сервер от Next.js по умолчанию называется server.js — мы
+# переименовываем его в next-server.js, чтобы освободить имя под наш
+# кастомный server.js (он оборачивает Next.js handler и добавляет
+# WS-прокси к HA через Supervisor для add-on под Ingress).
+RUN mv ./server.js ./next-server.js
+COPY --chown=nextjs:nodejs --from=builder /app/server.js ./server.js
+# `ws` пакет не попадает в standalone trace (Next.js его не использует),
+# поэтому копируем явно.
+COPY --chown=nextjs:nodejs --from=builder /app/node_modules/ws ./node_modules/ws
+
 # Готовим директорию для server-storage (профили, страницы, токен HA).
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 VOLUME ["/app/data"]
@@ -45,4 +55,4 @@ EXPOSE 3040
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD wget -qO- http://127.0.0.1:3040/ > /dev/null 2>&1 || exit 1
 
-CMD ["node", "server.js"]
+CMD ["node", "/app/server.js"]
