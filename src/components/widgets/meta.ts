@@ -604,6 +604,39 @@ export const WEATHER_ROOM_META: WidgetMeta = {
   ],
 };
 
+export const LOCK_META: WidgetMeta = {
+  type: 'lock',
+  name: 'Замок',
+  emoji: '🔒',
+  description:
+    'Управление замком: тап запирает/отпирает. Янтарный акцент когда открыт — мягкое предупреждение «дверь не заперта»',
+  category: 'switches',
+  defaultSize: { w: 1, h: 1 },
+  minSize: { w: 1, h: 1 },
+  paramSchema: [
+    {
+      key: 'entity',
+      label: 'Замок',
+      kind: 'entity',
+      domain: 'lock.',
+      required: true,
+      hint: 'Например, lock.front_door',
+    },
+    {
+      key: 'label',
+      label: 'Подпись',
+      kind: 'text',
+      placeholder: 'Входная дверь',
+    },
+    {
+      key: 'icon',
+      label: 'Иконка',
+      kind: 'icon',
+      hint: 'По умолчанию — lock / lock-open-variant в зависимости от состояния',
+    },
+  ],
+};
+
 export const CALENDAR_META: WidgetMeta = {
   type: 'calendar',
   name: 'Календарь',
