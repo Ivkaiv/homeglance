@@ -5,7 +5,10 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+// GLANCE_DATA_DIR можно задать через env — под HA Add-on указываем
+// `/addon_config` (мап supervisor'а, persistent между restarts).
+// По умолчанию — относительно cwd (для standalone-/dev-инсталляций).
+const DATA_DIR = process.env.GLANCE_DATA_DIR ?? path.join(process.cwd(), 'data');
 
 async function ensureDir() {
   await fs.mkdir(DATA_DIR, { recursive: true });

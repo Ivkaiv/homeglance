@@ -1,5 +1,5 @@
 name: Homeglance
-version: "0.1.0-alpha.18"
+version: "0.1.0-alpha.19"
 
 slug: homeglance
 description: Modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.
@@ -19,6 +19,8 @@ panel_icon: mdi:view-dashboard-variant
 panel_title: Homeglance
 panel_admin: false
 homeassistant_api: true
+map:
+  - addon_config:rw
 hassio_api: false
 ingress: true
 ingress_port: 3040

@@ -22,7 +22,8 @@ WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3040 \
-    HOSTNAME=0.0.0.0
+    HOSTNAME=0.0.0.0 \
+    GLANCE_DATA_DIR=/addon_config
 
 # Непривилегированный юзер.
 RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
@@ -44,9 +45,10 @@ COPY --chown=nextjs:nodejs --from=builder /app/server.js ./server.js
 # поэтому копируем явно.
 COPY --chown=nextjs:nodejs --from=builder /app/node_modules/ws ./node_modules/ws
 
-# Готовим директорию для server-storage (профили, страницы, токен HA).
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
-VOLUME ["/app/data"]
+# Persistent storage под HA Add-on — supervisor монтирует /addon_config
+# через `map: addon_config:rw` (см. homeglance-addon/config.yaml). Этот
+# каталог переживает рестарты, обновления и переустановки add-on.
+# Для standalone-Docker-инсталляций можно перебить GLANCE_DATA_DIR env.
 
 USER nextjs
 EXPOSE 3040
