@@ -604,6 +604,47 @@ export const WEATHER_ROOM_META: WidgetMeta = {
   ],
 };
 
+export const CALENDAR_META: WidgetMeta = {
+  type: 'calendar',
+  name: 'Календарь',
+  emoji: '📅',
+  description:
+    'События из HA-календаря: сегодняшние и ближайшие на несколько дней вперёд',
+  category: 'misc',
+  defaultSize: { w: 3, h: 3 },
+  minSize: { w: 2, h: 2 },
+  paramSchema: [
+    {
+      key: 'entity',
+      label: 'Календарь',
+      kind: 'entity',
+      domain: 'calendar.',
+      required: true,
+      hint: 'Например, calendar.personal',
+    },
+    {
+      key: 'label',
+      label: 'Заголовок',
+      kind: 'text',
+      placeholder: 'Календарь',
+      hint: 'Отображается над списком событий',
+    },
+    {
+      key: 'days',
+      label: 'Сколько дней вперёд показывать',
+      kind: 'number',
+      default: 7,
+    },
+    {
+      key: 'maxEvents',
+      label: 'Максимум событий в виджете',
+      kind: 'number',
+      default: 6,
+      hint: 'Виджет сам обрежет список, если событий больше',
+    },
+  ],
+};
+
 export const weatherRoomComputeMinSize = (params: any): { w: number; h: number } => {
   const fields = params.fields ?? WEATHER_ROOM_DEFAULT_FIELDS;
   let w = 4,

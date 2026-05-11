@@ -29,6 +29,7 @@ import {
   CONTROL_PANEL_META,
   ROOM_HUB_META,
   WEATHER_ROOM_META,
+  CALENDAR_META,
   weatherComputeMinSize,
   controlPanelComputeMinSize,
   roomHubComputeMinSize,
@@ -144,6 +145,12 @@ export function registerBuiltinWidgets(): void {
       import('./WeatherRoomWidget').then((m) => m.WeatherRoomWidget)
     ),
     computeMinSize: weatherRoomComputeMinSize,
+  });
+  register({
+    meta: CALENDAR_META,
+    Component: lazyLoad(() =>
+      import('./CalendarWidget').then((m) => m.CalendarWidget)
+    ),
   });
 
   registered = true;
