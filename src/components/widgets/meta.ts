@@ -604,6 +604,67 @@ export const WEATHER_ROOM_META: WidgetMeta = {
   ],
 };
 
+export const MULTI_SENSOR_META: WidgetMeta = {
+  type: 'multi_sensor',
+  name: 'Несколько сенсоров',
+  emoji: '📊',
+  description:
+    'Компактный блок из нескольких sensor/binary_sensor сущностей — chip-ы с иконкой и значением; тап по числовому открывает график',
+  category: 'sensors',
+  defaultSize: { w: 3, h: 2 },
+  minSize: { w: 2, h: 1 },
+  paramSchema: [
+    {
+      key: 'entities',
+      label: 'Сенсоры',
+      kind: 'multi-entity',
+      domain: 'sensor.,binary_sensor.',
+      required: true,
+      hint: 'Можно смешивать sensor.* и binary_sensor.*',
+    },
+    {
+      key: 'label',
+      label: 'Подпись блока',
+      kind: 'text',
+      placeholder: 'Метеостанция',
+    },
+  ],
+};
+
+export const IFRAME_META: WidgetMeta = {
+  type: 'iframe',
+  name: 'Встроенный сайт',
+  emoji: '🌐',
+  description:
+    'Показывает произвольный URL в виджете. Удобно для Grafana, отдельных дашбордов, web-камер',
+  category: 'misc',
+  defaultSize: { w: 3, h: 3 },
+  minSize: { w: 2, h: 2 },
+  paramSchema: [
+    {
+      key: 'url',
+      label: 'URL сайта',
+      kind: 'text',
+      required: true,
+      placeholder: 'https://grafana.example.com/d/abc',
+      hint: 'Сайт должен разрешать встраивание (X-Frame-Options: SAMEORIGIN/ALLOWALL)',
+    },
+    {
+      key: 'label',
+      label: 'Заголовок',
+      kind: 'text',
+      hint: 'Опциональная шапка над iframe',
+    },
+    {
+      key: 'allowScripts',
+      label: 'Разрешить JavaScript внутри',
+      kind: 'boolean',
+      default: false,
+      hint: 'Нужно для интерактивных дашбордов. По умолчанию — sandbox без скриптов',
+    },
+  ],
+};
+
 export const LOCK_META: WidgetMeta = {
   type: 'lock',
   name: 'Замок',

@@ -31,6 +31,8 @@ import {
   WEATHER_ROOM_META,
   CALENDAR_META,
   LOCK_META,
+  IFRAME_META,
+  MULTI_SENSOR_META,
   weatherComputeMinSize,
   controlPanelComputeMinSize,
   roomHubComputeMinSize,
@@ -157,6 +159,18 @@ export function registerBuiltinWidgets(): void {
     meta: LOCK_META,
     Component: lazyLoad(() =>
       import('./LockWidget').then((m) => m.LockWidget)
+    ),
+  });
+  register({
+    meta: IFRAME_META,
+    Component: lazyLoad(() =>
+      import('./IframeWidget').then((m) => m.IframeWidget)
+    ),
+  });
+  register({
+    meta: MULTI_SENSOR_META,
+    Component: lazyLoad(() =>
+      import('./MultiSensorWidget').then((m) => m.MultiSensorWidget)
     ),
   });
 
