@@ -695,9 +695,9 @@ export const LIGHT_COLOR_META: WidgetMeta = {
   name: 'Свет (цвет + яркость)',
   emoji: '🌈',
   description:
-    'Управление цветной лампой: тап = on/off, slider яркости, нативный color picker для RGB-ламп',
+    'Кнопка цветной лампы. Тап открывает sheet с яркостью, color wheel, цветовой температурой и эффектами в стиле панели',
   category: 'lights',
-  defaultSize: { w: 2, h: 2 },
+  defaultSize: { w: 2, h: 1 },
   minSize: { w: 2, h: 1 },
   paramSchema: [
     {

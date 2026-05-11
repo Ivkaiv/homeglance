@@ -7,6 +7,19 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.34] — 2026-05-11
+
+### Changed
+- **Light Color widget — переписан как тап → sheet.** В alpha.33 виджет 2×2 не вмещал brightness slider и color picker, а нативный `<input type="color">` выглядел чужеродно (системный диалог браузера). Теперь виджет — компактная кнопка (`2×1`) с иконкой/названием/процентом яркости, тап открывает `LightColorSheet`.
+- **LightColorSheet** содержит весь UX в стиле панели:
+  - крупный on/off toggle с цветным свечением
+  - brightness slider
+  - color wheel (рисуется на canvas через HSL — без сторонних библиотек)
+  - быстрый ряд из 10 preset-цветов
+  - color temperature slider от тёплого к холодному (если у лампы есть `color_temp`)
+  - кнопки эффектов из `effect_list` (если лампа поддерживает эффекты)
+  - фоновое свечение в текущий цвет лампы (как у MediaPlayerSheet)
+
 ## [0.1.0-alpha.33] — 2026-05-11
 
 ### Added
