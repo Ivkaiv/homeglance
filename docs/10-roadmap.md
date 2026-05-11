@@ -64,7 +64,7 @@
 
 **Deliverable:** ✅ работает.
 
-## Phase 4: Widget Catalog 🟡 (большая часть)
+## Phase 4: Widget Catalog ✅
 
 **Цель:** все «классические» виджеты
 
@@ -73,17 +73,17 @@
 - [x] Camera (HLS/snapshot)
 - [x] Media Player (+ full-screen sheet с обложкой и контролами)
 - [x] Sensor Chart (SensorValueWidget + история через sparkline)
-- [ ] Multi-Sensor (отдельного нет, частично покрывается RoomHubWidget)
-- [ ] Light Color (RGB picker) — есть только on/off в LightToggleWidget
+- [x] Multi-Sensor (alpha.32)
+- [x] Light Color — toggle + brightness + RGB picker (alpha.33)
 - [x] Cover (шторы)
-- [ ] Lock
-- [ ] Energy
+- [x] Lock (alpha.31)
+- [x] Energy — мощность/today/month/cost (alpha.33)
 - [x] Person Presence
-- [ ] Map
-- [ ] iframe
+- [x] Map — OSM iframe embed (alpha.33)
+- [x] iframe (alpha.32)
 - [x] Quick Action (script trigger)
 - [x] Group / Container (ControlPanelWidget)
-- [x] Calendar (добавлен в alpha.30 — из Phase 8)
+- [x] Calendar (alpha.30)
 - [x] Weather Room (room-version)
 
 ## Phase 5: Room Hub Widget ✅
@@ -148,9 +148,9 @@
 
 ## Реалистичная оценка
 
-Phase 0-7 завершены, Phase 8 частично. Соотношение план/факт: 
-по виджетам ~60% из roadmap, плюс улучшения которых в плане не было
-(server-side proxy, persistent /data, sandbox-safe inline views).
+Phase 0-7 завершены, Phase 8 частично. Phase 4 (виджеты) на 100% —
+все 15 виджетов из roadmap есть. Плюс улучшения которых в плане не
+было: server-side proxy, persistent /data, sandbox-safe inline views.
 
 ## Критерии готовности к v1.0
 
