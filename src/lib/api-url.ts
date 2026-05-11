@@ -27,7 +27,19 @@
  * запросы уходят не на add-on, а в пустоту. Поэтому собираем URL руками.
  */
 export function apiUrl(path: string): string {
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  let cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  // Next.js `trailingSlash: true` редиректит пути без `/` через 308 на
+  // вариант с `/`, но под HA Ingress redirect-Location не содержит
+  // ingress-префикс — браузер уходит на корень HA и получает 404.
+  // Добавляем slash сами (перед query-string, если он есть).
+  const qIndex = cleanPath.indexOf('?');
+  if (qIndex >= 0) {
+    const p = cleanPath.slice(0, qIndex);
+    const q = cleanPath.slice(qIndex);
+    if (!p.endsWith('/')) cleanPath = p + '/' + q;
+  } else if (!cleanPath.endsWith('/')) {
+    cleanPath = cleanPath + '/';
+  }
   if (typeof document === 'undefined') return '/' + cleanPath;
   const base = document.querySelector('base')?.getAttribute('href') ?? '/';
   // base всегда абсолютный (см. RootLayout): `/` или `/api/hassio_ingress/<t>/`.
