@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { MarqueeText } from '@/components/ui/MarqueeText';
 import { PressButton } from '@/components/ui/PressButton';
+import { MediaPlayerSheet } from './MediaPlayerSheet';
 import { Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react';
 
 interface Params {
@@ -18,6 +20,15 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
   const callService = useCallService();
   const [ref, size] = useWidgetSize();
   const tier = sizeTier(size);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const openSheet = () => setSheetOpen(true);
+  const sheet = (
+    <MediaPlayerSheet
+      entityId={params.entity}
+      open={sheetOpen}
+      onClose={() => setSheetOpen(false)}
+    />
+  );
 
   const isBad = !e || e.state === 'unavailable' || e.state === 'unknown' || e.state === 'off';
   const label = params.label ?? e?.attributes.friendly_name ?? 'Плеер';
@@ -40,46 +51,59 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
 
   if (tier === 'tiny') {
     return (
-      <button
-        ref={ref}
-        onClick={() => cmd(playing ? 'media_pause' : 'media_play')}
-        disabled={isBad}
-        title={label}
-        aria-label={playPauseLabel}
-        className="glass h-full w-full flex items-center justify-center disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
-      >
-        {playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
-      </button>
+      <>
+        <button
+          ref={ref}
+          onClick={() => cmd(playing ? 'media_pause' : 'media_play')}
+          disabled={isBad}
+          title={label}
+          aria-label={playPauseLabel}
+          className="glass h-full w-full flex items-center justify-center disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
+        >
+          {playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+        </button>
+        {sheet}
+      </>
     );
   }
 
   if (tier === 'small') {
     return (
-      <div
-        ref={ref}
-        className="glass h-full w-full p-2 flex flex-col items-center justify-center gap-1"
-      >
-        {cover ? (
-          <img
-            src={cover}
-            alt={title ? `Обложка: ${title}` : ''}
-            width={40}
-            height={40}
-            loading="lazy"
-            className="w-10 h-10 rounded-md object-cover"
-          />
-        ) : (
-          <GlanceIcon value={iconValue} size={28} />
-        )}
-        <PressButton
-          onClick={() => cmd(playing ? 'media_pause' : 'media_play')}
-          disabled={isBad}
-          size={32}
-          ariaLabel={playPauseLabel}
+      <>
+        <div
+          ref={ref}
+          className="glass h-full w-full p-2 flex flex-col items-center justify-center gap-1"
         >
-          {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-        </PressButton>
-      </div>
+          <button
+            type="button"
+            onClick={openSheet}
+            aria-label="Открыть плеер"
+            className="rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+          >
+            {cover ? (
+              <img
+                src={cover}
+                alt={title ? `Обложка: ${title}` : ''}
+                width={40}
+                height={40}
+                loading="lazy"
+                className="w-10 h-10 rounded-md object-cover"
+              />
+            ) : (
+              <GlanceIcon value={iconValue} size={28} />
+            )}
+          </button>
+          <PressButton
+            onClick={() => cmd(playing ? 'media_pause' : 'media_play')}
+            disabled={isBad}
+            size={32}
+            ariaLabel={playPauseLabel}
+          >
+            {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+          </PressButton>
+        </div>
+        {sheet}
+      </>
     );
   }
 
@@ -92,36 +116,44 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
 
   if (isShort) {
     return (
+      <>
       <div
         ref={ref}
         className="glass h-full w-full p-2 flex items-center gap-2 overflow-hidden"
       >
-        {showCover && (
-          cover ? (
-            <img
-              src={cover}
-              alt={title ? `Обложка: ${title}` : ''}
-              width={coverPx}
-              height={coverPx}
-              loading="lazy"
-              className="rounded-md object-cover shrink-0"
-              style={{ width: coverPx, height: coverPx }}
-            />
-          ) : (
-            <div
-              className="rounded-md bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0"
-              style={{ width: coverPx, height: coverPx }}
-            >
-              <GlanceIcon value={iconValue} size={Math.round(coverPx * 0.5)} />
-            </div>
-          )
-        )}
-        <div className="min-w-0 flex-1">
-          <MarqueeText className="text-sm font-medium">{title}</MarqueeText>
-          {artist && (
-            <MarqueeText className="text-[10px] text-text-tertiary">{artist}</MarqueeText>
+        <button
+          type="button"
+          onClick={openSheet}
+          aria-label="Открыть плеер"
+          className="flex items-center gap-2 min-w-0 flex-1 text-left rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+        >
+          {showCover && (
+            cover ? (
+              <img
+                src={cover}
+                alt={title ? `Обложка: ${title}` : ''}
+                width={coverPx}
+                height={coverPx}
+                loading="lazy"
+                className="rounded-md object-cover shrink-0"
+                style={{ width: coverPx, height: coverPx }}
+              />
+            ) : (
+              <div
+                className="rounded-md bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0"
+                style={{ width: coverPx, height: coverPx }}
+              >
+                <GlanceIcon value={iconValue} size={Math.round(coverPx * 0.5)} />
+              </div>
+            )
           )}
-        </div>
+          <div className="min-w-0 flex-1">
+            <MarqueeText className="text-sm font-medium">{title}</MarqueeText>
+            {artist && (
+              <MarqueeText className="text-[10px] text-text-tertiary">{artist}</MarqueeText>
+            )}
+          </div>
+        </button>
         <div className="flex items-center gap-1 shrink-0">
           {showPrevNext && (
             <PressButton
@@ -155,16 +187,24 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
           )}
         </div>
       </div>
+      {sheet}
+      </>
     );
   }
 
   // Вертикальный layout (h>=130)
   return (
+    <>
     <div
       ref={ref}
       className="glass h-full w-full p-3 flex flex-col gap-2 overflow-hidden"
     >
-      <div className="flex gap-3 items-center min-w-0 shrink-0">
+      <button
+        type="button"
+        onClick={openSheet}
+        aria-label="Открыть плеер"
+        className="flex gap-3 items-center min-w-0 shrink-0 text-left rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+      >
         {showCover && (
           <div className="shrink-0">
             {cover ? (
@@ -190,7 +230,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
             <MarqueeText className="text-[10px] text-text-tertiary">{artist}</MarqueeText>
           )}
         </div>
-      </div>
+      </button>
 
       <div className="flex items-center justify-center gap-1.5 my-auto shrink-0">
         {showPrevNext && (
@@ -245,5 +285,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
         </div>
       )}
     </div>
+    {sheet}
+    </>
   );
 }
