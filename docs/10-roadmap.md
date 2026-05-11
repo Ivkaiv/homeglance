@@ -1,164 +1,165 @@
 # 10 · Roadmap
 
+> **Статус на 2026-05-11** (рядом с релизом `0.1.0-alpha.30`). Галочки
+> отражают фактическое состояние кодовой базы. Где план разошёлся с
+> практикой — отмечено отдельным комментарием.
+
 ## Принцип этапности
 
 Каждый этап → **публикуемый релиз**. Между этапами проверяем работоспособность, получаем фидбэк, корректируем следующий этап.
 
-## Phase 0: Foundation (1-2 недели)
+## Phase 0: Foundation ✅
 
 **Цель:** базовый каркас без виджетов
 
-- [ ] Инициализация репозитория (Next.js + TypeScript + Tailwind + всё нужное)
-- [ ] Базовый дизайн-система: CSS-переменные, темы, типографика, .glass
-- [ ] HA Client: WebSocket + REST с реконнектом
-- [ ] Settings page: ввод URL HA + токена
-- [ ] Подключение → отображение списка сущностей (просто текстом, для теста)
-- [ ] Профиль: один локальный, без UI выбора
-- [ ] Темы: dark/light/auto
+- [x] Инициализация репозитория (Next.js + TypeScript + Tailwind + всё нужное)
+- [x] Базовый дизайн-система: CSS-переменные, темы, типографика, .glass
+- [x] HA Client: WebSocket + REST с реконнектом
+- [x] Settings page: ввод URL HA + токена
+- [x] Подключение → отображение списка сущностей
+- [x] Профиль: один локальный, без UI выбора
+- [x] Темы: dark/light/auto
 
-**Deliverable:** запускается, подключается к HA, показывает «работает»
+**Deliverable:** ✅ работает.
 
-## Phase 1: Layout Engine (1-2 недели)
+## Phase 1: Layout Engine ✅
 
 **Цель:** drag-and-drop сетка с виджетами
 
-- [ ] Интеграция react-grid-layout
-- [ ] Edit mode toggle, wiggle-анимация
-- [ ] Сетка-подсказка (visible grid)
-- [ ] 5 базовых виджетов: Sensor, Light, Switch, Time, Note
-- [ ] Widget Registry, Widget API
-- [ ] ConfigSheet — настройка параметров
-- [ ] AddWidgetSheet — каталог
-- [ ] Адаптивные размеры (tiny/small/medium/large)
-- [ ] localStorage для раскладок
-- [ ] Кастомные кнопки удаления, настройки
+- [x] Интеграция react-grid-layout
+- [x] Edit mode toggle, wiggle-анимация
+- [x] Сетка-подсказка (visible grid)
+- [x] 5 базовых виджетов: Sensor, Light, Switch, Time, Note
+- [x] Widget Registry, Widget API
+- [x] ConfigSheet — настройка параметров
+- [x] AddWidgetSheet — каталог
+- [x] Адаптивные размеры (tiny/small/medium/large)
+- [x] localStorage для раскладок (плюс server-side для multi-device sync)
+- [x] Кастомные кнопки удаления, настройки
 
-**Deliverable:** можно создать страницу из 5 виджетов, перетащить, настроить, сохранить
+**Deliverable:** ✅ работает.
 
-## Phase 2: Pages & Navigation (1 неделя)
+## Phase 2: Pages & Navigation ✅ (частично)
 
 **Цель:** несколько страниц с dock-навигацией
 
-- [ ] Dock-bar с иконками страниц
-- [ ] Создание/удаление/переименование страниц
-- [ ] Drag для изменения порядка страниц
+- [x] Dock-bar с иконками страниц
+- [x] Создание/удаление/переименование страниц
+- [x] Drag для изменения порядка страниц
 - [ ] Свайп для переключения страниц
-- [ ] URL-роутинг (`/p/{id}`)
-- [ ] Дефолтные шаблоны страниц
-- [ ] Header страницы (опциональный)
+- [ ] URL-роутинг (`/p/{id}`) — отказались: под HA Ingress sandbox iframe ломает navigation между URL, переключение страниц делается через state (см. [ADR 006](../agent-state/adr/006-inline-views-vs-url-navigation.md))
+- [x] Дефолтные шаблоны страниц (через FirstRunWizard)
+- [x] Header страницы (опциональный)
 
-**Deliverable:** дашборд из 3-4 страниц, все красиво
-
-## Phase 3: Multi-user (1 неделя)
+## Phase 3: Multi-user ✅
 
 **Цель:** несколько профилей на одном устройстве
 
-- [ ] Profile manager UI
-- [ ] Создание/переключение/удаление профилей
-- [ ] Аватар + имя
-- [ ] PIN protection (опционально)
-- [ ] Per-profile хранение раскладок и настроек
-- [ ] Экран первого запуска (онбординг)
+- [x] Profile manager UI
+- [x] Создание/переключение/удаление профилей
+- [x] Аватар + имя
+- [x] PIN protection
+- [x] Per-profile хранение раскладок и настроек
+- [x] Экран первого запуска (онбординг)
 
-**Deliverable:** можно создать 3 профиля, каждый со своим дашбордом
+**Deliverable:** ✅ работает.
 
-## Phase 4: Widget Catalog Expansion (2-3 недели)
+## Phase 4: Widget Catalog 🟡 (большая часть)
 
 **Цель:** все «классические» виджеты
 
-- [ ] Climate (термостат)
-- [ ] Weather
-- [ ] Camera (HLS на iOS, MSE на Android)
-- [ ] Media Player
-- [ ] Sensor Chart (sparkline + история + интерактивная модалка)
-- [ ] Multi-Sensor
-- [ ] Light Color (RGB picker)
-- [ ] Cover (шторы)
+- [x] Climate (термостат)
+- [x] Weather
+- [x] Camera (HLS/snapshot)
+- [x] Media Player (+ full-screen sheet с обложкой и контролами)
+- [x] Sensor Chart (SensorValueWidget + история через sparkline)
+- [ ] Multi-Sensor (отдельного нет, частично покрывается RoomHubWidget)
+- [ ] Light Color (RGB picker) — есть только on/off в LightToggleWidget
+- [x] Cover (шторы)
 - [ ] Lock
 - [ ] Energy
-- [ ] Person Presence
+- [x] Person Presence
 - [ ] Map
 - [ ] iframe
-- [ ] Quick Action (script trigger)
-- [ ] Group / Container
+- [x] Quick Action (script trigger)
+- [x] Group / Container (ControlPanelWidget)
+- [x] Calendar (добавлен в alpha.30 — из Phase 8)
+- [x] Weather Room (room-version)
 
-**Deliverable:** полный каталог для смарт-дома
+## Phase 5: Room Hub Widget ✅
 
-## Phase 5: Room Hub Widget (1-2 недели)
+**Цель:** хаб-виджет комнаты
 
-**Цель:** хаб-виджет комнаты с возможностью открыть детальную страницу
-
-- [ ] Room Widget (сегодняшний lab room)
-- [ ] Page-template для комнаты (детальная)
+- [x] Room Widget (RoomHubWidget)
+- [ ] Page-template для комнаты (детальная) — пока виджет, не отдельная страница
 - [ ] Auto-detection комнат из HA (по `area_id`)
-- [ ] Custom rooms (создавать вручную)
-- [ ] Drag для добавления entity в комнату
+- [x] Custom rooms (создавать вручную)
+- [x] Drag для добавления entity в комнату (через ConfigSheet)
 
-**Deliverable:** можно навигироваться: главная → комната → виджеты в комнате
+## Phase 6: Polish & Performance ✅ (Lighthouse 83/95)
 
-## Phase 6: Polish & Performance (1 неделя)
+- [x] Skeletons и loading states везде
+- [x] Error boundaries и graceful degradation (ErrorBoundary + WidgetErrorBoundary)
+- [x] Lazy loading виджетов — через next/dynamic (alpha.0-7)
+- [x] Viewport-based deferred rendering — IntersectionObserver по ячейкам (alpha.28-29)
+- [x] Lazy-load @mdi/js — initial bundle 3 MB → 200 kB (alpha.27)
+- [x] Service Worker (cache static, под прямой PWA-инсталляцией)
+- [x] Code splitting (Next.js делает сам + явные lazy-import'ы)
+- [ ] Image optimization (используются `<img loading="lazy">`, но не `next/image`)
+- [~] Lighthouse audit ≥ 95 — текущий **83** (TBT 100ms, LCP 2.7s; mobile cold). Чтобы поднять до 95 нужны рефакторы initial render Dashboard.
 
-- [ ] Skeletons и loading states везде
-- [ ] Error boundaries и graceful degradation
-- [ ] Lazy loading виджетов (только активной страницы)
-- [ ] Service Worker → офлайн-режим
-- [ ] Code splitting
-- [ ] Image optimization
-- [ ] Lighthouse audit ≥ 95
-
-**Deliverable:** всё быстро, плавно, надёжно
-
-## Phase 7: HACS Distribution (1 неделя)
+## Phase 7: HACS Distribution ✅
 
 **Цель:** установка через HACS
 
-- [ ] HACS-совместимый манифест (`hacs.json`)
-- [ ] Скрипт сборки → static HTML/JS/CSS
-- [ ] Документация по установке
-- [ ] Описание в HACS репозитории
-- [ ] Demo screenshots
+- [x] HACS-совместимый манифест (`hacs.json`)
+- [x] Скрипт сборки → multi-arch Docker-образы в ghcr.io (см. `.github/workflows/release.yml`)
+- [x] HA Add-on с zero-config Ingress (см. [ADR 004](../agent-state/adr/004-ha-ingress-server-side-proxy.md)) — пользователю не нужен LLT-токен
+- [x] Persistent storage через `/data` (см. [ADR 005](../agent-state/adr/005-persistent-storage-data-dir.md))
+- [x] Документация по установке (README)
+- [x] Описание в HACS репозитории (`repository.yaml`)
+- [ ] Demo screenshots в README
 - [ ] Tutorial видео (опционально)
 
-**Deliverable:** любой пользователь HA может поставить через HACS в 3 клика
+## Phase 8: Advanced Features 🟡
 
-## Phase 8: Advanced Features (постепенно)
-
-- [ ] OAuth flow с HA
+- [ ] OAuth flow с HA — отказались в пользу Supervisor proxy (ADR 004). Под прямой Docker остаётся manual токен.
 - [ ] Sync через `frontend_storage`
-- [ ] Кастомные темы через UI
+- [ ] Кастомные темы через UI (есть только presets)
 - [ ] Кастомные иконки через URL
-- [ ] Custom widgets API (для разработчиков)
+- [x] Custom widgets API — SDK (`src/lib/sdk/`)
 - [ ] Webhook trigger widget
-- [ ] Calendar widget (HA calendar integration)
+- [x] Calendar widget (alpha.30)
 - [ ] Notification feed widget
 - [ ] Push notifications (через web-push)
 - [ ] Voice control (через Whisper API)
 
-## Phase 9: Public release (1-2 недели)
+## Phase 9: Public release ⚪ (в основном впереди)
 
-- [ ] Сайт-лендинг (Vercel)
+- [ ] Сайт-лендинг
 - [ ] Demo-instance с примерами
 - [ ] HA Community Forum пост
 - [ ] Reddit /r/homeassistant пост
 - [ ] Twitter/X запуск
-- [ ] Issue templates
-- [ ] CONTRIBUTING.md
-- [ ] CODE_OF_CONDUCT.md
+- [x] Issue templates (bug_report, feature_request, widget_proposal)
+- [x] PR template
+- [x] CONTRIBUTING.md
+- [x] CODE_OF_CONDUCT.md
 
 ## Реалистичная оценка
 
-При работе **в режиме «вечером после основной работы»** — все Phase 0-7 займут **2-3 месяца**. Если делать активнее (по выходным + будням) — **1-1.5 месяца**.
-
-Phase 8-9 — постепенно, в режиме «по фиче в неделю» после первого релиза.
+Phase 0-7 завершены, Phase 8 частично. Соотношение план/факт: 
+по виджетам ~60% из roadmap, плюс улучшения которых в плане не было
+(server-side proxy, persistent /data, sandbox-safe inline views).
 
 ## Критерии готовности к v1.0
 
-- [ ] Все 10+ базовых виджетов работают и адаптивны
-- [ ] 100% покрытие mobile (iPhone SE минимум)
-- [ ] PWA install
-- [ ] Multi-user (3+ профиля)
-- [ ] Несколько страниц с dock-навигацией
-- [ ] Темы dark/light
-- [ ] HACS install работает
-- [ ] Lighthouse ≥ 95
+- [x] Все 10+ базовых виджетов работают и адаптивны (16 виджетов)
+- [x] 100% покрытие mobile
+- [x] PWA install (под прямым доступом)
+- [x] Multi-user (3+ профиля)
+- [x] Несколько страниц с dock-навигацией
+- [x] Темы dark/light
+- [x] HACS install работает (плюс HA Add-on)
+- [~] Lighthouse ≥ 95 — текущий 83
 - [ ] Без багов на тестовом устройстве пользователя 2 недели подряд

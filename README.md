@@ -49,7 +49,15 @@
 
 ### 2. HACS plugin (иконка в сайдбаре HA)
 
-Сам по себе не запускает сервер — это iframe-обёртка для уже запущенного Homeglance (Add-on или Docker). После установки Glance появляется в боковой панели HA как нативный пункт меню.
+> **Когда нужен.** HACS plugin **не нужен**, если вы используете HA Add-on
+> (вариант 1) — он уже добавляет Homeglance в боковую панель HA через
+> Ingress автоматически. Plugin предназначен для случая, когда сервер
+> Homeglance запущен **снаружи** HA: на другом компьютере в сети, в
+> Docker (вариант 3) или в HA Core/Container, где Add-on'ы недоступны.
+
+Сам по себе plugin не запускает сервер — это iframe-обёртка для уже
+запущенного Homeglance. После установки Glance появляется в боковой
+панели HA как нативный пункт меню.
 
 1. В HACS → Frontend → Custom repositories → добавить `https://github.com/Ivkaiv/homeglance`, тип **Plugin**
 2. Найти **Homeglance** → Install
@@ -62,11 +70,12 @@
        url_path: homeglance
        module_url: /hacsfiles/homeglance/homeglance.js
        config:
-         url: "http://homeassistant.local:3040"
+         url: "http://homeassistant.local:3040"  # адрес вашего Homeglance-сервера
    ```
 4. Перезагрузить HA → в боковой панели появится **Homeglance**
 
-> **Важно:** HACS plugin требует, чтобы где-то был запущен Homeglance-сервер — Add-on (1) или Docker (3).
+> **Важно:** plugin требует, чтобы где-то в сети уже был запущен
+> Homeglance-сервер — Docker (3) или процесс на другом хосте.
 
 ### 3. Docker / Docker Compose (любой HA-сценарий)
 
