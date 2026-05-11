@@ -67,7 +67,16 @@ function useResponsiveCols() {
   return cols;
 }
 
-export function Dashboard() {
+interface DashboardProps {
+  /**
+   * Под HA Ingress sandbox iframe не пускает window.location-навигацию,
+   * поэтому settings рендерится inline на главной (см. app/page.tsx).
+   * Если prop передан, кнопка «Настройки» дёргает его вместо <Link>.
+   */
+  onOpenSettings?: () => void;
+}
+
+export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
   const t = useT();
   const { current, setWidgets } = usePages();
   const { isReady, states, registries } = useConnection();
@@ -198,14 +207,25 @@ export function Dashboard() {
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <ProfileSwitcher />
-          <Link
-            href="/settings"
-            title={t('dashboard.settings')}
-            aria-label={t('dashboard.settings')}
-            className="px-2.5 py-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-xs flex items-center hover:text-text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
-          >
-            <Sliders size={14} aria-hidden="true" />
-          </Link>
+          {onOpenSettings ? (
+            <button
+              onClick={onOpenSettings}
+              title={t('dashboard.settings')}
+              aria-label={t('dashboard.settings')}
+              className="px-2.5 py-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-xs flex items-center hover:text-text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
+            >
+              <Sliders size={14} aria-hidden="true" />
+            </button>
+          ) : (
+            <Link
+              href="/settings"
+              title={t('dashboard.settings')}
+              aria-label={t('dashboard.settings')}
+              className="px-2.5 py-2 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-xs flex items-center hover:text-text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
+            >
+              <Sliders size={14} aria-hidden="true" />
+            </Link>
+          )}
           {editing && (
             <>
               <button

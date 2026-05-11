@@ -19,17 +19,12 @@ export function middleware(request: NextRequest): NextResponse {
   const ingressPath = request.headers.get('x-ingress-path');
   const { pathname } = request.nextUrl;
 
-  // Диагностический лог — пишет в stdout add-on'а, видно в Supervisor → Logs.
-  // Полезно для отладки ingress: понимаем какой URL пришёл и был ли header.
-  console.log(`[mw] ${request.method} ${pathname} | x-ingress-path=${ingressPath ?? '(none)'}`);
-
   if (!ingressPath) return NextResponse.next();
   if (!pathname.startsWith(ingressPath)) return NextResponse.next();
 
   const stripped = pathname.slice(ingressPath.length) || '/';
   const url = request.nextUrl.clone();
   url.pathname = stripped;
-  console.log(`[mw] rewrite → ${stripped}`);
   return NextResponse.rewrite(url);
 }
 

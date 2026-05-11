@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import OnboardingPage from './onboarding/page';
+import SettingsView from '@/components/settings/SettingsView';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
-import { nav } from '@/lib/ingress/nav';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import { usePages } from '@/lib/pages/PagesProvider';
 import { useT } from '@/lib/i18n/I18nProvider';
@@ -20,6 +20,10 @@ export default function HomePage() {
   const { active, loaded: profilesLoaded } = useProfiles();
   const { pages } = usePages();
   const [wizardDismissed, setWizardDismissed] = useState(false);
+  // Под HA Ingress sandbox iframe ломает window.location-навигацию между
+  // путями, поэтому settings/onboarding рендерятся inline через state, а
+  // не как отдельные /settings и /onboarding URL.
+  const [view, setView] = useState<'dashboard' | 'settings'>('dashboard');
 
   if (!initialized) {
     return <DashboardSkeleton />;
@@ -75,5 +79,9 @@ export default function HomePage() {
     return <FirstRunWizard onFinish={() => setWizardDismissed(true)} />;
   }
 
-  return <Dashboard />;
+  if (view === 'settings') {
+    return <SettingsView onBack={() => setView('dashboard')} />;
+  }
+
+  return <Dashboard onOpenSettings={() => setView('settings')} />;
 }

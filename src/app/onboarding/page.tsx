@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { nav } from '@/lib/ingress/nav';
 import { motion } from 'framer-motion';
 import { ChevronRight, Key, Globe, ExternalLink } from 'lucide-react';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
@@ -78,8 +77,9 @@ export default function OnboardingPage() {
         };
       });
 
+      // После connectTo ConnectionProvider обновит hasCredentials, и
+      // app/page.tsx сам перерендерится в Dashboard — без navigation.
       connectTo(cleanUrl, token.trim());
-      nav('/');
     } catch (e: any) {
       setError(e.message || String(e));
     } finally {
