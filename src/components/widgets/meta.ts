@@ -604,6 +604,119 @@ export const WEATHER_ROOM_META: WidgetMeta = {
   ],
 };
 
+export const MAP_META: WidgetMeta = {
+  type: 'map',
+  name: 'Карта',
+  emoji: '🗺️',
+  description:
+    'Положение person/device_tracker на OpenStreetMap. Без сторонних API и тяжёлых библиотек',
+  category: 'misc',
+  defaultSize: { w: 3, h: 3 },
+  minSize: { w: 2, h: 2 },
+  paramSchema: [
+    {
+      key: 'entity',
+      label: 'Сущность',
+      kind: 'entity',
+      domain: 'person.,device_tracker.',
+      required: true,
+      hint: 'Должна содержать атрибуты latitude/longitude',
+    },
+    {
+      key: 'label',
+      label: 'Подпись',
+      kind: 'text',
+      placeholder: 'Где я',
+    },
+    {
+      key: 'zoom',
+      label: 'Зум (1–18)',
+      kind: 'number',
+      default: 14,
+    },
+  ],
+};
+
+export const ENERGY_META: WidgetMeta = {
+  type: 'energy',
+  name: 'Энергопотребление',
+  emoji: '⚡',
+  description:
+    'Текущая мощность крупно + опционально потребление за день/месяц и стоимость',
+  category: 'sensors',
+  defaultSize: { w: 2, h: 2 },
+  minSize: { w: 1, h: 1 },
+  paramSchema: [
+    {
+      key: 'power',
+      label: 'Текущая мощность (W)',
+      kind: 'entity',
+      domain: 'sensor.',
+      required: true,
+      hint: 'Sensor с device_class=power, единицы W или kW',
+    },
+    {
+      key: 'todayEnergy',
+      label: 'Сегодня (kWh)',
+      kind: 'entity',
+      domain: 'sensor.',
+      hint: 'Опционально — sensor накопленного за день потребления',
+    },
+    {
+      key: 'monthEnergy',
+      label: 'Месяц (kWh)',
+      kind: 'entity',
+      domain: 'sensor.',
+      hint: 'Опционально — sensor накопленного за месяц',
+    },
+    {
+      key: 'pricePerKwh',
+      label: 'Цена за kWh',
+      kind: 'number',
+      hint: 'Если указано — покажем оценку стоимости за сегодня',
+    },
+    {
+      key: 'currency',
+      label: 'Валюта',
+      kind: 'text',
+      default: '₽',
+    },
+    {
+      key: 'label',
+      label: 'Подпись',
+      kind: 'text',
+      placeholder: 'Дом',
+    },
+  ],
+};
+
+export const LIGHT_COLOR_META: WidgetMeta = {
+  type: 'light_color',
+  name: 'Свет (цвет + яркость)',
+  emoji: '🌈',
+  description:
+    'Управление цветной лампой: тап = on/off, slider яркости, нативный color picker для RGB-ламп',
+  category: 'lights',
+  defaultSize: { w: 2, h: 2 },
+  minSize: { w: 2, h: 1 },
+  paramSchema: [
+    {
+      key: 'entity',
+      label: 'Лампа',
+      kind: 'entity',
+      domain: 'light.',
+      required: true,
+      hint: 'Должна поддерживать яркость или цвет (см. supported_color_modes)',
+    },
+    {
+      key: 'label',
+      label: 'Подпись',
+      kind: 'text',
+      placeholder: 'Кухня · потолок',
+    },
+  ],
+};
+
 export const MULTI_SENSOR_META: WidgetMeta = {
   type: 'multi_sensor',
   name: 'Несколько сенсоров',

@@ -33,6 +33,9 @@ import {
   LOCK_META,
   IFRAME_META,
   MULTI_SENSOR_META,
+  LIGHT_COLOR_META,
+  ENERGY_META,
+  MAP_META,
   weatherComputeMinSize,
   controlPanelComputeMinSize,
   roomHubComputeMinSize,
@@ -171,6 +174,24 @@ export function registerBuiltinWidgets(): void {
     meta: MULTI_SENSOR_META,
     Component: lazyLoad(() =>
       import('./MultiSensorWidget').then((m) => m.MultiSensorWidget)
+    ),
+  });
+  register({
+    meta: LIGHT_COLOR_META,
+    Component: lazyLoad(() =>
+      import('./LightColorWidget').then((m) => m.LightColorWidget)
+    ),
+  });
+  register({
+    meta: ENERGY_META,
+    Component: lazyLoad(() =>
+      import('./EnergyWidget').then((m) => m.EnergyWidget)
+    ),
+  });
+  register({
+    meta: MAP_META,
+    Component: lazyLoad(() =>
+      import('./MapWidget').then((m) => m.MapWidget)
     ),
   });
 

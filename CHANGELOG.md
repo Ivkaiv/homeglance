@@ -7,6 +7,15 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.33] — 2026-05-11
+
+### Added
+- **Light Color widget** — управление цветной лампой: тап = on/off, slider яркости, нативный `<input type="color">` для RGB. Использует supported_color_modes у entity, чтобы понять есть ли color/brightness. Без сторонних color-picker'ов — экономим bundle.
+- **Energy widget** — текущая мощность (W) крупно + опционально потребление за день/месяц (kWh) и оценка стоимости. Тап на основное значение открывает график мощности.
+- **Map widget** — положение `person`/`device_tracker` на OpenStreetMap через iframe-embed. Без сторонних API/ключей и тяжёлых библиотек (Leaflet/Mapbox).
+
+Roadmap Phase 4 закрыта: все 6 недостающих виджетов (Lock, iframe, Multi-Sensor, Light Color, Energy, Map) добавлены в alpha.31–33.
+
 ## [0.1.0-alpha.32] — 2026-05-11
 
 ### Added
