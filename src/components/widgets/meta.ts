@@ -771,10 +771,10 @@ export const LIGHT_COLOR_META: WidgetMeta = {
   name: 'Свет (цвет + яркость)',
   emoji: '🌈',
   description:
-    'Кнопка цветной лампы. Тап открывает sheet с яркостью, color wheel, цветовой температурой и эффектами в стиле панели',
+    'Адаптивная кнопка цветной лампы. На маленьком — только иконка-toggle, на среднем — со slider яркости, на широком — с быстрыми preset-цветами. Тап открывает sheet с полным управлением',
   category: 'lights',
   defaultSize: { w: 2, h: 1 },
-  minSize: { w: 2, h: 1 },
+  minSize: { w: 1, h: 1 },
   paramSchema: [
     {
       key: 'entity',
