@@ -6,7 +6,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 // GLANCE_DATA_DIR можно задать через env — под HA Add-on указываем
-// `/addon_config` (мап supervisor'а, persistent между restarts).
+// `/data` (Supervisor сам монтирует это место persistent, без map).
 // По умолчанию — относительно cwd (для standalone-/dev-инсталляций).
 const DATA_DIR = process.env.GLANCE_DATA_DIR ?? path.join(process.cwd(), 'data');
 

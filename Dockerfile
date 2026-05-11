@@ -23,7 +23,7 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3040 \
     HOSTNAME=0.0.0.0 \
-    GLANCE_DATA_DIR=/addon_config
+    GLANCE_DATA_DIR=/data
 
 # Под HA Add-on контейнер изолирован Supervisor'ом, и /addon_config
 # монтируется с правами root. Поэтому запускаем как root — это стандартная
@@ -49,9 +49,11 @@ COPY  --from=builder /app/server.js ./server.js
 # поэтому копируем явно.
 COPY  --from=builder /app/node_modules/ws ./node_modules/ws
 
-# Persistent storage под HA Add-on — supervisor монтирует /addon_config
-# через `map: addon_config:rw` (см. homeglance-addon/config.yaml). Этот
-# каталог переживает рестарты, обновления и переустановки add-on.
+# Persistent storage под HA Add-on — Supervisor автоматически монтирует
+# /data из /usr/share/hassio/addons/data/<addon-slug>/ host-side. Этот
+# каталог переживает рестарты, обновления, переустановки add-on. В
+# отличие от addon_config map (введён в Supervisor 2023.10), /data
+# поддерживается всеми версиями.
 # Для standalone-Docker-инсталляций можно перебить GLANCE_DATA_DIR env.
 
 EXPOSE 3040
