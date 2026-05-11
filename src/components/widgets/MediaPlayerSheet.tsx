@@ -144,20 +144,19 @@ export function MediaPlayerSheet({ entityId, open, onClose }: Props) {
       title={friendly}
       subtitle={appName || undefined}
       ariaLabel="Управление плеером"
+      innerStyle={
+        accent
+          ? {
+              // Свечение от обложки идёт через всё окно — растянутый radial
+              // от верха к низу. Локальный gradient на блоке обложки имел
+              // резкий обрыв снизу; перенесли в innerStyle ModalSheet, чтобы
+              // плавно затухал вплоть до контролов и громкости.
+              background: `radial-gradient(ellipse 90% 70% at 50% 0%, ${accentSoft(0.42)} 0%, ${accentSoft(0.18)} 30%, ${accentSoft(0.06)} 60%, transparent 92%), rgb(var(--bg-secondary))`,
+            }
+          : undefined
+      }
     >
-      {/* Обложка + текст. Фон-радиал вытянут на «полные плечи» блока через
-          отрицательные margins (-mx-5 -mt-5) — компенсируем p-5 у ModalSheet,
-          чтобы свечение ложилось до самых краёв шторки. Сам цвет — accentSoft. */}
-      <div
-        className="relative flex flex-col items-center gap-4 mb-5 -mx-5 -mt-5 px-5 pt-7 pb-3"
-        style={
-          accent
-            ? {
-                background: `radial-gradient(ellipse at 50% 0%, ${accentSoft(0.5)} 0%, ${accentSoft(0.18)} 40%, transparent 78%)`,
-              }
-            : undefined
-        }
-      >
+      <div className="relative flex flex-col items-center gap-4 mb-5 pt-2 pb-3">
         <div className="relative">
           {coverSrc ? (
             <img

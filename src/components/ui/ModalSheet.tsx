@@ -26,6 +26,9 @@ export interface ModalSheetProps {
   zIndex?: number;
   /** Позиция: bottom-sheet (по умолчанию) или центр экрана. */
   position?: 'bottom' | 'center';
+  /** Inline-стиль внутреннего контейнера — например для фон-radial-gradient,
+   * который распространяется на всё окно (см. MediaPlayerSheet). */
+  innerStyle?: import('react').CSSProperties;
   children: ReactNode;
 }
 
@@ -52,6 +55,7 @@ export function ModalSheet({
   footer,
   zIndex = 50,
   position = 'bottom',
+  innerStyle,
   children,
 }: ModalSheetProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -158,6 +162,7 @@ export function ModalSheet({
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
             className={className}
+            style={innerStyle}
           >
             {header ?? (
               (title || subtitle) && (
