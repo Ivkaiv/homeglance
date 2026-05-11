@@ -36,6 +36,8 @@ import {
   LIGHT_COLOR_META,
   ENERGY_META,
   MAP_META,
+  NOTIFICATION_FEED_META,
+  WEBHOOK_META,
   weatherComputeMinSize,
   controlPanelComputeMinSize,
   roomHubComputeMinSize,
@@ -192,6 +194,18 @@ export function registerBuiltinWidgets(): void {
     meta: MAP_META,
     Component: lazyLoad(() =>
       import('./MapWidget').then((m) => m.MapWidget)
+    ),
+  });
+  register({
+    meta: NOTIFICATION_FEED_META,
+    Component: lazyLoad(() =>
+      import('./NotificationFeedWidget').then((m) => m.NotificationFeedWidget)
+    ),
+  });
+  register({
+    meta: WEBHOOK_META,
+    Component: lazyLoad(() =>
+      import('./WebhookWidget').then((m) => m.WebhookWidget)
     ),
   });
 

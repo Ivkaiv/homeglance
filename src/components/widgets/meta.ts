@@ -604,6 +604,82 @@ export const WEATHER_ROOM_META: WidgetMeta = {
   ],
 };
 
+export const NOTIFICATION_FEED_META: WidgetMeta = {
+  type: 'notification_feed',
+  name: 'Уведомления HA',
+  emoji: '🔔',
+  description:
+    'Лента активных persistent-уведомлений HA. Можно закрыть прямо из виджета',
+  category: 'misc',
+  defaultSize: { w: 3, h: 3 },
+  minSize: { w: 2, h: 2 },
+  paramSchema: [
+    {
+      key: 'label',
+      label: 'Подпись',
+      kind: 'text',
+      placeholder: 'Уведомления',
+    },
+    {
+      key: 'max',
+      label: 'Максимум в списке',
+      kind: 'number',
+      default: 10,
+    },
+  ],
+};
+
+export const WEBHOOK_META: WidgetMeta = {
+  type: 'webhook',
+  name: 'Webhook-кнопка',
+  emoji: '🔗',
+  description:
+    'Дёргает HA webhook. Удобно для триггеров автоматизаций без сервиса (например, начать запись с камер)',
+  category: 'misc',
+  defaultSize: { w: 1, h: 1 },
+  minSize: { w: 1, h: 1 },
+  paramSchema: [
+    {
+      key: 'webhookId',
+      label: 'Webhook ID',
+      kind: 'text',
+      required: true,
+      placeholder: 'my-button',
+      hint: 'Часть URL: /api/webhook/<ID>. Регистрируется через автоматизацию HA с webhook trigger',
+    },
+    {
+      key: 'method',
+      label: 'HTTP-метод',
+      kind: 'select',
+      options: [
+        { value: 'POST', label: 'POST' },
+        { value: 'GET', label: 'GET' },
+        { value: 'PUT', label: 'PUT' },
+      ],
+      default: 'POST',
+    },
+    {
+      key: 'body',
+      label: 'JSON-тело',
+      kind: 'text',
+      placeholder: '{"scene":"movie"}',
+      hint: 'Опционально, для POST/PUT — будет отправлено как application/json',
+    },
+    {
+      key: 'label',
+      label: 'Подпись',
+      kind: 'text',
+      placeholder: 'Кино-режим',
+    },
+    {
+      key: 'buttonText',
+      label: 'Текст на кнопке',
+      kind: 'text',
+      placeholder: 'Запустить',
+    },
+  ],
+};
+
 export const MAP_META: WidgetMeta = {
   type: 'map',
   name: 'Карта',
