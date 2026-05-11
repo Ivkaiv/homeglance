@@ -55,8 +55,12 @@ function DeferredViewport({
     return () => ob.disconnect();
   }, [immediate]);
 
+  // ВАЖНО: НЕ использовать `display: contents` — IntersectionObserver
+  // не видит элементы без собственного box-модели, и виджеты никогда не
+  // попадают в viewport (баг alpha.28). `w-full h-full` гарантирует, что
+  // обёртка занимает весь box ячейки и пересечения детектятся.
   return (
-    <div ref={ref} className="contents">
+    <div ref={ref} className="w-full h-full">
       {visible ? children : <WidgetSkeleton />}
     </div>
   );

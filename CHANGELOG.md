@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.29] — 2026-05-11
+
+### Fixed
+- **Виджеты висели в загрузке в alpha.28.** Обёртка `DeferredViewport` использовала `display: contents`, у такого элемента нет собственного box-модели — `IntersectionObserver` не может его наблюдать, и виджеты никогда не «попадали в viewport». Заменил на `w-full h-full` — обёртка занимает весь box ячейки RGL, intersect-детекция работает.
+
 ## [0.1.0-alpha.28] — 2026-05-11
 
 ### Changed
