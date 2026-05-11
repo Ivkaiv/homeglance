@@ -7,6 +7,17 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.28] — 2026-05-11
+
+### Changed
+- **Viewport-based deferred rendering виджетов.** Все ячейки `RGLGrid` обёрнуты в `<DeferredViewport>`: пока ячейка не попала в viewport (с запасом `rootMargin: 400px`), внутри показывается `WidgetSkeleton`. Видимые виджеты рисуются сразу, скрытые ниже скролла подгружаются по мере прокрутки. В edit-mode откладывание отключено — drag/resize требуют, чтобы все виджеты были смонтированы.
+
+  Lighthouse mobile audit на холодном старте до/после:
+  - Performance 57 → **83** (+26)
+  - Total Blocking Time 2220 ms → **100 ms** (-95%)
+  - LCP 4.1 s → **2.7 s** (-34%)
+  - Time to Interactive 5.1 s → **1.3 s** (-75%)
+
 ## [0.1.0-alpha.27] — 2026-05-11
 
 ### Changed

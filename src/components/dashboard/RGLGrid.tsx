@@ -2,10 +2,65 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import GridLayout, { type Layout } from 'react-grid-layout';
+import { WidgetSkeleton } from '@/components/widgets/_states';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+/**
+ * Откладывает рендер дочернего узла, пока он не попадёт в viewport.
+ * До этого момента возвращает `fallback` (skeleton) — это убирает initial
+ * burst из десятков mount'ов одновременно: видимые виджеты рисуются сразу,
+ * скрытые ниже скролла подгружаются по мере прокрутки. Снижает Total
+ * Blocking Time на первом paint'е.
+ *
+ * `rootMargin: 400px` — pre-render с запасом, чтобы пустых мест не было
+ * видно при быстром скролле. Один раз заинтерсектил → запоминаем
+ * (`disconnect()`), повторно не разгружаем.
+ *
+ * В edit-mode откладывание отключаем: drag/resize требуют, чтобы все
+ * виджеты были смонтированы и имели свои handle'ы.
+ */
+function DeferredViewport({
+  children,
+  immediate,
+}: {
+  children: ReactNode;
+  immediate?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(immediate ?? false);
+
+  useEffect(() => {
+    if (immediate) {
+      setVisible(true);
+      return;
+    }
+    if (!ref.current) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return;
+    }
+    const ob = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setVisible(true);
+          ob.disconnect();
+        }
+      },
+      { rootMargin: '400px' },
+    );
+    ob.observe(ref.current);
+    return () => ob.disconnect();
+  }, [immediate]);
+
+  return (
+    <div ref={ref} className="contents">
+      {visible ? children : <WidgetSkeleton />}
+    </div>
+  );
+}
 
 export interface RGLItem {
   i: string;
@@ -120,7 +175,9 @@ export function RGLGrid(props: RGLGridProps) {
               // вместо JS-измерений через ResizeObserver.
               className={`rgl-cell @container widget-fade-in ${props.editing ? 'rgl-cell-wiggle' : ''}`}
             >
-              {props.renderItem(item)}
+              <DeferredViewport immediate={props.editing}>
+                {props.renderItem(item)}
+              </DeferredViewport>
               {props.editing && props.renderControls?.(item)}
             </div>
           ))}
