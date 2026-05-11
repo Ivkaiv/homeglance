@@ -25,32 +25,35 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0 \
     GLANCE_DATA_DIR=/addon_config
 
-# Непривилегированный юзер.
-RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
+# Под HA Add-on контейнер изолирован Supervisor'ом, и /addon_config
+# монтируется с правами root. Поэтому запускаем как root — это стандартная
+# практика для add-ons. Для standalone-Docker за пределами HA можно
+# перебить USER в production deployment.
+# (Раньше тут был непривилегированный nextjs:1001 — он не мог писать в
+# /addon_config и профили не сохранялись.)
 
 # Копируем standalone-сервер, статику и публичные ассеты. Конфиг хранения
 # (data/) оставляем монтировать через volume — иначе при пересборке образа
 # профили/токены/раскладки сбросятся.
-COPY --chown=nextjs:nodejs --from=builder /app/.next/standalone ./
-COPY --chown=nextjs:nodejs --from=builder /app/.next/static ./.next/static
-COPY --chown=nextjs:nodejs --from=builder /app/public ./public
+COPY  --from=builder /app/.next/standalone ./
+COPY  --from=builder /app/.next/static ./.next/static
+COPY  --from=builder /app/public ./public
 
 # Standalone-сервер от Next.js по умолчанию называется server.js — мы
 # переименовываем его в next-server.js, чтобы освободить имя под наш
 # кастомный server.js (он оборачивает Next.js handler и добавляет
 # WS-прокси к HA через Supervisor для add-on под Ingress).
 RUN mv ./server.js ./next-server.js
-COPY --chown=nextjs:nodejs --from=builder /app/server.js ./server.js
+COPY  --from=builder /app/server.js ./server.js
 # `ws` пакет не попадает в standalone trace (Next.js его не использует),
 # поэтому копируем явно.
-COPY --chown=nextjs:nodejs --from=builder /app/node_modules/ws ./node_modules/ws
+COPY  --from=builder /app/node_modules/ws ./node_modules/ws
 
 # Persistent storage под HA Add-on — supervisor монтирует /addon_config
 # через `map: addon_config:rw` (см. homeglance-addon/config.yaml). Этот
 # каталог переживает рестарты, обновления и переустановки add-on.
 # Для standalone-Docker-инсталляций можно перебить GLANCE_DATA_DIR env.
 
-USER nextjs
 EXPOSE 3040
 
 # Healthcheck — простой пинг главной страницы, считаем сервис живым если 200.
