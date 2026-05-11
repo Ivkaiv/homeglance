@@ -7,6 +7,15 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.27] — 2026-05-11
+
+### Changed
+- **`@mdi/js` теперь async-чанк.** Material Design Icons (~2.8 MB, 7000 path-констант) попадали в каждый initial bundle, потому что `MDI_MAP[key]` использовал динамические ключи и webpack не мог tree-shake'ить. `MdiIcon` переписан на `useEffect + import('@mdi/js')` с module-scope кэшем — иконки подгружаются после первого рендера, как отдельный async-chunk.
+
+  Эффект: **First Load JS = 200 kB вместо ~3 MB** (15× меньше). Bundle проверен через `@next/bundle-analyzer` и `performance.getEntriesByType('resource')`.
+
+  `searchMdi()` стал `async` — единственное место использования (`ConfigSheet`) обновлено на `useEffect + setState`.
+
 ## [0.1.0-alpha.26] — 2026-05-11
 
 ### Fixed

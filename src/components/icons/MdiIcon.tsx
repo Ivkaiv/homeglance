@@ -1,9 +1,35 @@
 'use client';
 
-import * as MdiIcons from '@mdi/js';
+import { useEffect, useState } from 'react';
 import { BrandIcon, hasBrandIcon } from './BrandIcons';
 
-const MDI_MAP = MdiIcons as unknown as Record<string, string>;
+/**
+ * MDI icon-set весит ~2.8 MB (все 7000 иконок). Если импортировать
+ * `import * as MdiIcons from '@mdi/js'`, весь пакет попадает в initial
+ * bundle — нагрузка на старт страницы огромная.
+ *
+ * `MDI_MAP[key]` с динамическими именами иконок не tree-shake'ится,
+ * поэтому единственный путь срезать вес — **lazy-load `@mdi/js`**
+ * через `import('@mdi/js')` после монтирования. Бандл с иконками
+ * становится отдельным async-чанком, который Next.js подгружает только
+ * когда первый MDI-компонент маунтится.
+ *
+ * Загруженный модуль кэшируется в module-scope, чтобы все последующие
+ * `<MdiIcon>` использовали уже распарсенную мапу синхронно.
+ */
+let mdiCache: Record<string, string> | null = null;
+let mdiLoading: Promise<Record<string, string>> | null = null;
+
+function loadMdi(): Promise<Record<string, string>> {
+  if (mdiCache) return Promise.resolve(mdiCache);
+  if (!mdiLoading) {
+    mdiLoading = import('@mdi/js').then((m) => {
+      mdiCache = m as unknown as Record<string, string>;
+      return mdiCache;
+    });
+  }
+  return mdiLoading;
+}
 
 /** Конвертация "lightbulb-on" → "mdiLightbulbOn" */
 function toMdiKey(name: string): string {
@@ -18,10 +44,36 @@ function toMdiKey(name: string): string {
   );
 }
 
+/**
+ * Синхронная версия: возвращает path только если @mdi/js уже загружен.
+ * Используется в местах, где значение нужно сразу (например, для условного
+ * рендера). До первой загрузки возвращает null.
+ */
 export function getMdiPath(name: string): string | null {
-  if (!name) return null;
+  if (!name || !mdiCache) return null;
   const key = toMdiKey(name);
-  return MDI_MAP[key] ?? null;
+  return mdiCache[key] ?? null;
+}
+
+/** React-хук: lazy-load @mdi/js и резолв path по имени. */
+function useMdiPath(name: string): string | null {
+  const [path, setPath] = useState<string | null>(() => getMdiPath(name));
+  useEffect(() => {
+    if (!name) {
+      setPath(null);
+      return;
+    }
+    let cancelled = false;
+    loadMdi().then((map) => {
+      if (cancelled) return;
+      const key = toMdiKey(name);
+      setPath(map[key] ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [name]);
+  return path;
 }
 
 export function MdiIcon({
@@ -35,7 +87,7 @@ export function MdiIcon({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const path = getMdiPath(name);
+  const path = useMdiPath(name);
   if (!path) return null;
   return (
     <svg
@@ -68,6 +120,7 @@ export function GlanceIcon({
   fallback?: string;
 }) {
   const v = value || fallback || '';
+  const mdiPath = useMdiPath(v);
   if (!v) return null;
 
   // 1. BrandIcon — кастомные SVG из PWA (лампы, светильники, переключатели и пр.)
@@ -78,8 +131,7 @@ export function GlanceIcon({
   }
 
   // 2. MDI — для общих имён типа «lightbulb», «thermometer», «account».
-  const path = getMdiPath(v);
-  if (path) {
+  if (mdiPath) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +141,7 @@ export function GlanceIcon({
         className={className}
         fill="currentColor"
       >
-        <path d={path} />
+        <path d={mdiPath} />
       </svg>
     );
   }
@@ -103,11 +155,12 @@ export function GlanceIcon({
 }
 
 /** Вернёт первые `limit` иконок MDI, чьё имя содержит `query`. */
-export function searchMdi(query: string, limit = 60): string[] {
+export async function searchMdi(query: string, limit = 60): Promise<string[]> {
   if (!query.trim()) return [];
+  const map = await loadMdi();
   const q = query.trim().toLowerCase();
   const result: string[] = [];
-  for (const key of Object.keys(MDI_MAP)) {
+  for (const key of Object.keys(map)) {
     // Конвертим mdiLightbulbOn → "lightbulb-on" для поиска по нативному формату
     const name = key
       .replace(/^mdi/, '')

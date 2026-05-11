@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Search, Check, ChevronDown, ChevronUp, Save, X } from 'lucide-react';
 import { getWidget } from '@/lib/widgets/registry';
 import { useStates, useConnection } from '@/lib/ha/ConnectionProvider';
@@ -958,7 +958,16 @@ function MdiPickerModal({
   onClose: () => void;
 }) {
   const [search, setSearch] = useState(current);
-  const results = useMemo(() => searchMdi(search || 'lightbulb', 96), [search]);
+  const [results, setResults] = useState<string[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    searchMdi(search || 'lightbulb', 96).then((r) => {
+      if (!cancelled) setResults(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [search]);
 
   return (
     <ModalSheet
