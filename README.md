@@ -33,7 +33,17 @@
 1. **Settings** → **Add-ons** → **Add-on Store** → ⋮ (три точки) → **Repositories**
 2. Добавить URL `https://github.com/Ivkaiv/homeglance` → **Add**
 3. Найти **Homeglance** → **Install** → **Start**
-4. Открыть через **Open Web UI** или `http://<homeassistant-ip>:3040`
+4. В боковой панели HA появится **Homeglance** — открыть.
+
+**Zero-config авторизация.** Под HA Ingress add-on автоматически
+подключается к HA через `SUPERVISOR_TOKEN` — никаких токенов вручную
+создавать не нужно. WS- и REST-запросы к HA проксируются server-side,
+токен не покидает контейнер. Архитектура описана в
+[ADR 004](agent-state/adr/004-ha-ingress-server-side-proxy.md).
+
+**Persistent storage.** Профили, виджеты, темы хранятся в `/data` mount,
+который Supervisor сохраняет между рестартами, обновлениями и
+переустановками add-on'а. На любой версии HA Supervisor.
 
 Подробнее: [`homeglance-addon/README.md`](homeglance-addon/README.md).
 

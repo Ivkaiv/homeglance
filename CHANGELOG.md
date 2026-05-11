@@ -7,6 +7,99 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.26] — 2026-05-11
+
+### Fixed
+- **MediaPlayer sheet glow без резкого обрыва.** Цветовое свечение от обложки рендерилось локально на блоке с обложкой (`-mx-5 -mt-5` + radial-gradient) и обрезалось снизу — заметная граница между подсвеченной верхушкой и обычным фоном. Перенесли в новый `innerStyle` prop у `ModalSheet`, который прокидывается в `style` внутреннего контейнера. Теперь свечение растекается по всему sheet и плавно затухает к контролам/громкости.
+
+## [0.1.0-alpha.25] — 2026-05-11
+
+### Added
+- **Тап по плееру открывает full-screen sheet.** `MediaPlayerWidget` на Dashboard теперь оборачивает обложку + title в кнопку, которая открывает тот же `MediaPlayerSheet`, что раньше был доступен только из `RoomHubWidget`. Tap-targets для play/pause/next/prev отделены и работают независимо. Поведение для всех tier'ов (small/short/vertical).
+
+## [0.1.0-alpha.24] — 2026-05-11
+
+### Fixed
+- **Persistent storage не работал** даже после `map: addon_config:rw`: эта permission введена в HA Supervisor 2023.10, и на более старых версиях `/addon_config` оставался в эфемерном layer контейнера. Переключились на стандартный `/data` mount, который Supervisor монтирует автоматически (без `map:`) на всех версиях. Профили/виджеты теперь переживают любые рестарты, обновления и переустановки add-on.
+
+## [0.1.0-alpha.23] — 2026-05-11
+
+### Changed
+- **Settings рендерится inline на главной странице** через React state, без navigation между URL — кнопка «настройки» под HA Companion App больше не даёт 404. `SettingsView` вынесен в `components/settings/SettingsView.tsx`, `app/settings/page.tsx` остаётся как тонкая обёртка для standalone-инсталляций.
+- **Onboarding `tryConnect()` больше не делает `nav('/')`** — `ConnectionProvider` обновит `hasCredentials`, и `app/page.tsx` сам перерендерится в Dashboard через state.
+
+### Removed
+- `lib/ingress/nav.ts` — helper для navigation через `<base href>`. После переезда на server-side proxy и inline-views не нужен.
+- `src/app/api/glance/auto-config/` — endpoint больше не используется (заменён meta-tag + proxy).
+- Debug-логи в `middleware.ts` (`[mw] GET /...`) — журнал add-on'а был залит мусором под proxy-mode.
+
+## [0.1.0-alpha.22] — 2026-05-11
+
+### Fixed
+- **EACCES при сохранении на диск.** В Dockerfile запускали под непривилегированным `nextjs:1001`, а HA Supervisor монтирует persistent-каталоги от root — каждая попытка `mkdir`/`writeFile` падала. Запускаем под root (стандартная практика HA Add-ons; контейнер изолирован Supervisor'ом).
+
+## [0.1.0-alpha.21] — 2026-05-11
+
+### Fixed
+- **API-fetch не доходил до сервера.** `apiUrl()` возвращал относительный путь без trailing slash, а Next.js (`trailingSlash: true`) отвечал 308 → URL с `/`. Под ingress Location-header не содержал ingress-префикса → браузер уходил на корень HA → 404. Теперь `apiUrl()` сразу собирает абсолютный URL с trailing slash (перед query-string, если есть).
+
+## [0.1.0-alpha.20] — 2026-05-11
+
+### Fixed
+- **`apiUrl()` собирает абсолютный URL через `<base href>`.** Relative-пути fetch'а в HA Companion WebView не подхватывают `<base>` так же, как `<script src>` — запросы уходили в никуда.
+
+## [0.1.0-alpha.19] — 2026-05-11
+
+### Added
+- **Persistent storage через `map: addon_config:rw`.** *(Заменено в alpha.24 на `/data` для compat со старыми Supervisor'ами.)*
+
+## [0.1.0-alpha.18] — 2026-05-10
+
+### Added
+- **Zero-config auto-connect через Supervisor.** Add-on проксирует HA WebSocket и REST через себя — пользователю больше не нужно создавать LLT-токен.
+  - Кастомный `server.js` оборачивает Next.js standalone: HTTP проксирует на внутренний port, WS upgrade на `/api/glance/ha-ws` перехватывает и открывает обратный коннект к `ws://supervisor/core/api/websocket` с supervisor-токеном, подменяя HA auth-handshake.
+  - `app/api/glance/ha-rest/[[...path]]/route.ts` — REST proxy с `Authorization: Bearer SUPERVISOR_TOKEN` server-side.
+  - `<meta name="hg-proxy-ready">` в layout сообщает клиенту, что нужно идти на proxy URL.
+  - `homeglance-addon/config.yaml`: `homeassistant_api: true`.
+  - `HAClient.connect()` принимает `overrides` для `wsUrl`/`restUrl` под proxy-mode.
+
+См. [ADR 004](agent-state/adr/004-ha-ingress-server-side-proxy.md).
+
+## [0.1.0-alpha.17] — 2026-05-10
+
+### Fixed
+- **Откатили попытку использовать `SUPERVISOR_TOKEN` для прямой HA-авторизации** — HA WebSocket отвечает `auth_invalid` (токен предназначен только для supervisor API). Кнопка «Перенастроить» в auth-failed теперь вызывает `forget()` через React state вместо `nav('/onboarding')` (последнее ломалось в sandbox iframe). URL в onboarding pre-filled `window.location.origin`.
+
+## [0.1.0-alpha.13] — 2026-05-10
+
+### Fixed
+- **Onboarding рендерится inline на главной.** HA Ingress оборачивает add-on в sandboxed iframe, который блокирует `window.location.assign(...)` за пределами ingress-префикса — `nav('/onboarding')` уходил на корень HA. Решение: при `!hasCredentials` рендерим `<OnboardingPage />` напрямую в `app/page.tsx`. После `connectTo()` `ConnectionProvider` обновляет state, и компонент сам перерендерится в Dashboard.
+
+## [0.1.0-alpha.12] — 2026-05-10
+
+### Fixed
+- **`<base href>` сделан абсолютным.** При `nav('/onboarding')` URL менялся на `/onboarding/`, и относительные `./_next/static/...` (из `assetPrefix='.'`) резолвились как `/onboarding/_next/static/...` → 404 на всю статику. Теперь base — `/` (или `<ingress>/` под ingress), не зависит от текущего route.
+
+## [0.1.0-alpha.11] — 2026-05-10
+
+### Fixed
+- **Все `router.push`/`router.replace` заменены на helper `nav()`** через `<base href>` — `next/navigation` ломался в sandbox iframe HA Companion App'а.
+
+## [0.1.0-alpha.10] — 2026-05-10
+
+### Fixed
+- **Service Worker self-unregister под ingress.** SW из alpha.8/9 кэшировал абсолютные пути на корень HA (битые 404) и отдавал их даже после обновления add-on. В новой версии SW обнаруживает ingress URL по `registration.scope` и при `activate` сам себя `unregister()`, очищая все кэши.
+
+## [0.1.0-alpha.9] — 2026-05-10
+
+### Fixed
+- **`<base href>` от `X-Ingress-Path` для статики через ingress.** Без него относительные `./_next/static/...` уходили на родительский URL HA и получали 404, а статика add-on'а не загружалась.
+
+## [0.1.0-alpha.8] — 2026-05-10
+
+### Fixed
+- **`bun run start` → `node .next/standalone/server.js`.** В предыдущих релизах сервис в systemd запускал `next start`, но в `next.config.js` стоит `output: 'standalone'` — Next.js явно ругался «`next start` does not work with `output: standalone`» и падал с runtime-ошибкой `Cannot read properties of undefined (reading 'clientModules')`. Теперь Dockerfile и systemd-unit запускают standalone server напрямую.
+
 ## [0.1.0-alpha.7] — 2026-05-09
 
 ### Fixed
