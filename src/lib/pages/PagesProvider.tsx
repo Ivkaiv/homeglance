@@ -5,6 +5,32 @@ import type { Page } from './types';
 import type { WidgetConfig } from '@/lib/widgets/types';
 import { loadPages, savePages, loadActivePageId, saveActivePageId } from './storage';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
+import { getWidget } from '@/lib/widgets/registry';
+
+/**
+ * Нормализация раскладки: подтягивает w/h каждого виджета до его минимального
+ * размера из meta (плюс динамический computeMinSize, если задан). Нужно,
+ * чтобы при увеличении minSize в новой версии или ручной правке meta
+ * у пользователя не оставались битые «ужатые» виджеты в saved-layout.
+ */
+function normalizeWidgetSizes(pages: Page[]): Page[] {
+  let changed = false;
+  const next = pages.map((p) => {
+    if (!p.widgets?.length) return p;
+    const widgets = p.widgets.map((w) => {
+      const entry = getWidget(w.type);
+      if (!entry) return w;
+      const min = entry.computeMinSize?.(w.params) ?? entry.meta.minSize;
+      const nextW = Math.max(w.w, min.w);
+      const nextH = Math.max(w.h, min.h);
+      if (nextW === w.w && nextH === w.h) return w;
+      changed = true;
+      return { ...w, w: nextW, h: nextH };
+    });
+    return { ...p, widgets };
+  });
+  return changed ? next : pages;
+}
 
 interface PagesContextValue {
   pages: Page[];
@@ -50,7 +76,9 @@ export function PagesProvider({ children }: { children: ReactNode }) {
     loadPages(profileId)
       .then((loadedPages) => {
         if (cancelled) return;
-        setPages(loadedPages);
+        // Авто-нормализация: подтягиваем виджеты к их минимальному
+        // размеру (если meta.minSize вырос с момента сохранения).
+        setPages(normalizeWidgetSizes(loadedPages));
         const stored = loadActivePageId(profileId);
         if (stored && loadedPages.some((p) => p.id === stored)) {
           setCurrentIdState(stored);
