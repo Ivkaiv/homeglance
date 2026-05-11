@@ -18,9 +18,18 @@
  *   - В ingress baseURI = `https://hass/api/hassio_ingress/<t>/` → URL внутри ingress
  */
 
-/** Превращает абсолютный API-путь (`/api/glance/...`) в relative (`api/glance/...`). */
+/**
+ * Возвращает абсолютный URL для fetch — резолвит относительно <base href>
+ * (который RootLayout эмитит абсолютным: `/` или `/api/hassio_ingress/<t>/`).
+ *
+ * Чисто relative-пути (без leading `/`) под HA Ingress в некоторых WebView
+ * не подхватывают `<base>` для fetch (в отличие от `<script src>`),
+ * запросы уходят не на add-on, а в пустоту. Поэтому собираем URL руками.
+ */
 export function apiUrl(path: string): string {
-  // Принимаем только пути начинающиеся с '/', иначе оставляем как есть.
-  if (!path.startsWith('/')) return path;
-  return path.slice(1);
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  if (typeof document === 'undefined') return '/' + cleanPath;
+  const base = document.querySelector('base')?.getAttribute('href') ?? '/';
+  // base всегда абсолютный (см. RootLayout): `/` или `/api/hassio_ingress/<t>/`.
+  return base.endsWith('/') ? base + cleanPath : base + '/' + cleanPath;
 }
