@@ -43,26 +43,30 @@ const WeatherPageView = dynamic(
   { ssr: false }
 );
 
-// Grid аналогичен iOS Home Screen / DashboardSkeleton: 4 колонки на мобиле,
-// 8 на планшете, 12 на десктопе. ROW_HEIGHT 80px даёт квадратную ячейку на
-// мобиле (~85×80), достаточно крупную для иконок-toggle и читаемого текста.
-// До alpha.40 было 9/12/16/24 × 32 — ячейка получалась ~40×32px, виджеты
-// minSize 2×1 (Energy, LightColor, MultiSensor) физически не вмещали контент.
+// Grid: 6 / 9 / 12 колонок на mobile/sm/lg, ROW_HEIGHT 60px. На телефоне
+// 360px → ячейка ~60×60 (квадратная мини-кнопка), виджеты 2×1 ≈ 120×60
+// (строка-toggle с иконкой и подписью), 2×2 ≈ 120×120 (компактная карточка).
+// Эволюция:
+// - до alpha.39: 9/12/16/24 × 32 — ячейка 40×32px, текст не вмещался;
+// - alpha.40: 4/8/12 × 80 — ячейка ~85×80, но minSize 2×2 = 180×160px,
+//   жрала пол-экрана и сетка использовалась неэффективно;
+// - alpha.41 (текущий): 6/9/12 × 60 — компромисс между читаемостью
+//   контента (минимум ~60px на строку текста) и плотностью раскладки.
 const COLS_BY_WIDTH = [
   { min: 1200, cols: 12 },
-  { min: 768, cols: 8 },
-  { min: 0, cols: 4 },
+  { min: 768, cols: 9 },
+  { min: 0, cols: 6 },
 ];
-const ROW_HEIGHT = 80;
+const ROW_HEIGHT = 60;
 const GAP = 10;
 
 function useResponsiveCols() {
-  const [cols, setCols] = useState(4);
+  const [cols, setCols] = useState(6);
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
       const found = COLS_BY_WIDTH.find((b) => w >= b.min);
-      setCols(found ? found.cols : 4);
+      setCols(found ? found.cols : 6);
     };
     update();
     window.addEventListener('resize', update);
