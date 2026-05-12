@@ -7,6 +7,24 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.42] — 2026-05-12
+
+### Changed
+- **Сетка приведена к reference-проекту `ha-pwa-lab` (на NUC, /home/server/ha-pwa/components/lab/LabDashboard.tsx) — он у пользователя «нормально работает», и грид-параметры там одобрены практикой:**
+  - `COLS_BY_WIDTH` = `24 / 16 / 12 / 9` на `lg / md / sm / mobile` (как в `ha-pwa-lab`'s `COLS = { lg: 24, md: 16, sm: 12, xs: 9, xxs: 9 }`)
+  - `ROW_HEIGHT = 32px` (как в `ha-pwa-lab`)
+  - На мобиле ячейка ~40×32px, и **за читаемость отвечает minSize виджетов**, а не геометрия сетки. Эксперименты alpha.40 (4×80) и alpha.41 (6×60) увеличивали ячейку, но в итоге minSize начинал занимать пол-экрана и сетка использовалась неэффективно.
+
+### Changed (meta)
+- **Все widget minSize ≥ `2×2`** — выровнено с reference: в `ha-pwa-lab` ровно так у всех виджетов (`SensorValue`, `LightToggle`, `SwitchToggle`, `Room`). На 9-cols/32px-grid 2×2 = ~80×64px — иконки + значение + подпись помещаются.
+  - `webhook` minSize+defaultSize `1×1` → `2×2`
+  - `lock` minSize+defaultSize `1×1` → `2×2`
+  - `energy` minSize `2×1` → `2×2`
+  - `multi_sensor` minSize `2×1` → `2×2`
+
+### Note (history)
+- alpha.40/41 откатываются по геометрии. Они оставались валидными как «эксперимент с укрупнённой ячейкой», но reference показал: пользователю комфортнее плотная сетка с крупным minSize, а не редкая сетка с компактным minSize.
+
 ## [0.1.0-alpha.41] — 2026-05-12
 
 ### Changed

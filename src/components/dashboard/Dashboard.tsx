@@ -43,30 +43,30 @@ const WeatherPageView = dynamic(
   { ssr: false }
 );
 
-// Grid: 6 / 9 / 12 колонок на mobile/sm/lg, ROW_HEIGHT 60px. На телефоне
-// 360px → ячейка ~60×60 (квадратная мини-кнопка), виджеты 2×1 ≈ 120×60
-// (строка-toggle с иконкой и подписью), 2×2 ≈ 120×120 (компактная карточка).
-// Эволюция:
-// - до alpha.39: 9/12/16/24 × 32 — ячейка 40×32px, текст не вмещался;
-// - alpha.40: 4/8/12 × 80 — ячейка ~85×80, но minSize 2×2 = 180×160px,
-//   жрала пол-экрана и сетка использовалась неэффективно;
-// - alpha.41 (текущий): 6/9/12 × 60 — компромисс между читаемостью
-//   контента (минимум ~60px на строку текста) и плотностью раскладки.
+// Grid скопирован 1:1 из reference-проекта ha-pwa-lab (на NUC он рабочий и
+// одобрен пользователем): 24/16/12/9 колонок × ROW_HEIGHT 32px. На мобиле
+// (360px) это 9 cols × 32px → ячейка ~40×32px. КЛЮЧЕВОЕ отличие от alpha.39
+// — minSize у ВСЕХ виджетов поднят до 2×2 в meta.ts: на 9-cols/32px-grid
+// 2×2 = ~80×64px, помещается иконка + значение + подпись (или две строки
+// текста). Эксперименты alpha.40 (4×80) и alpha.41 (6×60) расширяли ячейку,
+// но в итоге сетка использовалась неэффективно — даже минимальные виджеты
+// занимали полэкрана.
 const COLS_BY_WIDTH = [
-  { min: 1200, cols: 12 },
-  { min: 768, cols: 9 },
-  { min: 0, cols: 6 },
+  { min: 1200, cols: 24 },
+  { min: 996, cols: 16 },
+  { min: 768, cols: 12 },
+  { min: 0, cols: 9 },
 ];
-const ROW_HEIGHT = 60;
+const ROW_HEIGHT = 32;
 const GAP = 10;
 
 function useResponsiveCols() {
-  const [cols, setCols] = useState(6);
+  const [cols, setCols] = useState(9);
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
       const found = COLS_BY_WIDTH.find((b) => w >= b.min);
-      setCols(found ? found.cols : 6);
+      setCols(found ? found.cols : 9);
     };
     update();
     window.addEventListener('resize', update);
