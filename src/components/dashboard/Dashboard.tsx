@@ -43,22 +43,26 @@ const WeatherPageView = dynamic(
   { ssr: false }
 );
 
+// Grid аналогичен iOS Home Screen / DashboardSkeleton: 4 колонки на мобиле,
+// 8 на планшете, 12 на десктопе. ROW_HEIGHT 80px даёт квадратную ячейку на
+// мобиле (~85×80), достаточно крупную для иконок-toggle и читаемого текста.
+// До alpha.40 было 9/12/16/24 × 32 — ячейка получалась ~40×32px, виджеты
+// minSize 2×1 (Energy, LightColor, MultiSensor) физически не вмещали контент.
 const COLS_BY_WIDTH = [
-  { min: 1200, cols: 24 },
-  { min: 996, cols: 16 },
-  { min: 768, cols: 12 },
-  { min: 0, cols: 9 },
+  { min: 1200, cols: 12 },
+  { min: 768, cols: 8 },
+  { min: 0, cols: 4 },
 ];
-const ROW_HEIGHT = 32;
+const ROW_HEIGHT = 80;
 const GAP = 10;
 
 function useResponsiveCols() {
-  const [cols, setCols] = useState(9);
+  const [cols, setCols] = useState(4);
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
       const found = COLS_BY_WIDTH.find((b) => w >= b.min);
-      setCols(found ? found.cols : 9);
+      setCols(found ? found.cols : 4);
     };
     update();
     window.addEventListener('resize', update);
@@ -139,18 +143,24 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
     );
   }
 
-  // Migration: если у виджетов нет внятных x/y (или массово 0,0) — один раз
-  // прогоняем flowLayout, чтобы получить начальные позиции. Дальше виджеты
-  // живут с явными координатами.
+  // Migration / responsive reflow: перепаковываем виджеты через flowLayout если:
+  //  (а) все позиции в (0,0) — свежий импорт или старая раскладка без x/y
+  //  (б) какой-то виджет вылезает за текущее число колонок (x+w > cols) —
+  //      раскладка была собрана на широком экране, теперь открыли на узком
+  //      и виджеты «слипаются» в одну колонку слева, потому что RGL клампит x.
+  // Сохраняем reading-order (порядок в массиве) и подкладываем реальные x/y.
   const needsSeed =
     !!current &&
     widgets.length > 1 &&
-    widgets.every((w) => w.x === 0 && w.y === 0);
+    (
+      widgets.every((w) => w.x === 0 && w.y === 0) ||
+      widgets.some((w) => (w.x ?? 0) + w.w > cols)
+    );
 
   useEffect(() => {
     if (!needsSeed || !current) return;
     const seeded = flowLayout(
-      widgets.map((w) => ({ i: w.i, w: w.w, h: w.h })),
+      widgets.map((w) => ({ i: w.i, w: Math.min(w.w, cols), h: w.h })),
       cols
     );
     const map = new Map(seeded.map((p) => [p.i, p]));
@@ -158,11 +168,11 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
       current.id,
       widgets.map((w) => {
         const p = map.get(w.i);
-        return p ? { ...w, x: p.x, y: p.y } : w;
+        return p ? { ...w, x: p.x, y: p.y, w: p.w } : w;
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needsSeed, current?.id]);
+  }, [needsSeed, current?.id, cols]);
 
   if (!current) {
     return <div className="p-8 text-text-tertiary">Нет страниц.</div>;
