@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.39] — 2026-05-12
+
+### Fixed
+- **Авто-нормализация виджетов не работала.** `registerBuiltinWidgets()` вызывался внутри `Dashboard.tsx`, который монтируется после `PagesProvider` → в момент `normalizeWidgetSizes` registry был пустым, `getWidget(type)` возвращал undefined, и сжатые виджеты не подтягивались до minSize. Регистрация теперь вызывается явно из `normalizeWidgetSizes` (idempotent через флаг `registered` в registry).
+
 ## [0.1.0-alpha.38] — 2026-05-12
 
 ### Changed

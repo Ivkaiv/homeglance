@@ -6,6 +6,7 @@ import type { WidgetConfig } from '@/lib/widgets/types';
 import { loadPages, savePages, loadActivePageId, saveActivePageId } from './storage';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import { getWidget } from '@/lib/widgets/registry';
+import { registerBuiltinWidgets } from '@/components/widgets';
 
 /**
  * Нормализация раскладки: подтягивает w/h каждого виджета до его минимального
@@ -14,6 +15,11 @@ import { getWidget } from '@/lib/widgets/registry';
  * у пользователя не оставались битые «ужатые» виджеты в saved-layout.
  */
 function normalizeWidgetSizes(pages: Page[]): Page[] {
+  // Виджеты регистрируются в Dashboard.tsx — но PagesProvider загружает
+  // pages РАНЬШЕ, чем монтируется Dashboard, поэтому в этот момент
+  // registry мог быть пустым и normalize ничего не делал. Регистрируем
+  // здесь — функция idempotent (флаг `registered`).
+  registerBuiltinWidgets();
   let changed = false;
   const next = pages.map((p) => {
     if (!p.widgets?.length) return p;
