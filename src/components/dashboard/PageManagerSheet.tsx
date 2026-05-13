@@ -227,15 +227,20 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
                     >
                       <Pencil size={14} aria-hidden="true" />
                     </ActionIcon>
-                    {!p.protected && (
-                      <ActionIcon
-                        onClick={() => setConfirmDelete(p)}
-                        aria-label={`Удалить страницу «${p.title}»`}
-                        variant="danger"
-                      >
-                        <Trash2 size={14} aria-hidden="true" />
-                      </ActionIcon>
-                    )}
+                    {/* Кнопка удаления показывается всегда — даже для protected
+                        страниц. Защита от «остаться с 0 страниц» уже встроена
+                        в `deletePage`: при удалении последней автоматически
+                        создаётся пустая «Главная». До этого protected-страницы
+                        нельзя было удалить через UI вообще — после импорта
+                        раскладки появлялся дубль «Главная», и старую пустую
+                        protected-страницу удалить было нельзя. */}
+                    <ActionIcon
+                      onClick={() => setConfirmDelete(p)}
+                      aria-label={`Удалить страницу «${p.title}»`}
+                      variant="danger"
+                    >
+                      <Trash2 size={14} aria-hidden="true" />
+                    </ActionIcon>
                   </div>
                 </div>
               ))}
