@@ -7,6 +7,12 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.43] — 2026-05-13
+
+### Fixed
+- **`TimeWidget` — цифры вылазили за рамки.** На `defaultSize` 4×3 при `ROW_HEIGHT 32` высота карточки = 96px минус padding 32px = 64px, а `text-6xl` (~60px) + строка даты (~16px) = ~76px → контент торчал за нижнюю/верхнюю границу. Шкала шрифтов уменьшена до `text-xl/2xl/3xl/4xl`, паддинг p-4 → p-2/p-3, добавлен `leading-none` и `overflow-hidden` на root, дата — `truncate max-w-full`.
+- **`MediaPlayerWidget` — текст имени плеера/трека «выходил» за пределы карточки слева.** Корневой `<div className="glass">` имел `overflow-hidden`, но внутренние flex-контейнеры (кнопка с обложкой+текстом) — нет, при определённом сочетании длинного `media_title` и узкого виджета `MarqueeText` мог рендериться за пределами видимой области. Добавил `overflow-hidden` на flex-обёртку и на текстовый `<div>` с `MarqueeText`, плюс `block w-full` на сами `MarqueeText` — теперь контент гарантированно клиппится границами карточки.
+
 ## [0.1.0-alpha.42] — 2026-05-12
 
 ### Changed

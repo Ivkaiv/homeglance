@@ -52,16 +52,19 @@ export function TimeWidget({ params }: { params: Params }) {
     month: 'long',
   });
 
-  // Один layout, размер шрифта и паддинги — через container queries.
-  // tiny (<80): text-sm; small (80-140): text-2xl; medium (140-220): text-4xl;
-  // large (>=220): text-6xl. Дата видна только начиная со 140.
+  // Шрифт цифр и паддинг — через @container queries (по ширине ячейки).
+  // Ранее на широких виджетах (>=220px) шло text-6xl ≈ 60px — на высоте 96px
+  // (defaultSize 4×3 при ROW_HEIGHT=32) цифры физически не помещались с
+  // padding p-4 и второй строкой даты: контент торчал за нижнюю/верхнюю
+  // границу карточки. Уменьшил шкалу до 2xl/3xl/4xl и зафиксировал
+  // leading-none — цифры всегда сидят в одну строку без overflow.
   return (
-    <div className="glass h-full w-full flex flex-col items-center justify-center gap-1 @[80px]:p-2 @[140px]:p-4">
-      <div className="text-sm @[80px]:text-2xl @[140px]:text-4xl @[220px]:text-6xl font-light tabular-nums">
+    <div className="glass h-full w-full flex flex-col items-center justify-center gap-1 overflow-hidden p-2 @[140px]:p-3">
+      <div className="text-xl @[80px]:text-2xl @[140px]:text-3xl @[220px]:text-4xl font-light tabular-nums leading-none">
         {time}
       </div>
       {params.showDate !== false && (
-        <div className="hidden @[140px]:block text-xs text-text-secondary capitalize">
+        <div className="hidden @[140px]:block text-xs text-text-secondary capitalize leading-tight truncate max-w-full">
           {dateStr}
         </div>
       )}

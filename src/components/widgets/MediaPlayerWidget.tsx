@@ -125,7 +125,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
           type="button"
           onClick={openSheet}
           aria-label="Открыть плеер"
-          className="flex items-center gap-2 min-w-0 flex-1 text-left rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+          className="flex items-center gap-2 min-w-0 flex-1 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
         >
           {showCover && (
             cover ? (
@@ -147,10 +147,10 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
               </div>
             )
           )}
-          <div className="min-w-0 flex-1">
-            <MarqueeText className="text-sm font-medium">{title}</MarqueeText>
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <MarqueeText className="text-sm font-medium block w-full">{title}</MarqueeText>
             {artist && (
-              <MarqueeText className="text-[10px] text-text-tertiary">{artist}</MarqueeText>
+              <MarqueeText className="text-[10px] text-text-tertiary block w-full">{artist}</MarqueeText>
             )}
           </div>
         </button>
@@ -203,7 +203,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
         type="button"
         onClick={openSheet}
         aria-label="Открыть плеер"
-        className="flex gap-3 items-center min-w-0 shrink-0 text-left rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+        className="flex gap-3 items-center min-w-0 w-full shrink-0 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
       >
         {showCover && (
           <div className="shrink-0">
@@ -223,11 +223,11 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
             )}
           </div>
         )}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           <div className="text-xs text-text-tertiary truncate">{label}</div>
-          <MarqueeText className="text-sm font-medium">{title}</MarqueeText>
+          <MarqueeText className="text-sm font-medium block w-full">{title}</MarqueeText>
           {artist && (
-            <MarqueeText className="text-[10px] text-text-tertiary">{artist}</MarqueeText>
+            <MarqueeText className="text-[10px] text-text-tertiary block w-full">{artist}</MarqueeText>
           )}
         </div>
       </button>
