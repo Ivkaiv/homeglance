@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.48] — 2026-05-13
+
+### Fixed
+- **PWA cold-start больше не выкидывает в onboarding.** Connection хранилось только на сервере (`/api/glance/connection`). Когда PWA запускалась после выгрузки из памяти, сеть ещё не успевала подняться к моменту первого fetch — он падал в catch, `loadConnection()` возвращал `null`, `hasCredentials=false` → пользователь видел форму «введи URL+token», хотя реально connection давно настроено. Добавлено локальное зеркало (`localStorage`, ключ `hg.connection.v1`): пишется при `saveConnection`, читается как fallback в `loadConnection` если сетевой запрос упал. Источник правды остаётся серверный — при удачном fetch локальный кэш перезаписывается актуальным значением.
+
 ## [0.1.0-alpha.47] — 2026-05-13
 
 ### Changed
