@@ -32,6 +32,13 @@ export const metadata: Metadata = {
     ],
     apple: 'icons/icon-512.png',
   },
+  // Chrome 122+ ругается на устаревший `apple-mobile-web-app-capable` и
+  // ждёт стандартизированный `mobile-web-app-capable`. Без него браузер
+  // не показывает «Установить приложение» в меню — оставляем оба:
+  // apple-mobile-* читает iOS Safari, mobile-web-app-capable — Chrome.
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
 };
 
 export const viewport: Viewport = {

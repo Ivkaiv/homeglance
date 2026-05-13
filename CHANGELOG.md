@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.45] — 2026-05-13
+
+### Fixed
+- **PWA install не предлагался в Chrome 122+.** Был только `apple-mobile-web-app-capable` (устарел) — Chrome ждёт стандартизированный `mobile-web-app-capable`. Без него «Установить приложение» в меню браузера не появляется. Добавили оба, чтобы и iOS Safari (apple-*), и Chrome (mobile-web-app-capable) видели приложение как installable.
+
 ## [0.1.0-alpha.44] — 2026-05-13
 
 ### Fixed
