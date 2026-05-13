@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.46] — 2026-05-13
+
+### Changed
+- **Standalone `MediaPlayerWidget` теперь тонируется от обложки.** Тот же эффект, что у mini-плеера в `RoomHubWidget` и у полноэкранного `MediaPlayerSheet`: blur-фон из cover-art, accent-glow по рамке (`borderColor` + `boxShadow`) и accent на play-кнопке. Раньше виджет выглядел нейтральным «стеклом», тогда как тот же плеер внутри `RoomHubWidget` светился по обложке — расхождение в UX. Использован общий хук `useImageAccent`. Cover-blur подгружается только когда `entity_picture` — полный URL (HA-relative `/api/...` отбрасывается из-за CORS — иначе useImageAccent даёт `null`).
+
 ## [0.1.0-alpha.45] — 2026-05-13
 
 ### Fixed

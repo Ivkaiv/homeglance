@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
+import { useImageAccent } from '@/lib/useImageAccent';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { MarqueeText } from '@/components/ui/MarqueeText';
 import { PressButton } from '@/components/ui/PressButton';
@@ -35,8 +36,25 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
   const playing = e?.state === 'playing';
   const title = e?.attributes.media_title || '—';
   const artist = e?.attributes.media_artist || '';
-  const cover = e?.attributes.entity_picture;
+  const cover = e?.attributes.entity_picture as string | undefined;
   const volume = e?.attributes.volume_level ?? 0;
+
+  // Цветовая подсветка от обложки — как у mini-плеера в RoomHubWidget и
+  // у полноэкранного MediaPlayerSheet. До alpha.46 в standalone-виджете её
+  // не было, и плеер выглядел нейтральным «стеклом», тогда как тот же
+  // entity в RoomHub светился по обложке. Берём accent только когда cover
+  // — полный URL (HA-relative `/api/...` не проходит CORS у useImageAccent).
+  const coverForAccent = cover?.startsWith('http') ? cover : null;
+  const mediaAccent = useImageAccent(coverForAccent);
+  const accentRgb = mediaAccent?.match(/\d+/g)?.join(' ') ?? null;
+  const playBg = accentRgb ? `rgb(${accentRgb} / 0.25)` : 'rgb(var(--accent) / 0.25)';
+  const playBgPressed = accentRgb ? `rgb(${accentRgb} / 0.45)` : 'rgb(var(--accent) / 0.45)';
+  const accentGlow = accentRgb
+    ? {
+        borderColor: `rgb(${accentRgb} / 0.35)`,
+        boxShadow: `0 0 18px rgb(${accentRgb} / 0.18)`,
+      }
+    : undefined;
 
   const cmd = (service: string, data?: any) =>
     callService('media_player', service, params.entity, data);
@@ -119,13 +137,27 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
       <>
       <div
         ref={ref}
-        className="glass h-full w-full p-2 flex items-center gap-2 overflow-hidden"
+        className="glass h-full w-full p-2 flex items-center gap-2 overflow-hidden relative"
+        style={accentGlow}
       >
+        {coverForAccent && (
+          <div
+            className="absolute inset-0 pointer-events-none opacity-25"
+            style={{
+              backgroundImage: `url(${coverForAccent})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'blur(22px)',
+              transform: 'scale(1.2)',
+            }}
+            aria-hidden="true"
+          />
+        )}
         <button
           type="button"
           onClick={openSheet}
           aria-label="Открыть плеер"
-          className="flex items-center gap-2 min-w-0 flex-1 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+          className="relative flex items-center gap-2 min-w-0 flex-1 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
         >
           {showCover && (
             cover ? (
@@ -154,7 +186,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
             )}
           </div>
         </button>
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="relative flex items-center gap-1 shrink-0">
           {showPrevNext && (
             <PressButton
               onClick={() => cmd('media_previous_track')}
@@ -170,8 +202,8 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
             disabled={isBad}
             size={36}
             ariaLabel={playPauseLabel}
-            bg="rgb(var(--accent) / 0.25)"
-            bgPressed="rgb(var(--accent) / 0.45)"
+            bg={playBg}
+            bgPressed={playBgPressed}
           >
             {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
           </PressButton>
@@ -197,13 +229,27 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
     <>
     <div
       ref={ref}
-      className="glass h-full w-full p-3 flex flex-col gap-2 overflow-hidden"
+      className="glass h-full w-full p-3 flex flex-col gap-2 overflow-hidden relative"
+      style={accentGlow}
     >
+      {coverForAccent && (
+        <div
+          className="absolute inset-0 pointer-events-none opacity-25"
+          style={{
+            backgroundImage: `url(${coverForAccent})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(22px)',
+            transform: 'scale(1.2)',
+          }}
+          aria-hidden="true"
+        />
+      )}
       <button
         type="button"
         onClick={openSheet}
         aria-label="Открыть плеер"
-        className="flex gap-3 items-center min-w-0 w-full shrink-0 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+        className="relative flex gap-3 items-center min-w-0 w-full shrink-0 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
       >
         {showCover && (
           <div className="shrink-0">
@@ -232,7 +278,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
         </div>
       </button>
 
-      <div className="flex items-center justify-center gap-1.5 my-auto shrink-0">
+      <div className="relative flex items-center justify-center gap-1.5 my-auto shrink-0">
         {showPrevNext && (
           <PressButton
             onClick={() => cmd('media_previous_track')}
@@ -248,8 +294,8 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
           disabled={isBad}
           size={44}
           ariaLabel={playPauseLabel}
-          bg="rgb(var(--accent) / 0.25)"
-          bgPressed="rgb(var(--accent) / 0.45)"
+          bg={playBg}
+          bgPressed={playBgPressed}
         >
           {playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
         </PressButton>
@@ -266,7 +312,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
       </div>
 
       {showVolume && (
-        <div className="flex items-center gap-2 mt-1 min-w-0 shrink-0">
+        <div className="relative flex items-center gap-2 mt-1 min-w-0 shrink-0">
           <Volume2 size={12} className="text-text-tertiary shrink-0" aria-hidden="true" />
           <input
             type="range"
