@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Settings, Plus, X, Sliders, Cog, LayoutGrid } from 'lucide-react';
+import { Settings, Plus, X, Sliders, Cog, Check, LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 import { registerBuiltinWidgets } from '@/components/widgets';
 import { getWidget } from '@/lib/widgets/registry';
@@ -268,14 +268,22 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
             onClick={() => setEditing((v) => !v)}
             aria-label={editing ? t('dashboard.doneButton') : t('dashboard.editButton')}
             title={editing ? t('dashboard.doneButton') : t('dashboard.editButton')}
+            // В edit-режиме кнопка визуально превращается в «Готово»: акцентный
+            // фон, галочка вместо шестерёнки, видимый текст даже на мобиле.
+            // Раньше иконка оставалась Cog на мобиле без текста, и пользователь
+            // не сразу понимал что эта же кнопка выходит из режима.
             className={`px-2.5 sm:px-3 py-2 rounded-full text-xs flex items-center gap-1.5 transition ${
               editing
-                ? 'bg-black/15 dark:bg-white/15 border border-black/30 dark:border-white/30 text-text-primary'
+                ? 'bg-accent/20 border border-accent/40 text-accent'
                 : 'bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary'
             }`}
           >
-            <Cog size={14} aria-hidden="true" />
-            <span className="hidden sm:inline">
+            {editing ? (
+              <Check size={14} aria-hidden="true" />
+            ) : (
+              <Cog size={14} aria-hidden="true" />
+            )}
+            <span className={editing ? 'inline' : 'hidden sm:inline'}>
               {editing ? t('dashboard.doneButton') : t('dashboard.editButton')}
             </span>
           </button>
