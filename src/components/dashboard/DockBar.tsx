@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { LayoutGrid } from 'lucide-react';
 import { usePages } from '@/lib/pages/PagesProvider';
 
@@ -32,22 +32,6 @@ export function DockBar({
       className="fixed bottom-0 left-0 right-0 flex flex-col items-center pointer-events-none z-30 gap-1.5"
       style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)' }}
     >
-      {/* Подпись активной страницы — отдельной плашкой над доком, чтобы не наезжать на иконки */}
-      <AnimatePresence mode="popLayout">
-        {current && (
-          <motion.div
-            key={current.id}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            transition={{ duration: 0.18 }}
-            className="pointer-events-none px-2.5 py-0.5 rounded-full bg-bg-secondary/80 backdrop-blur-md border border-black/10 dark:border-white/10 text-[11px] text-text-secondary"
-          >
-            {current.title}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <motion.nav
         ref={navRef}
         aria-label="Страницы"
