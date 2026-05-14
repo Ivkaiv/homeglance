@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Search, Check, ChevronDown, ChevronUp, Save, X } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Save, X } from 'lucide-react';
 import { getWidget } from '@/lib/widgets/registry';
 import { useStates, useConnection } from '@/lib/ha/ConnectionProvider';
 import { getEntityDisplay, groupByArea } from '@/lib/ha/entity-display';
@@ -475,12 +475,14 @@ function EntityPicker({
   const groups = useMemo(() => {
     if (!open) return [];
     const q = search.toLowerCase().trim();
+    // Фильтруем только по домену. Раньше дополнительно резали entity с
+    // registry-флагами hidden_by / disabled_by — но если сущность есть в
+    // `states`, она активна и реально отдаёт значение (как sensor.blood_sugar
+    // от nightscout: disabled_by='config_entry' в registry, но работает и
+    // присутствует в states). hidden_by — это про витрину дашбордов HA, а
+    // Glance — отдельная панель, пусть пользователь сам решает что добавлять.
     const filtered = Object.values(states)
-      .filter((s) => (domain ? s.entity_id.startsWith(domain) : true))
-      .filter((s) => {
-        const reg = registries.entities[s.entity_id];
-        return !reg?.hidden_by && !reg?.disabled_by;
-      });
+      .filter((s) => (domain ? s.entity_id.startsWith(domain) : true));
     const displayed = filtered.map((s) => getEntityDisplay(s, registries, s.entity_id));
     const matched = q
       ? displayed.filter(
@@ -607,13 +609,12 @@ function MultiEntityCombinedPicker({
   const groups = useMemo(() => {
     if (!adding) return [];
     const q = search.toLowerCase().trim();
+    // Фильтр по домену + исключаем уже добавленные. registry-флаги
+    // hidden_by / disabled_by НЕ режем: сущность в `states` = активна и
+    // отдаёт значение (см. EntityPicker — тот же случай sensor.blood_sugar).
     const filtered = Object.values(states)
       .filter((s) => (domain ? s.entity_id.startsWith(domain) : true))
-      .filter((s) => !entities.includes(s.entity_id))
-      .filter((s) => {
-        const reg = registries.entities[s.entity_id];
-        return !reg?.hidden_by && !reg?.disabled_by;
-      });
+      .filter((s) => !entities.includes(s.entity_id));
     const displayed = filtered.map((s) => getEntityDisplay(s, registries, s.entity_id));
     const matched = q
       ? displayed.filter(
@@ -1035,19 +1036,20 @@ function MultiEntityPicker({
   const states = useStates();
   const { registries } = useConnection();
   const [search, setSearch] = useState('');
-  const [open, setOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
   const domain = field.domain ?? '';
   const selected = Array.isArray(value) ? value : [];
 
   const groups = useMemo(() => {
-    if (!open) return [];
+    if (!adding) return [];
     const q = search.toLowerCase().trim();
+    // Фильтр по домену + исключаем уже добавленные. registry-флаги
+    // hidden_by / disabled_by НЕ режем: сущность в `states` = активна и
+    // отдаёт значение (как sensor.blood_sugar от nightscout —
+    // disabled_by='config_entry' в registry, но работает и есть в states).
     const filtered = Object.values(states)
       .filter((s) => (domain ? s.entity_id.startsWith(domain) : true))
-      .filter((s) => {
-        const reg = registries.entities[s.entity_id];
-        return !reg?.hidden_by && !reg?.disabled_by;
-      });
+      .filter((s) => !selected.includes(s.entity_id));
     const displayed = filtered.map((s) => getEntityDisplay(s, registries, s.entity_id));
     const matched = q
       ? displayed.filter(
@@ -1059,90 +1061,129 @@ function MultiEntityPicker({
         )
       : displayed;
     return groupByArea(matched);
-  }, [states, registries, search, domain, open]);
+  }, [states, registries, search, domain, adding, selected]);
 
-  function toggle(id: string) {
-    if (selected.includes(id)) onChange(selected.filter((x) => x !== id));
-    else onChange([...selected, id]);
+  function add(id: string) {
+    onChange([...selected, id]);
+    setAdding(false);
+    setSearch('');
   }
 
-  // Превью выбранных в свёрнутом виде (имена через запятую)
-  const summaryText =
-    selected.length === 0
-      ? '— ничего не выбрано —'
-      : selected
-          .map((id) => getEntityDisplay(states[id], registries, id).name)
-          .join(', ');
+  function remove(id: string) {
+    onChange(selected.filter((x) => x !== id));
+  }
 
   return (
-    <Field label={`${field.label} (${selected.length})`}>
-      <PickerToggle
-        open={open}
-        onToggle={() => setOpen((v) => !v)}
-        empty={selected.length === 0}
-        summary={summaryText}
-      />
-      {open && (
-        <div className="mt-2">
-          <div className="relative mb-2">
-            <Search
-              size={14}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary"
-              aria-hidden="true"
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={domain ? `поиск (${domain.replace('.', '')})…` : 'поиск…'}
-              aria-label="Поиск"
-              className="w-full pl-8 pr-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm"
-            />
-          </div>
-          <div className="max-h-72 overflow-auto rounded-md border border-black/10 dark:border-white/10 bg-black/2 dark:bg-white/2">
-            {groups.length === 0 ? (
-              <div className="text-text-tertiary text-xs p-3 text-center">ничего не найдено</div>
-            ) : (
-              groups.map((g) => (
-                <div key={g.areaId ?? '__no_area__'}>
-                  <div className="px-3 py-1.5 bg-black/3 dark:bg-white/3 text-[10px] uppercase tracking-wider text-text-tertiary sticky top-0 backdrop-blur-sm">
-                    {g.areaName}
-                  </div>
-                  {g.entities.map((e) => {
-                    const checked = selected.includes(e.entityId);
-                    return (
+    <Field label={`${field.label} (${selected.length})`} hint={field.hint}>
+      <div className="flex flex-col gap-1.5">
+        {/* Выбранные — отдельными строками с крестиком: убрать можно сразу,
+            не открывая общий каталог. Раньше был свёрнутый список с
+            галочками, и чтобы убрать одну сущность приходилось искать её
+            среди сотен. Логика выровнена с MultiEntityCombinedPicker. */}
+        {selected.map((id) => {
+          const display = getEntityDisplay(states[id], registries, id);
+          return (
+            <div
+              key={id}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="text-sm truncate">{display.name}</div>
+                <div className="text-[10px] text-text-tertiary truncate">
+                  {display.area && <span>{display.area} · </span>}
+                  <span className="font-mono">{id}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => remove(id)}
+                aria-label={`Убрать ${display.name}`}
+                title="Убрать из списка"
+                className="text-text-tertiary hover:text-red-400 shrink-0 w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-400/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400/50"
+              >
+                <X size={14} aria-hidden="true" />
+              </button>
+            </div>
+          );
+        })}
+
+        {!adding && (
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="px-3 py-2.5 rounded-md border border-dashed border-black/20 dark:border-white/20 text-sm text-text-secondary hover:border-accent/60 hover:text-accent hover:bg-accent/5 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 transition"
+          >
+            + Добавить {selected.length === 0 ? '' : 'ещё'}
+          </button>
+        )}
+
+        {adding && (
+          <div className="rounded-md border border-black/10 dark:border-white/10 bg-black/2 dark:bg-white/2 p-2">
+            <div className="relative mb-2">
+              <Search
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary"
+                aria-hidden="true"
+              />
+              <input
+                autoFocus
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={domain ? `поиск (${domain.replace('.', '')})…` : 'поиск…'}
+                aria-label="Поиск"
+                className="w-full pl-8 pr-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm"
+              />
+            </div>
+            <div className="max-h-64 overflow-auto rounded-md bg-black/2 dark:bg-white/2">
+              {groups.length === 0 ? (
+                <div className="text-text-tertiary text-xs p-3 text-center">
+                  {selected.length > 0 ? 'Все доступные уже добавлены' : 'Ничего не найдено'}
+                </div>
+              ) : (
+                groups.map((g) => (
+                  <div key={g.areaId ?? '__no_area__'}>
+                    <div className="px-3 py-1.5 bg-black/3 dark:bg-white/3 text-[10px] uppercase tracking-wider text-text-tertiary sticky top-0 backdrop-blur-sm">
+                      {g.areaName}
+                    </div>
+                    {g.entities.map((e) => (
                       <button
                         key={e.entityId}
                         type="button"
-                        onClick={() => toggle(e.entityId)}
-                        aria-pressed={checked}
-                        className={`block w-full text-left px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5 border-b border-black/5 dark:border-white/5 last:border-0 text-sm ${
-                          checked ? 'bg-accent/10' : ''
-                        }`}
+                        onClick={() => add(e.entityId)}
+                        className="block w-full text-left px-3 py-2 hover:bg-accent/10 border-b border-black/5 dark:border-white/5 last:border-0 text-sm"
                       >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                              checked ? 'bg-accent/40 border-accent' : 'border-black/30 dark:border-white/30'
-                            }`}
-                            aria-hidden="true"
-                          >
-                            {checked && <Check size={11} />}
-                          </span>
-                          <span className="flex-1 text-text-primary truncate">{e.name}</span>
-                          <span className="text-[10px] text-text-tertiary tabular-nums shrink-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-text-primary truncate flex-1">{e.name}</div>
+                          <div className="text-[10px] text-text-tertiary tabular-nums shrink-0">
                             {e.state}
-                          </span>
+                          </div>
+                        </div>
+                        <div className="text-[10px] text-text-tertiary truncate">
+                          {e.device && <span>{e.device} · </span>}
+                          <span className="font-mono">{e.entityId}</span>
                         </div>
                       </button>
-                    );
-                  })}
-                </div>
-              ))
-            )}
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="flex justify-end mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAdding(false);
+                  setSearch('');
+                }}
+                className="text-xs text-text-secondary hover:text-text-primary px-2 py-1"
+              >
+                Закрыть
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </Field>
   );
 }
