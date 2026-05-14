@@ -43,14 +43,18 @@ const WeatherPageView = dynamic(
   { ssr: false }
 );
 
-// Grid скопирован 1:1 из reference-проекта ha-pwa-lab (на NUC он рабочий и
-// одобрен пользователем): 24/16/12/9 колонок × ROW_HEIGHT 32px. На мобиле
-// (360px) это 9 cols × 32px → ячейка ~40×32px. КЛЮЧЕВОЕ отличие от alpha.39
-// — minSize у ВСЕХ виджетов поднят до 2×2 в meta.ts: на 9-cols/32px-grid
-// 2×2 = ~80×64px, помещается иконка + значение + подпись (или две строки
-// текста). Эксперименты alpha.40 (4×80) и alpha.41 (6×60) расширяли ячейку,
-// но в итоге сетка использовалась неэффективно — даже минимальные виджеты
-// занимали полэкрана.
+// Grid скопирован 1:1 из reference-проекта ha-pwa-lab: 24/16/12/9 колонок
+// × ROW_HEIGHT 32px, minSize виджетов 2×2 (см. ADR 007).
+//
+// MAX_GRID_WIDTH — раскладка хранит ОДИН набор координат w/h. Если число
+// колонок меняется между breakpoint'ами, та же раскладка на десктопе
+// расползается: виджеты, собранные в 9-col сетке (≈ как на телефоне или
+// импорт с другого устройства), занимают левые ~37% 24-col грида и
+// «прилипают» к левому краю. Решение: на широких экранах грид не тянется
+// во всю ширину, а ограничен 760px и центрируется. При effectiveWidth ≤ 760
+// COLS_BY_WIDTH всегда даёт 9 — раскладка выглядит одинаково на телефоне и
+// на десктопе (на десктопе — как центрированная колонка).
+const MAX_GRID_WIDTH = 760;
 const COLS_BY_WIDTH = [
   { min: 1200, cols: 24 },
   { min: 996, cols: 16 },
@@ -64,7 +68,10 @@ function useResponsiveCols() {
   const [cols, setCols] = useState(9);
   useEffect(() => {
     const update = () => {
-      const w = window.innerWidth;
+      // Считаем от ширины грид-контейнера (клампится к MAX_GRID_WIDTH),
+      // а не от window.innerWidth — иначе на десктопе cols=24, а контейнер
+      // узкий, и ячейки выходят микроскопическими.
+      const w = Math.min(window.innerWidth, MAX_GRID_WIDTH);
       const found = COLS_BY_WIDTH.find((b) => w >= b.min);
       setCols(found ? found.cols : 9);
     };
@@ -338,7 +345,11 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
           </div>
         </main>
       ) : (
-        <main key={current.id} className="page-fade-in p-3">
+        <main
+          key={current.id}
+          className="page-fade-in p-3 mx-auto w-full"
+          style={{ maxWidth: MAX_GRID_WIDTH }}
+        >
           <RGLGrid
             items={rglItems}
             cols={cols}
