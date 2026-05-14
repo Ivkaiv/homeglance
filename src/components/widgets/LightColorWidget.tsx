@@ -36,14 +36,21 @@ function hexToRgb(hex: string): [number, number, number] {
 /**
  * Виджет цветной лампы — адаптивный layout по размеру ячейки.
  *
- * - tiny (1×1): только иконка + toggle по тапу
- * - compact (≤2×1): иконка + название + статус, тап → sheet
+ * - compact: иконка + название + статус, тап → sheet. На узких ячейках
+ *   (w < 120) — вертикальный stack (иконка над текстом), на широких —
+ *   иконка слева от текста.
  * - medium (≥3×1, h≤2): добавляем brightness slider справа
  * - wide-tall (≥3×3): + ряд быстрых preset-цветов внизу
  *
  * Внутри (по тапу на основной body) всегда открывается `LightColorSheet`
  * с полным управлением. Slider и preset'ы в самом виджете — для удобных
  * «быстрых действий» без открытия sheet.
+ *
+ * tier 'tiny' (только иконка, без названия) убран в alpha.49: minSize
+ * виджета — 2×2, а на мобильной сетке (9 cols × 32px) это ≈71×74px.
+ * Старый порог tiny `< 90 && < 90` ошибочно ловил этот минимальный
+ * размер и прятал название лампы — пользователь видел голую иконку
+ * и не понимал, чем управляет.
  */
 export function LightColorWidget({ params }: { params: Params }) {
   const e = useEntity(params.entity);
@@ -90,48 +97,23 @@ export function LightColorWidget({ params }: { params: Params }) {
   };
 
   // Tier-определение по ячейке RGL (не по CSS @container, чтобы знать что показывать):
-  // tiny = очень маленькая ячейка, только иконка
-  // compact = одна строка: иконка + текст
+  // compact = иконка + название + статус (вертикально на узких, горизонтально на широких)
   // medium = есть место под slider справа
   // wide = есть место под presets снизу
   const tier =
-    size.w < 90 && size.h < 90
-      ? 'tiny'
-      : size.w < 200 || size.h < 80
-        ? 'compact'
-        : size.h < 130
-          ? 'medium'
-          : 'wide';
+    size.w < 200 || size.h < 80
+      ? 'compact'
+      : size.h < 130
+        ? 'medium'
+        : 'wide';
+  // Узкая ячейка (минимальный 2×2 на мобиле ≈71px) — иконку и текст
+  // ставим вертикально, иначе на горизонтальный layout не остаётся места
+  // под название.
+  const compactVertical = size.w < 120;
 
   const glow = on
     ? { boxShadow: `inset 0 0 0 1px ${colorHex}33, 0 0 16px ${colorHex}40` }
     : undefined;
-
-  // Tiny: иконка по центру; тап = toggle (без sheet — не хватает места показать
-  // даже название, sheet тут лишний)
-  if (tier === 'tiny') {
-    return (
-      <button
-        ref={ref as any}
-        type="button"
-        onClick={toggle}
-        disabled={isBad}
-        className="glass h-full w-full flex items-center justify-center disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-        style={glow}
-        aria-label={`${label}: ${status}, переключить`}
-        title={label}
-      >
-        <div
-          className={`w-9 h-9 rounded-full flex items-center justify-center ${
-            on ? 'shadow-[0_0_12px_currentColor]' : 'bg-black/5 dark:bg-white/5 text-text-tertiary'
-          }`}
-          style={on ? { color: colorHex, backgroundColor: `${colorHex}33` } : undefined}
-        >
-          {on ? <Lightbulb size={16} /> : <Power size={16} />}
-        </div>
-      </button>
-    );
-  }
 
   const IconBlock = (
     <div
@@ -144,9 +126,9 @@ export function LightColorWidget({ params }: { params: Params }) {
     </div>
   );
 
-  // Compact: иконка + название + статус. Тап по body → open sheet, тап
-  // на иконке (отдельная кнопка) = toggle. Для очень узких видджетов
-  // оставляем только body-click → sheet.
+  // Compact: иконка + название + статус. Тап по body → open sheet.
+  // На узкой ячейке (compactVertical) — вертикальный stack по центру,
+  // на широкой — иконка слева, текст справа.
   if (tier === 'compact') {
     return (
       <>
@@ -155,12 +137,16 @@ export function LightColorWidget({ params }: { params: Params }) {
           type="button"
           onClick={() => setSheetOpen(true)}
           disabled={isBad}
-          className="glass h-full w-full p-2.5 flex items-center gap-2 text-left disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+          className={`glass h-full w-full p-2 text-left disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 flex ${
+            compactVertical
+              ? 'flex-col items-center justify-center gap-1 text-center'
+              : 'items-center gap-2'
+          }`}
           style={glow}
           aria-label={`Открыть управление: ${label}`}
         >
           {IconBlock}
-          <div className="min-w-0 flex-1">
+          <div className={compactVertical ? 'min-w-0 w-full' : 'min-w-0 flex-1'}>
             <div className="text-xs font-medium truncate">{label}</div>
             <div className="text-[10px] text-text-tertiary truncate">{status}</div>
           </div>
