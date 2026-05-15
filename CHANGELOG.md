@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.54] — 2026-05-15
+
+### Fixed
+- **CI alpha.53 упал на docker-сборке.** `npm install hls.js` обновил `package.json` и создал `package-lock.json`, но не тронул `bun.lock`. Dockerfile собирает через `bun install --frozen-lockfile` — sanity-check падал в 7 сек. Удалил `package-lock.json` (в репо коммитится только bun.lock), прогнал `bun install` для регенерации bun.lock с `hls.js`. Содержимо самой alpha.53 (HLS-стрим) не изменилось.
+
 ## [0.1.0-alpha.53] — 2026-05-15
 
 ### Changed
