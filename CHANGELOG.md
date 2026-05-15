@@ -7,6 +7,21 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.53] — 2026-05-15
+
+### Changed
+- **`CameraWidget` теперь показывает live-стрим через HLS.** Раньше виджет дёргал `entity_picture` (snapshot) раз в 5-10 секунд — «дёрганая» картинка с заметным запаздыванием. Теперь:
+  - При mount запрашивается HLS-плейлист через WS-команду `camera/stream` (HA Stream Integration сама перекодирует RTSP/ONVIF в HLS).
+  - На Safari (iOS/macOS) — нативный HLS, без дополнительных библиотек.
+  - На Chrome/Firefox/Edge — через `hls.js` с `lowLatencyMode`, динамический импорт (~50КБ gzip только когда есть камера на странице).
+  - Tier `'tiny'` остаётся на snapshot — держать stream ради превью ~80×64px бессмысленная нагрузка на камеру.
+  - Фолбэк на snapshot если у камеры нет stream-source (дешёвые ESP/IP-камеры без RTSP) или если HLS падает.
+  - Под HA Ingress URL стрима проходит через тот же proxy-роут `/api/glance/ha-rest/hls/...`, что и REST к HA — Supervisor-токен остаётся на сервере, не утекает в браузер.
+- Заимствовано идеологически из reference-проекта `advanced-camera-card` (Dermot Duffy), но без зависимости от HA-frontend компонент `ha-hls-player` — у нас отдельное Next.js приложение, не Lovelace card.
+
+### Dependencies
+- Добавлено: `hls.js ^1.6.16`.
+
 ## [0.1.0-alpha.52] — 2026-05-14
 
 ### Fixed

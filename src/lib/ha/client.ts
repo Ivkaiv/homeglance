@@ -292,6 +292,38 @@ export class HAClient {
     }
   }
 
+  /**
+   * Запросить live-stream камеры. HA Stream Integration возвращает HLS
+   * playlist (m3u8) с одноразовым токеном в URL — auth не нужен, hls.js
+   * сам подгружает плейлист и сегменты.
+   *
+   * Возвращаемый URL HA даёт относительный — `/api/hls/<token>/master_playlist.m3u8`.
+   * Чтобы he работал и под HA Ingress (когда клиент идёт через add-on-proxy,
+   * а не на HA напрямую), склеиваем не с `this.url`, а с `this.restUrl`:
+   *   - direct mode: restUrl = `<haUrl>/api` → результат `<haUrl>/api/hls/...`
+   *   - proxy mode: restUrl = `<ingressBase>/api/glance/ha-rest` → результат
+   *     `<ingressBase>/api/glance/ha-rest/hls/...`, который проходит через
+   *     `[[...path]]`-роут add-on'а с подменой Authorization на supervisor-токен.
+   * Поэтому из `result.url` обрезаем ведущий `/api/` (он уже в restUrl).
+   *
+   * Возвращает `null` если у камеры нет stream-source (камера без stream
+   * integration, RTSP не подключён и т.п.).
+   */
+  async getCameraStreamUrl(entityId: EntityId): Promise<string | null> {
+    try {
+      const result = await this.callWS<{ url?: string }>({
+        type: 'camera/stream',
+        entity_id: entityId,
+        format: 'hls',
+      });
+      if (!result?.url || !this.restUrl) return null;
+      const haPath = result.url.replace(/^\/?api\//, '');
+      return new URL(haPath, this.restUrl.replace(/\/$/, '') + '/').href;
+    } catch {
+      return null;
+    }
+  }
+
   async getHistory(
     entityIds: EntityId[],
     hoursBack = 24
