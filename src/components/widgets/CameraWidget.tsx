@@ -11,8 +11,12 @@ interface Params {
   entity: string;
   /** Подпись (если пусто — берётся friendly_name). */
   label?: string;
-  /** Период обновления snapshot-фолбэка в секундах (когда стрим недоступен). */
+  /** Период обновления snapshot в секундах (для режима snapshot и фолбэка). */
   refreshSec?: number;
+  /** Режим: auto (live с фолбэком на снимок), stream (только live), snapshot (только снимки). */
+  mode?: 'auto' | 'stream' | 'snapshot';
+  /** Заглушить аудио стрима. По умолчанию true. */
+  muted?: boolean;
 }
 
 /**
@@ -38,6 +42,9 @@ export function CameraWidget({ params }: { params: Params }) {
 
   const label = params.label ?? e?.attributes.friendly_name ?? 'Камера';
   const isUnavail = !e || e.state === 'unavailable' || e.state === 'unknown';
+  const mode = params.mode ?? 'auto';
+  const muted = params.muted ?? true;
+  const refreshSec = Math.max(2, params.refreshSec ?? 10);
 
   if (!size.measured) {
     return <div ref={ref} className="glass h-full w-full" />;
@@ -71,7 +78,7 @@ export function CameraWidget({ params }: { params: Params }) {
         <SnapshotImage
           entity={params.entity}
           alt={`Снимок: ${label}`}
-          refreshSec={Math.max(2, params.refreshSec ?? 10)}
+          refreshSec={refreshSec}
           className="absolute inset-0 w-full h-full object-cover"
           fallback={<Camera size={20} aria-hidden="true" />}
         />
@@ -81,7 +88,9 @@ export function CameraWidget({ params }: { params: Params }) {
             <FullscreenView
               entity={params.entity}
               label={label}
-              refreshSec={Math.max(2, params.refreshSec ?? 10)}
+              refreshSec={refreshSec}
+              mode={mode}
+              muted={muted}
               onClose={() => setFullscreen(false)}
             />,
             document.body,
@@ -102,7 +111,9 @@ export function CameraWidget({ params }: { params: Params }) {
         <LiveOrSnapshot
           entity={params.entity}
           label={label}
-          refreshSec={Math.max(2, params.refreshSec ?? 10)}
+          refreshSec={refreshSec}
+          mode={mode}
+          muted={muted}
           autoplay
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -123,7 +134,9 @@ export function CameraWidget({ params }: { params: Params }) {
           <FullscreenView
             entity={params.entity}
             label={label}
-            refreshSec={Math.max(2, params.refreshSec ?? 10)}
+            refreshSec={refreshSec}
+            mode={mode}
+            muted={muted}
             onClose={() => setFullscreen(false)}
           />,
           document.body,
@@ -136,11 +149,15 @@ function FullscreenView({
   entity,
   label,
   refreshSec,
+  mode,
+  muted,
   onClose,
 }: {
   entity: string;
   label: string;
   refreshSec: number;
+  mode: 'auto' | 'stream' | 'snapshot';
+  muted: boolean;
   onClose: () => void;
 }) {
   return (
@@ -165,6 +182,8 @@ function FullscreenView({
         entity={entity}
         label={label}
         refreshSec={refreshSec}
+        mode={mode}
+        muted={muted}
         autoplay
         className="max-w-full max-h-full object-contain"
       />
@@ -175,17 +194,26 @@ function FullscreenView({
 /**
  * Пробует получить HLS-стрим, при неудаче — снимок с периодическим
  * обновлением. Это сердце виджета.
+ *
+ * `mode='snapshot'` — не запрашиваем stream вообще, рендерим snapshot.
+ * `mode='stream'` — только видео; если стрима нет, остаёмся на «подключение…»
+ *   (не сваливаемся в snapshot — пользователь явно попросил видео).
+ * `mode='auto'` — пробуем видео, при неудаче — snapshot.
  */
 function LiveOrSnapshot({
   entity,
   label,
   refreshSec,
+  mode,
+  muted,
   autoplay,
   className,
 }: {
   entity: string;
   label: string;
   refreshSec: number;
+  mode: 'auto' | 'stream' | 'snapshot';
+  muted: boolean;
   autoplay: boolean;
   className?: string;
 }) {
@@ -197,6 +225,7 @@ function LiveOrSnapshot({
   // Integration держит транскод пока есть подписчики). Если URL вернулся —
   // показываем video, иначе фолбэк на snapshot ниже.
   useEffect(() => {
+    if (mode === 'snapshot') return;
     let cancelled = false;
     setStreamUrl(null);
     setStreamFailed(false);
@@ -210,7 +239,7 @@ function LiveOrSnapshot({
     return () => {
       cancelled = true;
     };
-  }, [entity]);
+  }, [entity, mode]);
 
   // Когда URL готов и есть <video> — подключаем hls.js (или native Safari).
   useEffect(() => {
@@ -266,12 +295,13 @@ function LiveOrSnapshot({
     };
   }, [streamUrl]);
 
-  if (streamUrl && !streamFailed) {
+  // Видео — если есть URL и режим не «только снимок».
+  if (streamUrl && !streamFailed && mode !== 'snapshot') {
     return (
       <video
         ref={videoRef}
         autoPlay={autoplay}
-        muted
+        muted={muted}
         playsInline
         // Без controls — клик ведёт открытие fullscreen (через родительский button).
         className={className}
@@ -280,7 +310,20 @@ function LiveOrSnapshot({
     );
   }
 
-  // Стрим не доступен или упал — fallback на снимок.
+  // Если пользователь явно выбрал stream-only, а стрима нет — не падаем на
+  // снимок (это противоречит его выбору), показываем заглушку.
+  if (mode === 'stream') {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-text-tertiary">
+        <Camera size={28} aria-hidden="true" />
+        <div className="text-[10px]">
+          {streamFailed ? 'видео недоступно' : 'подключаюсь…'}
+        </div>
+      </div>
+    );
+  }
+
+  // Auto или snapshot: показываем снимок.
   return (
     <SnapshotImage
       entity={entity}

@@ -352,7 +352,7 @@ export const CAMERA_META: WidgetMeta = {
   type: 'camera',
   name: 'Камера',
   emoji: '📹',
-  description: 'Снимок с HA-камеры с автообновлением. Клик открывает fullscreen.',
+  description: 'Live-видео с HA-камеры (HLS) со снимком как фолбэк. Клик открывает fullscreen.',
   category: 'cameras',
   defaultSize: { w: 5, h: 4 },
   minSize: { w: 3, h: 3 },
@@ -360,8 +360,32 @@ export const CAMERA_META: WidgetMeta = {
     { key: 'entity', label: 'Какая камера?', kind: 'entity', domain: 'camera.', required: true,
       hint: 'Например, Tenda во дворе, Dahua у двери' },
     { key: 'label', label: 'Название', kind: 'text', placeholder: 'Двор', hint: 'По умолчанию — имя камеры из HA' },
-    { key: 'refreshSec', label: 'Как часто обновлять снимок (секунды)', kind: 'number', default: 10,
-      hint: 'Меньше = свежее картинка, больше = меньше нагрузка на камеру' },
+    {
+      key: 'mode',
+      label: 'Режим отображения',
+      kind: 'select',
+      default: 'auto',
+      options: [
+        { value: 'auto', label: 'Авто (видео если есть, иначе снимок)' },
+        { value: 'stream', label: 'Только live-видео' },
+        { value: 'snapshot', label: 'Только снимок' },
+      ],
+      hint: 'Видео работает если HA Stream Integration перекодирует камеру (большинство RTSP/ONVIF). Снимок — для камер без stream-source.',
+    },
+    {
+      key: 'muted',
+      label: 'Без звука',
+      kind: 'boolean',
+      default: true,
+      hint: 'Многие камеры передают аудио — на дашборде обычно лишнее. Снимай галочку если хочешь слышать.',
+    },
+    {
+      key: 'refreshSec',
+      label: 'Период обновления снимка (секунды)',
+      kind: 'number',
+      default: 10,
+      hint: 'Используется в режиме «снимок» и как фолбэк когда видео недоступно. Меньше = свежее, больше = меньше нагрузки.',
+    },
   ],
 };
 
