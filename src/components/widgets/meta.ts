@@ -107,6 +107,7 @@ export const SENSOR_VALUE_META: WidgetMeta = {
         { value: 'energy', label: '🔋 Энергия (кВт·ч)' },
         { value: 'co2', label: '🌬 CO₂' },
         { value: 'gas', label: '🔥 Газ (м³)' },
+        { value: 'glucose', label: '🩸 Глюкоза (ммоль/л)' },
         { value: 'door', label: '🚪 Дверь' },
         { value: 'window', label: '🪟 Окно' },
         { value: 'motion', label: '🚶 Движение' },

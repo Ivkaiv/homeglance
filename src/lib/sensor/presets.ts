@@ -16,6 +16,7 @@ export type SensorType =
   | 'energy'
   | 'co2'
   | 'gas'
+  | 'glucose'
   | 'door'
   | 'window'
   | 'motion'
@@ -98,6 +99,12 @@ export const SENSOR_PRESETS: Record<Exclude<SensorType, 'auto' | 'numeric'>, Sen
     unit: 'м³',
     decimals: 2,
     accent: 'text-amber-700 dark:text-amber-300',
+  },
+  glucose: {
+    icon: 'diabetes',
+    unit: 'ммоль/л',
+    decimals: 1,
+    accent: 'text-rose-700 dark:text-rose-300',
   },
   // Бинарные
   door: {
@@ -199,6 +206,19 @@ export function detectSensorType(e: HAState | undefined): SensorType {
     if (dc === 'energy' || dc === 'energy_storage') return 'energy';
     if (dc === 'carbon_dioxide') return 'co2';
     if (dc === 'gas') return 'gas';
+    if (dc === 'blood_glucose_concentration') return 'glucose';
+  }
+
+  // По id — раньше device_class, чтобы поймать template-сенсоры nightscout
+  // (sensor.blood_sugar, sensor.glucose_*) у которых device_class пустой,
+  // но имя явно про глюкозу.
+  if (
+    id.includes('blood_glucose') ||
+    id.includes('blood_sugar') ||
+    id.includes('glucose') ||
+    id.includes('sahar')
+  ) {
+    return 'glucose';
   }
 
   if (unit) {
@@ -212,6 +232,7 @@ export function detectSensorType(e: HAState | undefined): SensorType {
     if (unit === 'kwh' || unit === 'wh' || unit === 'квт·ч') return 'energy';
     if (unit === 'ppm') return 'co2';
     if (unit === 'm³' || unit === 'м³') return 'gas';
+    if (unit === 'mmol/l' || unit === 'ммоль/л' || unit === 'mg/dl' || unit === 'мг/дл') return 'glucose';
   }
 
   return 'numeric';

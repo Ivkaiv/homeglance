@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.56] — 2026-05-16
+
+### Added
+- **Тип сенсора `glucose` в авто-определении.** Раньше `SensorValueWidget` не распознавал датчики глюкозы и сваливался в `numeric` (без иконки и единиц). Теперь:
+  - `device_class === 'blood_glucose_concentration'` → glucose.
+  - id содержит `blood_glucose` / `blood_sugar` / `glucose` / `sahar` → glucose (это нужно для template-сенсоров nightscout вроде `sensor.blood_sugar` без `device_class`).
+  - unit `mmol/L` / `ммоль/л` / `mg/dL` / `мг/дл` → glucose.
+  - Preset: иконка `diabetes`, единица «ммоль/л», 1 знак после запятой, rose-акцент.
+  - В ConfigSheet добавлен вариант «🩸 Глюкоза (ммоль/л)» в селект «Тип датчика».
+
 ## [0.1.0-alpha.55] — 2026-05-15
 
 ### Added
