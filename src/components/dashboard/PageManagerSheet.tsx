@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Plus, Trash2, Pencil, Check, ChevronUp, ChevronDown, Eye, EyeOff, Download, Upload, Cloud } from 'lucide-react';
+import { X, Plus, Trash2, Pencil, Check, ChevronUp, ChevronDown, Eye, EyeOff, Download, Upload, Cloud, Activity } from 'lucide-react';
 import { usePages } from '@/lib/pages/PagesProvider';
+import { buildGlucosePage } from '@/lib/pages/presets';
 import { extractEntities, buildImportPlan } from '@/lib/lovelace/import';
 import {
   DEFAULT_WEATHER_SECTIONS,
@@ -36,6 +37,15 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
 
   function startNew() {
     setEditing({ id: '', title: '', icon: '📄', kind: 'grid', widgets: [] });
+  }
+
+  function addGlucosePreset() {
+    const preset = buildGlucosePage();
+    const created = addPage(preset);
+    setImportMessage({
+      kind: 'success',
+      text: `Готовая страница «${created.title}» добавлена — ${preset.widgets.length} виджетов`,
+    });
   }
 
   function exportPage(page: Page) {
@@ -277,6 +287,22 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
               <Cloud size={14} aria-hidden="true" />
               {lovelaceBusy ? t('pages.manager.importLovelace.busy') : t('pages.manager.importLovelace')}
             </button>
+
+            <div className="mt-3 pt-3 border-t border-black/10 dark:border-white/10">
+              <div className="text-[10px] uppercase tracking-wider text-text-tertiary mb-1.5">
+                Готовые страницы
+              </div>
+              <button
+                onClick={addGlucosePreset}
+                className="w-full px-3 py-2.5 rounded-xl bg-rose-500/15 border border-rose-400/30 text-rose-300 text-xs flex items-center justify-center gap-1.5 hover:bg-rose-500/25 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-400/70"
+              >
+                <Activity size={14} aria-hidden="true" />
+                🩸 Сахар — мониторинг CGM
+              </button>
+              <div className="text-[10px] text-text-tertiary mt-1.5 leading-snug">
+                Текущая глюкоза, тренд, TIR за 24 ч и за неделю, график динамики
+              </div>
+            </div>
 
             {importMessage && (
               <div

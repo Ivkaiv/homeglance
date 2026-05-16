@@ -38,6 +38,9 @@ import {
   MAP_META,
   NOTIFICATION_FEED_META,
   WEBHOOK_META,
+  GLUCOSE_META,
+  GLUCOSE_CHART_META,
+  GLUCOSE_STATS_META,
   weatherComputeMinSize,
   controlPanelComputeMinSize,
   roomHubComputeMinSize,
@@ -206,6 +209,24 @@ export function registerBuiltinWidgets(): void {
     meta: WEBHOOK_META,
     Component: lazyLoad(() =>
       import('./WebhookWidget').then((m) => m.WebhookWidget)
+    ),
+  });
+  register({
+    meta: GLUCOSE_META,
+    Component: lazyLoad(() =>
+      import('./GlucoseWidget').then((m) => m.GlucoseWidget)
+    ),
+  });
+  register({
+    meta: GLUCOSE_CHART_META,
+    Component: lazyLoad(() =>
+      import('./GlucoseChartWidget').then((m) => m.GlucoseChartWidget)
+    ),
+  });
+  register({
+    meta: GLUCOSE_STATS_META,
+    Component: lazyLoad(() =>
+      import('./GlucoseStatsWidget').then((m) => m.GlucoseStatsWidget)
     ),
   });
 

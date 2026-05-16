@@ -18,6 +18,7 @@ export type WidgetCategory =
   | 'media'
   | 'cameras'
   | 'rooms'
+  | 'health'
   | 'misc';
 
 export interface ParamField {

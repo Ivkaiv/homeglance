@@ -968,6 +968,128 @@ export const CALENDAR_META: WidgetMeta = {
   ],
 };
 
+// ── Glucose (CGM) ────────────────────────────────────────────────────────────
+export const GLUCOSE_META: WidgetMeta = {
+  type: 'glucose',
+  name: 'Глюкоза',
+  emoji: '🩸',
+  description:
+    'Большая карточка глюкозы CGM: текущее значение, стрелка тренда, дельта, цвет фона по зоне (низко / норма / выше нормы / высоко). Тап открывает график за 6 часов.',
+  category: 'health',
+  defaultSize: { w: 4, h: 3 },
+  minSize: { w: 2, h: 2 },
+  paramGroups: [
+    { id: '_basic', label: 'Основное' },
+    {
+      id: 'thresholds',
+      label: 'Целевые границы (ммоль/л)',
+      icon: '🎯',
+      collapsed: true,
+      hint: 'Если эндокринолог рекомендует другие границы — поменяй здесь',
+    },
+  ],
+  paramSchema: [
+    {
+      key: 'entity',
+      label: 'Сенсор глюкозы',
+      kind: 'entity',
+      domain: 'sensor.',
+      default: 'sensor.blood_sugar',
+      hint: 'Должен иметь атрибуты direction (тренд) и delta — обычно это sensor.blood_sugar от Nightscout/Juggluco',
+    },
+    { key: 'label', label: 'Подпись', kind: 'text', placeholder: 'Глюкоза' },
+    { key: 'urgentLow', label: 'Опасно низко (ниже)', kind: 'number', default: 3.0, group: 'thresholds' },
+    { key: 'low', label: 'Низко (ниже)', kind: 'number', default: 3.9, group: 'thresholds' },
+    { key: 'high', label: 'Высоко (выше)', kind: 'number', default: 10.0, group: 'thresholds' },
+    { key: 'urgentHigh', label: 'Опасно высоко (выше)', kind: 'number', default: 13.9, group: 'thresholds' },
+  ],
+};
+
+// ── Glucose Chart ────────────────────────────────────────────────────────────
+export const GLUCOSE_CHART_META: WidgetMeta = {
+  type: 'glucose_chart',
+  name: 'График глюкозы',
+  emoji: '📈',
+  description:
+    'График глюкозы за выбранный период (3/6/12/24 ч) с подсветкой целевой зоны, точками по зонам и тапом для просмотра конкретного замера.',
+  category: 'health',
+  defaultSize: { w: 8, h: 5 },
+  minSize: { w: 4, h: 3 },
+  paramGroups: [
+    { id: '_basic', label: 'Основное' },
+    { id: 'thresholds', label: 'Целевые границы (ммоль/л)', icon: '🎯', collapsed: true },
+  ],
+  paramSchema: [
+    {
+      key: 'entity',
+      label: 'Сенсор глюкозы',
+      kind: 'entity',
+      domain: 'sensor.',
+      default: 'sensor.blood_sugar',
+    },
+    {
+      key: 'rangeEntity',
+      label: 'Переключатель диапазона',
+      kind: 'entity',
+      domain: 'input_select.',
+      default: 'input_select.glucose_range',
+      hint: 'Опционально — input_select с опциями вида «3ч/6ч/12ч/24ч». Если нет — переключатель работает локально',
+    },
+    {
+      key: 'defaultHours',
+      label: 'Диапазон по умолчанию',
+      kind: 'select',
+      default: 6,
+      options: [
+        { value: '3', label: '3 часа' },
+        { value: '6', label: '6 часов' },
+        { value: '12', label: '12 часов' },
+        { value: '24', label: '24 часа' },
+      ],
+    },
+    { key: 'label', label: 'Заголовок', kind: 'text', placeholder: 'Глюкоза' },
+    { key: 'urgentLow', label: 'Опасно низко (ниже)', kind: 'number', default: 3.0, group: 'thresholds' },
+    { key: 'low', label: 'Низко (ниже)', kind: 'number', default: 3.9, group: 'thresholds' },
+    { key: 'high', label: 'Высоко (выше)', kind: 'number', default: 10.0, group: 'thresholds' },
+    { key: 'urgentHigh', label: 'Опасно высоко (выше)', kind: 'number', default: 13.9, group: 'thresholds' },
+  ],
+};
+
+// ── Glucose Stats ────────────────────────────────────────────────────────────
+export const GLUCOSE_STATS_META: WidgetMeta = {
+  type: 'glucose_stats',
+  name: 'Статистика глюкозы',
+  emoji: '📊',
+  description:
+    'TIR (время в норме) с прогресс-баром, среднее, GMI/HbA1c, % выше и ниже нормы. За 24 часа или за 7 дней.',
+  category: 'health',
+  defaultSize: { w: 4, h: 4 },
+  minSize: { w: 3, h: 3 },
+  paramGroups: [
+    { id: '_basic', label: 'Основное' },
+    { id: 'sensors', label: 'Сенсоры (если не нашёл сам)', icon: '🔌', collapsed: true,
+      hint: 'По умолчанию пытается найти sensor.glucose_avg_24h / _7d, _tir_24h / _7d, _gmi, _time_above, _time_below' },
+  ],
+  paramSchema: [
+    {
+      key: 'period',
+      label: 'Период',
+      kind: 'select',
+      default: '24h',
+      options: [
+        { value: '24h', label: 'За 24 часа' },
+        { value: '7d', label: 'За 7 дней' },
+      ],
+    },
+    { key: 'label', label: 'Подпись', kind: 'text', placeholder: 'Статистика · 24 ч' },
+    { key: 'avgEntity', label: 'Среднее за период', kind: 'entity', domain: 'sensor.', group: 'sensors' },
+    { key: 'tirEntity', label: 'TIR за период', kind: 'entity', domain: 'sensor.', group: 'sensors' },
+    { key: 'gmiEntity', label: 'GMI / HbA1c', kind: 'entity', domain: 'sensor.', group: 'sensors' },
+    { key: 'highEntity', label: '% времени выше нормы', kind: 'entity', domain: 'sensor.', group: 'sensors' },
+    { key: 'lowEntity', label: '% времени ниже нормы', kind: 'entity', domain: 'sensor.', group: 'sensors' },
+  ],
+};
+
 export const weatherRoomComputeMinSize = (params: any): { w: number; h: number } => {
   const fields = params.fields ?? WEATHER_ROOM_DEFAULT_FIELDS;
   let w = 4,

@@ -38,5 +38,6 @@ export const CATEGORY_LABELS: Record<WidgetCategory, { label: string; emoji: str
   media: { label: 'Медиа', emoji: '🎵' },
   cameras: { label: 'Камеры', emoji: '📷' },
   rooms: { label: 'Комнаты', emoji: '🏠' },
+  health: { label: 'Здоровье', emoji: '🩸' },
   misc: { label: 'Прочее', emoji: '✨' },
 };
