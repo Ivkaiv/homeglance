@@ -51,11 +51,19 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         setProfiles(list);
         const active = loadActiveProfileId();
         if (active && list.some((p) => p.id === active)) {
+          // На этом устройстве уже залогинены — PIN не переспрашиваем.
           setActiveIdState(active);
-        } else if (list.length === 1) {
+        } else if (list.length === 1 && !list[0].pinHash) {
+          // Один профиль БЕЗ PIN — авто-вход (single-user, без защиты).
+          // ВАЖНО: если PIN установлен — даже единственный профиль должен
+          // пройти через ProfilePicker → PinPrompt. Иначе любой кто открыл
+          // адрес Glance в браузере, попадёт сразу внутрь.
           setActiveIdState(list[0].id);
           saveActiveProfileId(list[0].id);
         }
+        // Во всех остальных случаях (>1 профиля, или 1 профиль с PIN, или
+        // 0 профилей) — activeId остаётся null, и UI покажет ProfilePicker
+        // (или онбординг создания первого профиля).
         setLoaded(true);
       })
       .catch(() => {

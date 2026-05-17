@@ -58,6 +58,12 @@ export function deleteProfileData(profileId: string): void {
 
 /** Хэшируем PIN. SubtleCrypto в secure context, fallback в insecure. */
 export async function hashPin(pin: string): Promise<string> {
+  const sha = await hashPinSha256(pin);
+  if (sha) return sha;
+  return hashPinSimple(pin);
+}
+
+async function hashPinSha256(pin: string): Promise<string | null> {
   try {
     if (typeof crypto !== 'undefined' && crypto.subtle) {
       const enc = new TextEncoder();
@@ -70,11 +76,31 @@ export async function hashPin(pin: string): Promise<string> {
       );
     }
   } catch {}
+  return null;
+}
+
+function hashPinSimple(pin: string): string {
   let h = 0;
   for (let i = 0; i < pin.length; i++) h = (h * 31 + pin.charCodeAt(i)) | 0;
   return 'simple:' + h.toString(36);
 }
 
+/**
+ * Проверка PIN — пересчитывает хэш ТЕМ ЖЕ алгоритмом, что был использован
+ * при установке (по префиксу `sha256:` / `simple:`). Без этого PIN, установленный
+ * в HTTP-контексте (simple-fallback), невозможно было бы ввести с HTTPS-устройства,
+ * где crypto.subtle доступен и `hashPin` всегда выдаёт sha256-хэш.
+ */
 export async function verifyPin(pin: string, hash: string): Promise<boolean> {
-  return (await hashPin(pin)) === hash;
+  if (hash.startsWith('sha256:')) {
+    const sha = await hashPinSha256(pin);
+    return sha === hash;
+  }
+  if (hash.startsWith('simple:')) {
+    return hashPinSimple(pin) === hash;
+  }
+  // Хэш без префикса (legacy / битый) — пытаемся оба варианта.
+  const sha = await hashPinSha256(pin);
+  if (sha === hash) return true;
+  return hashPinSimple(pin) === hash;
 }
