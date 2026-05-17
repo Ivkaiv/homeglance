@@ -34,7 +34,8 @@ export interface ParamField {
     | 'select'
     | 'multi-select'
     | 'icon'
-    | 'entity-icons';
+    | 'entity-icons'
+    | 'entity-numbers';
   domain?: string;
   options?: { value: string; label: string }[];
   required?: boolean;
@@ -47,7 +48,8 @@ export interface ParamField {
   /** Для kind='number': границы значения. */
   min?: number;
   max?: number;
-  /** Для kind='entity-icons': key другого multi-entity-поля, чьи entities используются */
+  /** Для kind='entity-icons' и 'entity-numbers': key другого multi-entity-поля,
+   *  чьи entities используются. */
   linkedKey?: string;
   /** Логическая группа поля — для аккордеонов в ConfigSheet.
    *  Поля с одинаковым `group` рендерятся в одну секцию, в порядке как в массиве.

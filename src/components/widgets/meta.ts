@@ -470,8 +470,12 @@ export const ROOM_HUB_META: WidgetMeta = {
 
     { key: 'climateEntities', label: 'Климат-сущности с регулятором', kind: 'multi-entity', domain: 'climate.',
       hint: 'Каждая получит компактный стэппер с минусом/плюсом', group: 'climate-controls' },
-    { key: 'climateStep', label: 'Шаг кнопок −/+', kind: 'number', default: 0.5, step: 0.1, min: 0.1, max: 5,
-      hint: 'На сколько градусов меняется при одном нажатии. Котлы и тёплые полы часто используют 0.1, кондиционеры 0.5–1',
+    { key: 'climateStep', label: 'Шаг кнопок −/+ (по умолчанию)', kind: 'number', default: 0.5, step: 0.1, min: 0.1, max: 5,
+      hint: 'Используется, если у конкретной сущности не задан свой шаг ниже',
+      group: 'climate-controls' },
+    { key: 'climateSteps', label: 'Свой шаг для каждой сущности', kind: 'entity-numbers',
+      linkedKey: 'climateEntities', step: 0.1, min: 0.1, max: 5,
+      hint: 'Пусто = использовать общий шаг. Котлы и тёплые полы часто 0.1, кондиционеры 0.5–1',
       group: 'climate-controls' },
 
     { key: 'sensorEntities', label: 'Дополнительные датчики', kind: 'multi-entity',

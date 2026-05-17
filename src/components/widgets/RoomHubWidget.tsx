@@ -30,8 +30,11 @@ interface Params {
   mediaPlayerEntity?: string;
   /** Климат-сущности (climate.*) для встраивания компактных степперов температуры. */
   climateEntities?: string[];
-  /** Шаг изменения температуры для climate-степперов. По умолчанию 1. */
+  /** Общий шаг изменения температуры — fallback, если для сущности не задан свой. */
   climateStep?: number;
+  /** Кастомный шаг отдельно для каждой climate-сущности (entity_id → шаг).
+   *  Котёл может иметь 0.1, а кондиционер 1 — в одной комнате. */
+  climateSteps?: Record<string, number>;
   /** Дополнительные «умные» сенсоры (sensor.*, binary_sensor.*) — отображаются
    *  как компактные чипы с авто-распознаванием типа: давление, освещённость,
    *  CO₂, дверь, окно, движение и т.д. */
@@ -506,7 +509,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
             if (!c) return null;
             const target = c.attributes.temperature;
             const isUnavail = c.state === 'unavailable';
-            const step = params.climateStep ?? 1;
+            const step = params.climateSteps?.[cid] ?? params.climateStep ?? 0.5;
             const setTemp = (delta: number) => {
               if (target === undefined) return;
               callService('climate', 'set_temperature', cid, { temperature: target + delta });

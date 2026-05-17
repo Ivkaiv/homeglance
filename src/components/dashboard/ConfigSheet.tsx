@@ -316,6 +316,17 @@ function ParamInput({
       />
     );
   }
+  if (field.kind === 'entity-numbers') {
+    const linkedEntities: string[] = field.linkedKey ? draft[field.linkedKey] ?? [] : [];
+    return (
+      <EntityNumbersPicker
+        field={field}
+        entities={linkedEntities}
+        value={value ?? {}}
+        onChange={onChange}
+      />
+    );
+  }
   if (field.kind === 'multi-select') {
     const selected: string[] = Array.isArray(value) ? value : (field.default ?? []);
     const toggle = (v: string) => {
@@ -983,6 +994,87 @@ function EntityIconsPicker({
           onClose={() => setPickingFor(null)}
         />
       )}
+    </Field>
+  );
+}
+
+/**
+ * Связка с multi-entity-полем (через linkedKey): для каждой выбранной
+ * сущности отображается строка «имя + число». Используется, например, для
+ * шага регулировки температуры — у котла можно поставить 0.1, у конвектора
+ * 0.5. Если значение не задано — используется field.default (общий дефолт).
+ */
+function EntityNumbersPicker({
+  field,
+  entities,
+  value,
+  onChange,
+}: {
+  field: ParamField;
+  entities: string[];
+  value: Record<string, number>;
+  onChange: (v: Record<string, number>) => void;
+}) {
+  const states = useStates();
+  const { registries } = useConnection();
+  const stepAttr = field.step ?? 'any';
+  const minAttr = field.min;
+  const maxAttr = field.max;
+  const defaultText =
+    field.default !== undefined && field.default !== null ? String(field.default) : '';
+
+  if (entities.length === 0) {
+    return (
+      <Field label={field.label} hint={field.hint}>
+        <div className="text-text-tertiary text-xs px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 italic">
+          Сначала выбери сущности выше
+        </div>
+      </Field>
+    );
+  }
+
+  const update = (id: string, raw: string) => {
+    const next = { ...value };
+    if (raw === '') {
+      delete next[id];
+    } else {
+      const n = Number(raw);
+      if (!Number.isNaN(n)) next[id] = n;
+    }
+    onChange(next);
+  };
+
+  return (
+    <Field label={field.label} hint={field.hint}>
+      <div className="flex flex-col gap-1.5">
+        {entities.map((id) => {
+          const display = getEntityDisplay(states[id], registries, id);
+          const current = value[id];
+          return (
+            <div
+              key={id}
+              className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="text-sm truncate">{display.name}</div>
+                <div className="text-[10px] text-text-tertiary truncate font-mono">{id}</div>
+              </div>
+              <input
+                type="number"
+                inputMode="decimal"
+                step={stepAttr}
+                min={minAttr}
+                max={maxAttr}
+                value={current ?? ''}
+                placeholder={defaultText}
+                onChange={(e) => update(id, e.target.value)}
+                aria-label={`Значение для ${display.name}`}
+                className="w-20 px-2 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm text-right"
+              />
+            </div>
+          );
+        })}
+      </div>
     </Field>
   );
 }
