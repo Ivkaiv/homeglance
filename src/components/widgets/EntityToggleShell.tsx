@@ -6,35 +6,29 @@ import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { PressButton } from '@/components/ui/PressButton';
 
 export interface EntityToggleShellProps {
-  /** Включено ли (для подсветки и индикатора). */
   on: boolean;
-  /** Не отвечает / unavailable. */
   isBad?: boolean;
-  /** Подпись виджета. */
   label: string;
-  /** Иконка (mdi-имя или эмодзи). */
   iconValue: string;
-  /** Цвет точки-индикатора и подсветки в "on" состоянии. */
   color: string;
-  /** Текст в medium+/large состоянии: «Включён» / «Выключен» / «Нет связи». */
   statusText: { on: string; off: string; bad?: string };
-  /** Клик по виджету. */
   onClick: () => void;
-  /** Дополнительный inline-style для glow-эффекта (если нужен «мягкий» свет). */
   glowOverride?: CSSProperties;
 }
 
 /**
- * Общая основа для виджетов вида «toggle entity вкл/выкл»: лампы, переключатели,
- * розетки. Использует CSS container queries (Tailwind v4): родительский
- * `.rgl-cell` имеет `@container`, и внутри мы:
- *  - **до 80px**: видна только иконка по центру
- *  - **80-140px**: добавляется точка-индикатор снизу
- *  - **140px+**: разворачивается полный layout с подписью, индикатором, иконкой
- *    и статусным текстом
+ * Общая основа для виджетов вида «toggle entity вкл/выкл»: лампы,
+ * переключатели, розетки. Layout управляется CSS container queries
+ * (Tailwind v4) — родительский `.rgl-cell` имеет `@container`.
  *
- * Все три варианта присутствуют в DOM одновременно, но CQ скрывают лишние —
- * никаких JS-измерений и ререндеров на ResizeObserver-event'ах.
+ * Уровни:
+ *  - **< 70px**: только иконка по центру (минимальный 2×2 не помещает текст)
+ *  - **≥ 70px**: иконка по центру + подпись маленьким шрифтом снизу
+ *  - **≥ 140px**: разворачивается полный layout — подпись сверху,
+ *    иконка + статус снизу
+ *
+ * Индикатор on/off — это сам glow + цвет иконки, отдельная «точка-индикатор»
+ * не нужна: на узких клетках она читалась как графический мусор.
  */
 export function EntityToggleShell({
   on,
@@ -55,7 +49,8 @@ export function EntityToggleShell({
   const ariaLabel = `${label}: ${
     isBad ? statusText.bad ?? 'Нет связи' : on ? statusText.on : statusText.off
   }`;
-  const dotColor = on ? color : 'rgba(255,255,255,0.18)';
+
+  const iconColor = on ? color : undefined;
 
   return (
     <PressButton
@@ -67,44 +62,34 @@ export function EntityToggleShell({
       bg="none"
       className={clsx(
         'h-full w-full',
-        // tiny (default, < 140px): центрированная иконка
-        'flex flex-col items-center justify-center',
-        // medium+ (>= 140px): паддинги и колонка с распределением
-        '@[140px]:p-3 @[140px]:justify-between',
-        // glass всегда. glass-active — только когда «включено» И достаточно
-        // места для развёрнутого вида (≥ 140px), иначе background-mix не виден.
+        // compact (default): иконка + подпись по центру, вертикально
+        'flex flex-col items-center justify-center gap-1 px-1.5 py-2',
+        // large (≥ 140px): полный layout — заголовок сверху, ряд иконка+статус снизу
+        '@[140px]:p-3 @[140px]:gap-0 @[140px]:justify-between @[140px]:items-stretch',
         'glass',
         on && '@[140px]:glass-active'
       )}
       style={glow}
     >
-      {/* Верхний ряд: подпись + точка. Виден только в medium+ */}
-      <div className="hidden @[140px]:flex items-center justify-between w-full">
+      {/* Заголовок — виден только в large (≥ 140px) */}
+      <div className="hidden @[140px]:block w-full">
         <div className="text-xs text-text-secondary truncate text-left">{label}</div>
-        <div
-          className="w-3 h-3 rounded-full shrink-0"
-          style={{ background: dotColor }}
-          aria-hidden="true"
-        />
       </div>
 
-      {/* Точка-индикатор для small (80-140): под иконкой по центру */}
+      {/* Иконка — по центру в compact, слева внизу в large */}
       <div
-        className="hidden @[80px]:block @[140px]:hidden w-2 h-2 rounded-full mt-1"
-        style={{ background: dotColor }}
-        aria-hidden="true"
-      />
-
-      {/* Нижний ряд: иконка + статусный текст в medium+, либо просто иконка в tiny */}
-      <div className="flex items-center gap-2 @[140px]:gap-2">
+        className="flex items-center gap-2 @[140px]:gap-2 justify-center @[140px]:justify-start"
+        style={iconColor ? { color: iconColor } : undefined}
+      >
         <GlanceIcon value={iconValue} size={28} />
-        <div className="hidden @[140px]:block text-sm">
-          {isBad
-            ? statusText.bad ?? 'Нет связи'
-            : on
-            ? statusText.on
-            : statusText.off}
+        <div className="hidden @[140px]:block text-sm text-text-primary">
+          {isBad ? statusText.bad ?? 'Нет связи' : on ? statusText.on : statusText.off}
         </div>
+      </div>
+
+      {/* Подпись под иконкой — только в compact (70-140px), скрыта в tiny и large */}
+      <div className="hidden @[70px]:block @[140px]:hidden text-[10px] text-text-secondary text-center truncate w-full px-0.5 leading-tight">
+        {label}
       </div>
     </PressButton>
   );

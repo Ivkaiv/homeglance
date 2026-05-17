@@ -238,6 +238,18 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* iOS Safari зумит страницу при фокусе на input с font-size < 16px.
+     На touch-устройствах принудительно поднимаем шрифт всех текстовых
+     полей до 16px — визуально почти неотличимо от 14px на мобиле,
+     но Safari больше не дёргает зум при открытии клавиатуры. */
+  @media (pointer: coarse) {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']),
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
+
   /* ─── Glass-эффекты ──────────────────────────────────────────────────── */
 }
 

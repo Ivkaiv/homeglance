@@ -41,6 +41,12 @@ export interface ParamField {
   default?: any;
   placeholder?: string;
   hint?: string;
+  /** Для kind='number': шаг ввода. По умолчанию 'any' (любые дроби).
+   *  Указать число (например 0.1) — чтобы input округлял до этого шага. */
+  step?: number | 'any';
+  /** Для kind='number': границы значения. */
+  min?: number;
+  max?: number;
   /** Для kind='entity-icons': key другого multi-entity-поля, чьи entities используются */
   linkedKey?: string;
   /** Логическая группа поля — для аккордеонов в ConfigSheet.

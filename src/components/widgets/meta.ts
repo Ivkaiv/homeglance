@@ -210,7 +210,8 @@ export const CLIMATE_META: WidgetMeta = {
       hint: 'Тёплый пол, бойлер, кондиционер — всё что в HA как climate.*' },
     { key: 'label', label: 'Название', kind: 'text', hint: 'По умолчанию — имя из Home Assistant' },
     { key: 'icon', label: 'Иконка', kind: 'icon', default: 'thermometer' },
-    { key: 'step', label: 'Шаг кнопок −/+', kind: 'number', default: 1, hint: 'На сколько градусов меняется при одном нажатии' },
+    { key: 'step', label: 'Шаг кнопок −/+', kind: 'number', default: 0.5, step: 0.1, min: 0.1, max: 5,
+      hint: 'На сколько градусов меняется при одном нажатии. Котлы и тёплые полы часто используют 0.1, кондиционеры 0.5–1' },
   ],
 };
 
@@ -469,8 +470,9 @@ export const ROOM_HUB_META: WidgetMeta = {
 
     { key: 'climateEntities', label: 'Климат-сущности с регулятором', kind: 'multi-entity', domain: 'climate.',
       hint: 'Каждая получит компактный стэппер с минусом/плюсом', group: 'climate-controls' },
-    { key: 'climateStep', label: 'Шаг кнопок −/+', kind: 'number', default: 1,
-      hint: 'На сколько градусов меняется при одном нажатии', group: 'climate-controls' },
+    { key: 'climateStep', label: 'Шаг кнопок −/+', kind: 'number', default: 0.5, step: 0.1, min: 0.1, max: 5,
+      hint: 'На сколько градусов меняется при одном нажатии. Котлы и тёплые полы часто используют 0.1, кондиционеры 0.5–1',
+      group: 'climate-controls' },
 
     { key: 'sensorEntities', label: 'Дополнительные датчики', kind: 'multi-entity',
       hint: 'Двери, окна, движение, давление, CO₂, освещённость и т.п. Виджет сам распознает тип и нарисует чип/иконку.',

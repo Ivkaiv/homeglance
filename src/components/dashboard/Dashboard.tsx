@@ -215,7 +215,13 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
 
   return (
     <div className="min-h-screen pb-32">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-bg-primary/80 border-b border-black/5 dark:border-white/5 px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
+      {/* sticky-header не наследует safe-area родителя (он уходит к верху
+          viewport, под notch). Прибиваем его именно к нижней границе
+          safe-area-inset-top — заголовок всегда стоит под status bar. */}
+      <header
+        className="sticky z-30 backdrop-blur-md bg-bg-primary/80 border-b border-black/5 dark:border-white/5 px-3 sm:px-4 py-3 flex items-center justify-between gap-2"
+        style={{ top: 'env(safe-area-inset-top)' }}
+      >
         {/* Левый блок (название страницы) уступает кнопкам в edit-mode на mobile,
             чтобы хватило ширины для всех кнопок. В обычном режиме показываем
             полностью. */}

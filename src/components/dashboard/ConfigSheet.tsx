@@ -10,6 +10,20 @@ import type { WidgetConfig, ParamField, ParamGroup } from '@/lib/widgets/types';
 import { ModalSheet } from '@/components/ui/ModalSheet';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
+/**
+ * Проверяет совпадение entity_id с заявленным доменом из paramSchema.
+ * Поддерживает запятую — `'sensor.,binary_sensor.'` совпадает с обоими.
+ * Пустая строка = принять любой entity. Без этой утилки multi-domain
+ * фильтр у MultiSensorWidget возвращал пустой список (startsWith со строкой
+ * `'sensor.,binary_sensor.'` целиком).
+ */
+function matchDomain(entityId: string, domain: string): boolean {
+  if (!domain) return true;
+  const prefixes = domain.split(',').map((d) => d.trim()).filter(Boolean);
+  if (prefixes.length === 0) return true;
+  return prefixes.some((p) => entityId.startsWith(p));
+}
+
 /** Группирует paramSchema по полю group, в порядке: paramGroups (если есть) → группы из schema → fallback "Основное". */
 function groupSchema(
   schema: ParamField[],
@@ -364,12 +378,27 @@ function ParamInput({
     );
   }
   if (field.kind === 'number') {
+    // step="any" по умолчанию: иначе HTML-input для number-поля молча
+    // блокирует ввод дробей (default step=1) — пользователь не мог поставить
+    // шаг регулятора температуры 0.5 / 0.1, например, для котла.
     return (
       <Field label={field.label} hint={field.hint}>
         <input
           type="number"
+          inputMode="decimal"
+          step={field.step ?? 'any'}
+          min={field.min}
+          max={field.max}
           value={value ?? field.default ?? ''}
-          onChange={(e) => onChange(Number(e.target.value))}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (raw === '') {
+              onChange(undefined);
+              return;
+            }
+            const n = Number(raw);
+            if (!Number.isNaN(n)) onChange(n);
+          }}
           className="w-full px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary"
         />
       </Field>
@@ -482,7 +511,7 @@ function EntityPicker({
     // присутствует в states). hidden_by — это про витрину дашбордов HA, а
     // Glance — отдельная панель, пусть пользователь сам решает что добавлять.
     const filtered = Object.values(states)
-      .filter((s) => (domain ? s.entity_id.startsWith(domain) : true));
+      .filter((s) => matchDomain(s.entity_id, domain));
     const displayed = filtered.map((s) => getEntityDisplay(s, registries, s.entity_id));
     const matched = q
       ? displayed.filter(
@@ -613,7 +642,7 @@ function MultiEntityCombinedPicker({
     // hidden_by / disabled_by НЕ режем: сущность в `states` = активна и
     // отдаёт значение (см. EntityPicker — тот же случай sensor.blood_sugar).
     const filtered = Object.values(states)
-      .filter((s) => (domain ? s.entity_id.startsWith(domain) : true))
+      .filter((s) => matchDomain(s.entity_id, domain))
       .filter((s) => !entities.includes(s.entity_id));
     const displayed = filtered.map((s) => getEntityDisplay(s, registries, s.entity_id));
     const matched = q
@@ -1048,7 +1077,7 @@ function MultiEntityPicker({
     // отдаёт значение (как sensor.blood_sugar от nightscout —
     // disabled_by='config_entry' в registry, но работает и есть в states).
     const filtered = Object.values(states)
-      .filter((s) => (domain ? s.entity_id.startsWith(domain) : true))
+      .filter((s) => matchDomain(s.entity_id, domain))
       .filter((s) => !selected.includes(s.entity_id));
     const displayed = filtered.map((s) => getEntityDisplay(s, registries, s.entity_id));
     const matched = q
