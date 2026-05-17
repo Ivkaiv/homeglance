@@ -1,18 +1,25 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, Trash2, Lock } from 'lucide-react';
+import { LogOut, Trash2, Lock, KeyRound } from 'lucide-react';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import { useSecurity } from '@/lib/security/SecurityProvider';
 import { PinPrompt } from '@/components/security/PinPrompt';
+import { ProfilePinPrompt } from './ProfilePinPrompt';
+import { ChangePinDialog } from './ChangePinDialog';
+import type { Profile } from '@/lib/profiles/types';
 
 export function ProfileSwitcher() {
   const { active, profiles, signOut, deleteProfile, setActiveId } = useProfiles();
   const { enabled: securityEnabled } = useSecurity();
   const [open, setOpen] = useState(false);
   const [pinPromptOpen, setPinPromptOpen] = useState(false);
+  /** Целевой профиль для переключения — требует ввода его PIN. */
+  const [switchTarget, setSwitchTarget] = useState<Profile | null>(null);
+  /** Открыт диалог смены PIN активного профиля. */
+  const [changePinOpen, setChangePinOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
 
   if (!active) return null;
@@ -90,19 +97,43 @@ export function ProfileSwitcher() {
                           <button
                             key={p.id}
                             onClick={() => {
-                              setActiveId(p.id);
                               setOpen(false);
+                              if (p.pinHash) {
+                                // У целевого профиля есть PIN — спрашиваем его
+                                // перед переключением, иначе любой, кто залогинен
+                                // в один профиль, мог бы зайти в любой другой
+                                // без знания его пароля.
+                                setSwitchTarget(p);
+                              } else {
+                                setActiveId(p.id);
+                              }
                             }}
                             className="w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 text-sm"
                           >
                             <span className="text-xl">{p.avatar}</span>
                             <span className="flex-1 text-left">{p.name}</span>
+                            {p.pinHash && (
+                              <Lock size={11} className="text-text-tertiary" />
+                            )}
                           </button>
                         ))}
                     </>
                   )}
 
                   <div className="border-t border-black/5 dark:border-white/5 mt-1 pt-1">
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        setChangePinOpen(true);
+                      }}
+                      className="w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 text-sm text-text-secondary"
+                    >
+                      <KeyRound size={14} />
+                      {active.pinHash ? 'Сменить PIN' : 'Установить PIN'}
+                      {active.pinHash && (
+                        <Lock size={11} className="ml-auto opacity-60" />
+                      )}
+                    </button>
                     <button
                       onClick={() => {
                         setOpen(false);
@@ -136,6 +167,23 @@ export function ProfileSwitcher() {
           onConfirm={() => deleteProfile(active.id)}
           onCancel={() => setPinPromptOpen(false)}
         />
+      )}
+
+      {switchTarget && (
+        <ProfilePinPrompt
+          profile={switchTarget}
+          title={`Переключение на «${switchTarget.name}»`}
+          onCancel={() => setSwitchTarget(null)}
+          onSuccess={() => {
+            const targetId = switchTarget.id;
+            setSwitchTarget(null);
+            setActiveId(targetId);
+          }}
+        />
+      )}
+
+      {changePinOpen && (
+        <ChangePinDialog profile={active} onClose={() => setChangePinOpen(false)} />
       )}
     </>
   );
