@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { Search, ChevronDown, ChevronUp, Save, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Search, ChevronDown, ChevronUp, Save, X, Check } from 'lucide-react';
 import { getWidget } from '@/lib/widgets/registry';
 import { useStates, useConnection } from '@/lib/ha/ConnectionProvider';
 import { getEntityDisplay, groupByArea } from '@/lib/ha/entity-display';
@@ -348,20 +348,11 @@ function ParamInput({
   if (field.kind === 'select') {
     return (
       <Field label={field.label + (field.required ? ' *' : '')} hint={field.hint}>
-        <select
+        <SelectField
           value={value ?? field.default ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary"
-        >
-          <option value="" disabled>
-            — выбери —
-          </option>
-          {(field.options ?? []).map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+          options={field.options ?? []}
+          onChange={(v) => onChange(v)}
+        />
       </Field>
     );
   }
@@ -451,6 +442,96 @@ function Field({
       )}
       {children}
       {hint && <div className="text-[11px] text-text-tertiary mt-1.5">{hint}</div>}
+    </div>
+  );
+}
+
+/**
+ * Кастомный select — нативный <select> на iOS открывает свой
+ * полноэкранный picker с белым фоном и игнорирует тёмную тему Glance,
+ * из-за чего меню «как камера передаёт картинку» выглядело чужеродно.
+ * Заменено на кнопку + inline-выпадашку в нашем стиле, с закрытием
+ * по клику снаружи / Esc и галочкой у текущего выбора.
+ */
+function SelectField({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const selected = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointer = (ev: Event) => {
+      if (rootRef.current && !rootRef.current.contains(ev.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleKey = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('touchstart', handlePointer);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('touchstart', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative" ref={rootRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="w-full px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-left flex items-center justify-between gap-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+      >
+        <span className={selected ? '' : 'text-text-tertiary'}>
+          {selected ? selected.label : '— выбери —'}
+        </span>
+        <ChevronDown
+          size={16}
+          className={`shrink-0 text-text-tertiary transition-transform ${open ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        />
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          className="absolute z-20 top-full left-0 right-0 mt-1 rounded-md border border-black/10 dark:border-white/10 bg-bg-secondary shadow-lg overflow-hidden max-h-72 overflow-y-auto"
+        >
+          {options.map((o) => {
+            const active = o.value === value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => {
+                  onChange(o.value);
+                  setOpen(false);
+                }}
+                className={`w-full px-3 py-2.5 text-left text-sm flex items-center justify-between gap-2 hover:bg-black/5 dark:hover:bg-white/5 focus-visible:outline-hidden focus-visible:bg-black/5 dark:focus-visible:bg-white/5 ${
+                  active ? 'text-accent' : 'text-text-primary'
+                }`}
+              >
+                <span>{o.label}</span>
+                {active && <Check size={14} aria-hidden="true" className="shrink-0" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
