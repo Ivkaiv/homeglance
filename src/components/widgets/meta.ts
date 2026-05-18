@@ -155,6 +155,8 @@ export const SWITCH_TOGGLE_META: WidgetMeta = {
       hint: 'Розетка, реле, вентилятор и т.п.' },
     { key: 'label', label: 'Название', kind: 'text', hint: 'По умолчанию — имя из HA' },
     { key: 'icon', label: 'Иконка', kind: 'icon', default: 'toggle-switch' },
+    { key: 'color', label: 'Цвет свечения когда включён', kind: 'color', default: '#34d399',
+      hint: 'Зелёный по умолчанию. Для вентилятора уместен голубой, для котла — оранжевый и т.п.' },
   ],
 };
 
@@ -470,8 +472,12 @@ export const ROOM_HUB_META: WidgetMeta = {
 
     { key: 'lights', label: '💡 Лампы', kind: 'multi-entity', domain: 'light.', hint: 'Появятся в виде круглых кнопок', group: 'controls' },
     { key: 'lightIcons', label: 'Иконки для каждой лампы', kind: 'entity-icons', linkedKey: 'lights', group: 'controls' },
+    { key: 'lightColors', label: 'Цвет свечения для каждой лампы', kind: 'entity-colors', linkedKey: 'lights',
+      hint: 'По умолчанию все лампы светятся янтарным. Можно задать свой цвет — например, синий для ночника', group: 'controls' },
     { key: 'switches', label: '🔌 Переключатели', kind: 'multi-entity', domain: 'switch.', hint: 'Розетки, реле, вентиляторы и т.п.', group: 'controls' },
     { key: 'switchIcons', label: 'Иконки для переключателей', kind: 'entity-icons', linkedKey: 'switches', group: 'controls' },
+    { key: 'switchColors', label: 'Цвет свечения для каждого переключателя', kind: 'entity-colors', linkedKey: 'switches',
+      hint: 'Голубой для вентилятора, оранжевый для обогревателя — что хочешь', group: 'controls' },
 
     { key: 'mediaPlayerEntity', label: 'Плеер для встраивания', kind: 'entity', domain: 'media_player.',
       hint: 'Например, Яндекс.Станция в этой комнате', group: 'media' },

@@ -327,6 +327,17 @@ function ParamInput({
       />
     );
   }
+  if (field.kind === 'entity-colors') {
+    const linkedEntities: string[] = field.linkedKey ? draft[field.linkedKey] ?? [] : [];
+    return (
+      <EntityColorsPicker
+        field={field}
+        entities={linkedEntities}
+        value={value ?? {}}
+        onChange={onChange}
+      />
+    );
+  }
   if (field.kind === 'multi-select') {
     const selected: string[] = Array.isArray(value) ? value : (field.default ?? []);
     const toggle = (v: string) => {
@@ -1071,6 +1082,89 @@ function EntityNumbersPicker({
                 aria-label={`Значение для ${display.name}`}
                 className="w-20 px-2 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm text-right"
               />
+            </div>
+          );
+        })}
+      </div>
+    </Field>
+  );
+}
+
+/**
+ * Связка с multi-entity-полем (через linkedKey): для каждой выбранной
+ * сущности отображается строка «имя + color picker». Используется,
+ * например, чтобы у каждой лампы / переключателя в RoomHubWidget был свой
+ * цвет свечения когда «вкл» (голубой для вентилятора, оранжевый для
+ * обогревателя и т.д.). Если цвет не задан — у виджета остаётся дефолт.
+ */
+function EntityColorsPicker({
+  field,
+  entities,
+  value,
+  onChange,
+}: {
+  field: ParamField;
+  entities: string[];
+  value: Record<string, string>;
+  onChange: (v: Record<string, string>) => void;
+}) {
+  const states = useStates();
+  const { registries } = useConnection();
+
+  if (entities.length === 0) {
+    return (
+      <Field label={field.label} hint={field.hint}>
+        <div className="text-text-tertiary text-xs px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 italic">
+          Сначала выбери сущности выше
+        </div>
+      </Field>
+    );
+  }
+
+  const updateColor = (id: string, color: string) => {
+    onChange({ ...value, [id]: color });
+  };
+  const resetColor = (id: string) => {
+    const next = { ...value };
+    delete next[id];
+    onChange(next);
+  };
+
+  return (
+    <Field label={field.label} hint={field.hint}>
+      <div className="flex flex-col gap-1.5">
+        {entities.map((id) => {
+          const display = getEntityDisplay(states[id], registries, id);
+          const current = value[id];
+          return (
+            <div
+              key={id}
+              className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10"
+            >
+              <input
+                type="color"
+                value={current ?? '#888888'}
+                onChange={(e) => updateColor(id, e.target.value)}
+                aria-label={`Цвет для ${display.name}`}
+                className="w-10 h-10 rounded-md bg-transparent border border-black/10 dark:border-white/10 shrink-0 cursor-pointer p-0.5"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm truncate">{display.name}</div>
+                <div className="text-[10px] text-text-tertiary truncate font-mono">
+                  {current ? current : 'по умолчанию'}
+                </div>
+              </div>
+              {current && (
+                <button
+                  type="button"
+                  onClick={() => resetColor(id)}
+                  aria-label={`Сбросить цвет для ${display.name}`}
+                  title="Сбросить цвет"
+                  className="text-text-tertiary hover:text-text-primary shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 rounded-xs"
+                >
+                  <X size={14} aria-hidden="true" />
+                </button>
+              )}
             </div>
           );
         })}

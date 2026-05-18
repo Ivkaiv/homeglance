@@ -7,9 +7,13 @@ interface Params {
   entity: string;
   label?: string;
   icon?: string;
+  /** Цвет свечения когда включён — hex (#34d399). Если не задан — дефолтный
+   *  зелёный. Пользователь может выставить голубой для вентилятора,
+   *  оранжевый для обогревателя и т.п. */
+  color?: string;
 }
 
-const ACCENT = '#34d399';
+const DEFAULT_COLOR = '#34d399';
 
 export function SwitchToggleWidget({ params }: { params: Params }) {
   const e = useEntity(params.entity);
@@ -28,13 +32,11 @@ export function SwitchToggleWidget({ params }: { params: Params }) {
   const label = params.label ?? e?.attributes.friendly_name ?? 'Переключатель';
   const haIcon = e?.attributes.icon as string | undefined;
   const iconValue = params.icon || haIcon || '🔌';
+  const color = params.color || DEFAULT_COLOR;
   const dom = params.entity.split('.')[0];
 
   const onClick = () =>
     !isBad && callService(dom, on ? 'turn_off' : 'turn_on', params.entity);
-
-  // У переключателя свечение мягче, чем у света — отдельный override.
-  const glow = on ? { boxShadow: '0 0 24px rgba(52, 211, 153, 0.4)' } : undefined;
 
   return (
     <EntityToggleShell
@@ -42,10 +44,9 @@ export function SwitchToggleWidget({ params }: { params: Params }) {
       isBad={isBad}
       label={label}
       iconValue={iconValue}
-      color={ACCENT}
+      color={color}
       statusText={{ on: 'Включено', off: 'Выключено', bad: 'Нет связи' }}
       onClick={onClick}
-      glowOverride={glow}
     />
   );
 }

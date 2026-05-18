@@ -27,6 +27,10 @@ interface Params {
   switches?: string[];
   lightIcons?: Record<string, string>;
   switchIcons?: Record<string, string>;
+  /** Кастомный цвет свечения для конкретной лампы / переключателя.
+   *  Если задан — заменяет дефолт (янтарный у ламп, accent у переключателей). */
+  lightColors?: Record<string, string>;
+  switchColors?: Record<string, string>;
   /** Плеер для встраивания компактной полоски управления внутри карточки. */
   mediaPlayerEntity?: string;
   /** Климат-сущности (climate.*) для встраивания компактных степперов температуры. */
@@ -464,13 +468,21 @@ export function RoomHubWidget({ params }: { params: Params }) {
           const haIcon = (s?.attributes.icon as string | undefined) ?? undefined;
           const iconName = customIcon || haIcon;
           const fallbackEmoji = kind === 'light' ? '💡' : '🔌';
-          // Light всегда тёплый янтарный; switch — accent (адаптивный к теме).
-          const onClass = kind === 'light'
-            ? 'rgba(251, 191, 36, 0.45)'
-            : 'rgb(var(--accent) / 0.45)';
-          const glowColor = kind === 'light'
-            ? 'rgba(251, 191, 36, 0.6)'
-            : 'rgb(var(--accent) / 0.6)';
+          // Цвет свечения: если пользователь задал свой через lightColors /
+          // switchColors — используем его (с alpha 0x73 ≈ 0.45 для фона
+          // и 0x99 ≈ 0.6 для glow). Иначе дефолт: лампа янтарная,
+          // переключатель — accent (адаптивный к теме).
+          const customColor = kind === 'light' ? params.lightColors?.[id] : params.switchColors?.[id];
+          const onClass = customColor
+            ? `${customColor}73`
+            : kind === 'light'
+              ? 'rgba(251, 191, 36, 0.45)'
+              : 'rgb(var(--accent) / 0.45)';
+          const glowColor = customColor
+            ? `${customColor}99`
+            : kind === 'light'
+              ? 'rgba(251, 191, 36, 0.6)'
+              : 'rgb(var(--accent) / 0.6)';
           return (
             <PressButton
               key={id}
