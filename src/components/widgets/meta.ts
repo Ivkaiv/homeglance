@@ -842,6 +842,13 @@ export const LIGHT_COLOR_META: WidgetMeta = {
       kind: 'text',
       placeholder: 'Кухня · потолок',
     },
+    {
+      key: 'icon',
+      label: 'Иконка',
+      kind: 'icon',
+      default: 'lightbulb',
+      hint: 'Любая mdi-иконка или эмодзи. Пусто — берётся из Home Assistant',
+    },
   ],
 };
 

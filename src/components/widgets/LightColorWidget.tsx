@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Lightbulb, Power } from 'lucide-react';
+import { Lightbulb, Power, Palette } from 'lucide-react';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { useWidgetSize } from '@/lib/widgets/useWidgetSize';
 import { LightColorSheet } from './LightColorSheet';
@@ -10,6 +10,9 @@ import { EntityToggleShell } from './EntityToggleShell';
 interface Params {
   entity: string;
   label?: string;
+  /** Override иконки — mdi-имя ('lightbulb', 'led-strip') или эмодзи ('💡').
+   *  Пусто — берётся из Home Assistant (entity.attributes.icon), иначе '💡'. */
+  icon?: string;
 }
 
 function rgbToHex(rgb: number[] | undefined): string {
@@ -135,7 +138,7 @@ export function LightColorWidget({ params }: { params: Params }) {
   // и при этом видно «у этой лампы есть настройка цвета».
   if (tier === 'compact') {
     const haIcon = e?.attributes.icon as string | undefined;
-    const iconValue = haIcon || '💡';
+    const iconValue = params.icon || haIcon || '💡';
     return (
       <>
         <div ref={ref} className="h-full w-full">
@@ -157,11 +160,23 @@ export function LightColorWidget({ params }: { params: Params }) {
                 disabled={isBad}
                 aria-label={`Цвет и яркость: ${label}`}
                 title="Цвет и яркость"
-                className="w-4 h-4 rounded-full ring-1 ring-white/40 dark:ring-black/30 shadow-sm hover:scale-110 transition disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                className="w-6 h-6 rounded-full ring-2 ring-white/70 dark:ring-black/40 shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-accent"
                 style={{
-                  backgroundColor: on ? colorHex : 'rgba(255,255,255,0.25)',
+                  // Когда лампа включена — кнопка светится её цветом.
+                  // Когда выключена — радужный conic-gradient, чтобы было сразу
+                  // ясно «это кнопка выбора цвета», а не серый кружок-индикатор.
+                  background: on
+                    ? colorHex
+                    : 'conic-gradient(from 180deg, #ff3030, #ffd9a8, #34d399, #22d3ee, #4f8fff, #a855f7, #ff3030)',
                 }}
-              />
+              >
+                <Palette
+                  size={12}
+                  className={on ? 'text-white drop-shadow' : 'text-white drop-shadow'}
+                  aria-hidden="true"
+                  strokeWidth={2.5}
+                />
+              </button>
             }
           />
         </div>
