@@ -5,6 +5,7 @@ import { Lightbulb, Power } from 'lucide-react';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { useWidgetSize } from '@/lib/widgets/useWidgetSize';
 import { LightColorSheet } from './LightColorSheet';
+import { EntityToggleShell } from './EntityToggleShell';
 
 interface Params {
   entity: string;
@@ -126,31 +127,44 @@ export function LightColorWidget({ params }: { params: Params }) {
     </div>
   );
 
-  // Compact: иконка + название + статус. Тап по body → open sheet.
-  // На узкой ячейке (compactVertical) — вертикальный stack по центру,
-  // на широкой — иконка слева, текст справа.
+  // Compact: визуально как обычная лампа (EntityToggleShell — иконка по
+  // центру + подпись снизу), тап по площади = toggle. В правом верхнем
+  // углу маленькая цветная точка-кнопка — открывает sheet с цветом и
+  // яркостью. Цвет точки = актуальный цвет лампы (если on), серый — если
+  // выключена. Так визуально не отличается от обычных ламп на полке,
+  // и при этом видно «у этой лампы есть настройка цвета».
   if (tier === 'compact') {
+    const haIcon = e?.attributes.icon as string | undefined;
+    const iconValue = haIcon || '💡';
     return (
       <>
-        <button
-          ref={ref as any}
-          type="button"
-          onClick={() => setSheetOpen(true)}
-          disabled={isBad}
-          className={`glass h-full w-full p-2 text-left disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 flex ${
-            compactVertical
-              ? 'flex-col items-center justify-center gap-1 text-center'
-              : 'items-center gap-2'
-          }`}
-          style={glow}
-          aria-label={`Открыть управление: ${label}`}
-        >
-          {IconBlock}
-          <div className={compactVertical ? 'min-w-0 w-full' : 'min-w-0 flex-1'}>
-            <div className="text-xs font-medium truncate">{label}</div>
-            <div className="text-[10px] text-text-tertiary truncate">{status}</div>
-          </div>
-        </button>
+        <div ref={ref} className="h-full w-full">
+          <EntityToggleShell
+            on={on}
+            isBad={isBad}
+            label={label}
+            iconValue={iconValue}
+            color={colorHex}
+            statusText={{ on: `${brightnessPct}%`, off: 'Выключена', bad: 'Нет связи' }}
+            onClick={toggle}
+            cornerButton={
+              <button
+                type="button"
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  setSheetOpen(true);
+                }}
+                disabled={isBad}
+                aria-label={`Цвет и яркость: ${label}`}
+                title="Цвет и яркость"
+                className="w-4 h-4 rounded-full ring-1 ring-white/40 dark:ring-black/30 shadow-sm hover:scale-110 transition disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                style={{
+                  backgroundColor: on ? colorHex : 'rgba(255,255,255,0.25)',
+                }}
+              />
+            }
+          />
+        </div>
         <LightColorSheet
           entityId={params.entity}
           open={sheetOpen}
