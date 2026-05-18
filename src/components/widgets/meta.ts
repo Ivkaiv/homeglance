@@ -1131,6 +1131,69 @@ export const GLUCOSE_STATS_META: WidgetMeta = {
   ],
 };
 
+// ── Zaycev FM Radio ──────────────────────────────────────────────────────────
+// 18 жанровых каналов, проигрываются через прямые HTTP-MP3 стримы с
+// abs.zaycev.fm. Тап на канал → media_player.play_media с этим URL. Работает
+// на любом плеере, который умеет принимать произвольный HTTP-mp3:
+// Yandex.Station (через AlexxIT/YandexStation), DLNA, AirPlay, Cast.
+export const ZAYCEV_RADIO_META: WidgetMeta = {
+  type: 'zaycev_radio',
+  name: 'Zaycev FM (радио)',
+  emoji: '📻',
+  description:
+    '18 жанровых каналов Zaycev FM на любую колонку. Тап на канал — играет на выбранном media_player (Яндекс.Станция, DLNA, AirPlay).',
+  category: 'media',
+  defaultSize: { w: 5, h: 4 },
+  minSize: { w: 3, h: 3 },
+  paramSchema: [
+    {
+      key: 'mediaPlayerEntity',
+      label: 'На чём играть',
+      kind: 'entity',
+      domain: 'media_player.',
+      required: true,
+      hint: 'Яндекс.Станция, DLNA-колонка, AirPlay — что-нибудь, что принимает произвольный HTTP-mp3',
+    },
+    {
+      key: 'bitrate',
+      label: 'Качество',
+      kind: 'select',
+      default: '128k',
+      options: [
+        { value: '48k', label: '48 kbps (экономия трафика)' },
+        { value: '128k', label: '128 kbps (рекомендуется)' },
+        { value: '256k', label: '256 kbps (макс. качество)' },
+      ],
+    },
+    {
+      key: 'channels',
+      label: 'Какие каналы показать',
+      kind: 'multi-select',
+      hint: 'Пусто = все 18. Можно ограничить только нужными жанрами',
+      options: [
+        { value: 'pop', label: '🎤 Pop' },
+        { value: 'rock', label: '🎸 Rock' },
+        { value: 'club', label: '🪩 Club' },
+        { value: 'disco', label: '🕺 Disco' },
+        { value: 'rurock', label: '🎸 РуРок' },
+        { value: 'shanson', label: '🚬 Шансон' },
+        { value: 'rus', label: '🇷🇺 Русское' },
+        { value: 'rnb', label: '🎵 R&B' },
+        { value: 'relax', label: '🌊 Relax' },
+        { value: 'zaychata', label: '🐰 Зайчата' },
+        { value: 'kpop', label: '🎎 K-Pop' },
+        { value: 'rap', label: '🎤 Рэп' },
+        { value: 'metal', label: '🤘 Metal' },
+        { value: 'bass', label: '🔊 Bass' },
+        { value: 'love', label: '❤️ Love' },
+        { value: 'folk', label: '🪕 Folk' },
+        { value: 'classic', label: '🎻 Classic' },
+      ],
+    },
+    { key: 'label', label: 'Подпись', kind: 'text', placeholder: 'Zaycev FM' },
+  ],
+};
+
 export const weatherRoomComputeMinSize = (params: any): { w: number; h: number } => {
   const fields = params.fields ?? WEATHER_ROOM_DEFAULT_FIELDS;
   let w = 4,

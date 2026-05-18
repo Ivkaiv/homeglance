@@ -7,6 +7,20 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.68] — 2026-05-18
+
+### Added
+- **Виджет «Zaycev FM (радио)»**. 18 жанровых каналов российского
+  радио-сервиса Zaycev FM (Pop, Rock, Club, Disco, РуРок, Шансон,
+  Русское, R&B, Relax, Зайчата, K-Pop, Рэп, Metal, Bass, Love, Folk,
+  Classic) на любой media_player в HA: Яндекс.Станция через
+  AlexxIT/YandexStation, DLNA, AirPlay, Cast. Тап по каналу — играет
+  на выбранном плеере, текущий канал подсвечивается, есть кнопки
+  пауза/стоп. Прямые HTTP-MP3 стримы с `abs.zaycev.fm` — никаких
+  токенов, никакой авторизации, никаких custom_component в HA.
+  Настройки: media_player entity, качество (48/128/256 kbps), какие
+  каналы показывать (multi-select, пусто = все 18).
+
 ## [0.1.0-alpha.67] — 2026-05-18
 
 ### Added
