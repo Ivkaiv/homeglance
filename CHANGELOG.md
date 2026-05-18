@@ -7,6 +7,40 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.71] — 2026-05-18
+
+### Changed
+- **Виджет Zaycev FM: подзаголовок — название трека, MarqueeText, минимум 4×2.**
+  Раньше под заголовком всегда висела статичная «📻 Тап — выбрать канал»
+  или «Zaycev FM · 128k». Теперь там идёт `media_title` (и `media_artist`)
+  плеера в бегущей строке — как у обычного MediaPlayerWidget. Если
+  плеер не отдаёт ICY-метаданные, fallback на «Zaycev FM · {bitrate}».
+  minSize поднят с 3×2 до 4×2 — на 3×2 подзаголовок обрезался много­точием
+  на втором же слове.
+
+### Fixed
+- **Виджет не понимал, что играет канал, после нажатия play.** AlexxIT/
+  YandexStation оборачивает наш URL в локальный proxy (`/api/yandex_station/
+  <token>.mp3`), и `media_content_id` у плеера перестаёт указывать на
+  `abs.zaycev.fm`. Из-за этого `playingChannel` всегда был `undefined`,
+  кнопка play не превращалась в pause, и подсветка активного канала в
+  sheet не работала. Добавлен локальный override: запоминаем выбранный
+  канал в state, сбрасываем при stop или когда плеер уходит в idle / off.
+  Sheet синхронизируется с виджетом через `activeChannel` + `onChannelStart`
+  / `onStop` callback'и.
+- **`media_content_type` сменён с `music` на `stream.mp3`.** AlexxIT/
+  YandexStation `music` интерпретирует как «найти в Яндекс.Музыке», и для
+  произвольного URL команда молча падала. `stream.mp3` явно сообщает
+  «это прямой HTTP-MP3 стрим». Для других плееров (DLNA, AirPlay, Cast)
+  значение игнорируется или интерпретируется корректно.
+
+### Known issues
+- На самой Яндекс.Станции (AlexxIT v3.21.0) `play_media` со
+  `stream.mp3` не всегда подхватывается — Станция отвечает HTTP 200, но
+  фактически URL не запускается, и `media_content_id` остаётся прежним.
+  Подозрение — проблема с регистрацией `StreamView.hass_url` в AlexxIT,
+  отдельный issue. На DLNA-плеерах работает штатно.
+
 ## [0.1.0-alpha.70] — 2026-05-18
 
 ### Changed

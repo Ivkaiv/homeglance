@@ -12,6 +12,12 @@ interface Props {
   channels?: string[];
   open: boolean;
   onClose: () => void;
+  /** Активный канал, который виджет «помнит» локально (AlexxIT прячет
+   *  наш URL за proxy, поэтому media_content_id не указывает на канал). */
+  activeChannel?: string | null;
+  /** Колбэки в виджет, чтобы виджет тоже знал, что играет какой-то канал. */
+  onChannelStart?: (channelId: string) => void;
+  onStop?: () => void;
 }
 
 /**
@@ -19,7 +25,16 @@ interface Props {
  * подсветка играющего, transport-кнопки (play/pause/stop) и слайдер
  * громкости. Открывается тапом по компактному ZaycevRadioWidget.
  */
-export function ZaycevRadioSheet({ entityId, bitrate, channels, open, onClose }: Props) {
+export function ZaycevRadioSheet({
+  entityId,
+  bitrate,
+  channels,
+  open,
+  onClose,
+  activeChannel,
+  onChannelStart,
+  onStop,
+}: Props) {
   const e = useEntity(entityId);
   const callService = useCallService();
 
@@ -28,22 +43,29 @@ export function ZaycevRadioSheet({ entityId, bitrate, channels, open, onClose }:
     : ZAYCEV_CHANNELS;
 
   const currentMediaId = e?.attributes.media_content_id as string | undefined;
-  const playingChannel = currentMediaId?.match(/abs\.zaycev\.fm\/(\w+?)(48|128|256)k/)?.[1];
+  const directMatch = currentMediaId?.match(/abs\.zaycev\.fm\/(\w+?)(?:48|128|256)k/)?.[1];
+  const playingChannel = directMatch || activeChannel || undefined;
   const isPlaying = e?.state === 'playing';
   const volume = (e?.attributes.volume_level as number | undefined) ?? 0;
   const muted = !!e?.attributes.is_volume_muted;
   const playerName = (e?.attributes.friendly_name as string) || entityId;
 
   const playChannel = (channelId: string) => {
+    onChannelStart?.(channelId);
     callService('media_player', 'play_media', entityId, {
       media_content_id: streamUrl(channelId, bitrate),
-      media_content_type: 'music',
+      // 'stream.mp3' — нужно AlexxIT/YandexStation, чтобы понять что
+      // URL — это прямой стрим, а не идентификатор трека Яндекс.Музыки.
+      media_content_type: 'stream.mp3',
     });
   };
 
   const togglePlay = () =>
     callService('media_player', isPlaying ? 'media_pause' : 'media_play', entityId);
-  const stop = () => callService('media_player', 'media_stop', entityId);
+  const stop = () => {
+    onStop?.();
+    callService('media_player', 'media_stop', entityId);
+  };
   const setVolume = (v: number) =>
     callService('media_player', 'volume_set', entityId, { volume_level: v });
   const toggleMute = () =>

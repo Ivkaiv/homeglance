@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pause, Play, Radio, Square } from 'lucide-react';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
@@ -77,8 +77,23 @@ export function ZaycevRadioWidget({ params }: { params: Params }) {
     );
   }
 
+  // Локальный override: пользователь нажал канал — запомнили какой,
+  // потому что AlexxIT/YandexStation оборачивает наш URL в proxy
+  // (`/api/yandex_station/<token>.mp3`) и media_content_id перестаёт
+  // указывать на abs.zaycev.fm. Без этого виджет не понимал, что играет,
+  // и кнопка play не превращалась в «пауза».
+  const [lastRequested, setLastRequested] = useState<string | null>(null);
   const currentMediaId = e?.attributes.media_content_id as string | undefined;
-  const playingChannel = currentMediaId?.match(/abs\.zaycev\.fm\/(\w+?)(48|128|256)k/)?.[1];
+  const directMatch = currentMediaId?.match(/abs\.zaycev\.fm\/(\w+?)(?:48|128|256)k/)?.[1];
+  const stateStr = e?.state;
+  // Сбрасываем override, когда плеер ушёл в terminal state (off/idle/unavail) —
+  // значит юзер сам выключил или Станция переключилась на что-то другое.
+  useEffect(() => {
+    if (lastRequested && stateStr && ['off', 'idle', 'unavailable'].includes(stateStr)) {
+      setLastRequested(null);
+    }
+  }, [stateStr, lastRequested]);
+  const playingChannel = directMatch || lastRequested || undefined;
   const isPlaying = e?.state === 'playing';
   const currentChannel = playingChannel
     ? ZAYCEV_CHANNELS.find((c) => c.id === playingChannel)
@@ -86,19 +101,49 @@ export function ZaycevRadioWidget({ params }: { params: Params }) {
   const playerName = (e?.attributes.friendly_name as string) || playerEntity;
   const label = params.label ?? 'Zaycev FM';
 
+  // Подзаголовок — что играет прямо сейчас. Приоритет:
+  //  1. media_title + media_artist из ICY-метаданных стрима (если плеер их
+  //     парсит — например, DLNA-колонки или AlexxIT/YandexStation иногда).
+  //  2. Название канала + битрейт (если стрим Zaycev запущен).
+  //  3. Подсказка «Тап — выбрать канал» (ничего не играет).
+  // Защита от случая, когда плеер пихает URL в media_title как fallback —
+  // фильтруем по характерным паттернам «zaycev» / «128k» / «.mp3» / «.fm».
+  const rawTitle = (e?.attributes.media_title as string | undefined)?.trim();
+  const rawArtist = (e?.attributes.media_artist as string | undefined)?.trim();
+  const isPlaceholderTitle = rawTitle
+    ? /zaycev|abs\.|^\w+\d{2,3}k$|\.mp3$|^https?:/i.test(rawTitle)
+    : true;
+  const trackTitle = rawTitle && !isPlaceholderTitle ? rawTitle : '';
+  const trackArtist = rawArtist && !/zaycev/i.test(rawArtist) ? rawArtist : '';
+  const nowPlaying = trackTitle
+    ? trackArtist
+      ? `${trackArtist} — ${trackTitle}`
+      : trackTitle
+    : currentChannel
+      ? `Zaycev FM · ${bitrate}`
+      : 'Тап — выбрать канал';
+
+
   const togglePlay = () => {
     if (playingChannel) {
       callService('media_player', isPlaying ? 'media_pause' : 'media_play', playerEntity);
     } else {
-      // Если ничего не играет — запустить первый канал
       const first = params.channels?.[0] ?? ZAYCEV_CHANNELS[0].id;
+      setLastRequested(first);
       callService('media_player', 'play_media', playerEntity, {
         media_content_id: streamUrl(first, bitrate),
-        media_content_type: 'music',
+        // 'stream.mp3' — AlexxIT/YandexStation требует именно такой content_type,
+        // чтобы понять что media_id — это прямой HTTP-MP3 стрим (URL без
+        // расширения .mp3, как у Zaycev: abs.zaycev.fm/pop128k). С 'music'
+        // AlexxIT пытался искать трек в Яндекс.Музыке и команда молча падала.
+        media_content_type: 'stream.mp3',
       });
     }
   };
-  const stop = () => callService('media_player', 'media_stop', playerEntity);
+  const stop = () => {
+    setLastRequested(null);
+    callService('media_player', 'media_stop', playerEntity);
+  };
 
   const openSheet = () => setSheetOpen(true);
 
@@ -109,6 +154,9 @@ export function ZaycevRadioWidget({ params }: { params: Params }) {
       channels={params.channels}
       open={sheetOpen}
       onClose={() => setSheetOpen(false)}
+      activeChannel={lastRequested}
+      onChannelStart={(id) => setLastRequested(id)}
+      onStop={() => setLastRequested(null)}
     />
   );
 
@@ -226,9 +274,9 @@ export function ZaycevRadioWidget({ params }: { params: Params }) {
               <MarqueeText className="text-sm font-medium block w-full">
                 {currentChannel ? currentChannel.name : label}
               </MarqueeText>
-              <div className="text-[10px] text-text-tertiary truncate">
-                📻 {currentChannel ? `Zaycev FM · ${bitrate}` : 'Тап — выбрать канал'}
-              </div>
+              <MarqueeText className="text-[10px] text-text-tertiary block w-full">
+                📻 {nowPlaying}
+              </MarqueeText>
             </div>
           </button>
           <div className="flex items-center gap-1 shrink-0">
@@ -288,9 +336,9 @@ export function ZaycevRadioWidget({ params }: { params: Params }) {
             <MarqueeText className="text-sm font-medium block w-full">
               {currentChannel ? currentChannel.name : label}
             </MarqueeText>
-            <div className="text-[10px] text-text-tertiary truncate">
-              {currentChannel ? `${playerName} · ${bitrate}` : 'Тап — выбрать канал'}
-            </div>
+            <MarqueeText className="text-[10px] text-text-tertiary block w-full">
+              {nowPlaying}
+            </MarqueeText>
           </div>
         </button>
 
