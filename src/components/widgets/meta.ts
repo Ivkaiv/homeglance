@@ -1141,10 +1141,10 @@ export const ZAYCEV_RADIO_META: WidgetMeta = {
   name: 'Zaycev FM (радио)',
   emoji: '📻',
   description:
-    '18 жанровых каналов Zaycev FM на любую колонку. Тап на канал — играет на выбранном media_player (Яндекс.Станция, DLNA, AirPlay).',
+    '18 жанровых каналов Zaycev FM. Компактная карточка в стиле плеера: текущий канал, кнопка play. Список каналов и громкость — в попапе по тапу.',
   category: 'media',
-  defaultSize: { w: 5, h: 4 },
-  minSize: { w: 3, h: 3 },
+  defaultSize: { w: 4, h: 2 },
+  minSize: { w: 2, h: 1 },
   paramSchema: [
     {
       key: 'mediaPlayerEntity',

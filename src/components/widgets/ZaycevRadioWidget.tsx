@@ -1,9 +1,12 @@
 'use client';
 
-import clsx from 'clsx';
-import { Pause, Play, Square } from 'lucide-react';
+import { useState } from 'react';
+import { Pause, Play, Radio, Square } from 'lucide-react';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
+import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
 import { PressButton } from '@/components/ui/PressButton';
+import { MarqueeText } from '@/components/ui/MarqueeText';
+import { ZaycevRadioSheet } from './ZaycevRadioSheet';
 
 interface Params {
   /** На каком media_player играть. Должен поддерживать play_media с произвольным
@@ -11,13 +14,13 @@ interface Params {
   mediaPlayerEntity?: string;
   /** Битрейт стрима — 48, 128 или 256 kbps. По умолчанию 128. */
   bitrate?: '48k' | '128k' | '256k';
-  /** Какие каналы показывать в сетке. Пусто = все. */
+  /** Какие каналы показывать в sheet. Пусто = все. */
   channels?: string[];
   /** Подпись над сеткой. Если не задана — «Zaycev FM». */
   label?: string;
 }
 
-interface Channel {
+export interface Channel {
   id: string;
   name: string;
   emoji: string;
@@ -49,41 +52,22 @@ export function streamUrl(channelId: string, bitrate: '48k' | '128k' | '256k' = 
   return `${STREAM_BASE}/${channelId}${bitrate}`;
 }
 
+/**
+ * Компактный радио-виджет в стиле MediaPlayerWidget — небольшая карточка с
+ * текущим каналом и transport-кнопками. Полный список каналов и громкость
+ * — в sheet (открывается тапом). Уникальность относительно обычного плеера:
+ *  - вместо обложки трека — крупная иконка-радио на цветной плашке
+ *  - в подзаголовке всегда «📻 РАДИО» — сразу видно, что это не TTS/трек
+ *  - акцентный цвет тёплый (orange/amber) — отличает от media_player'a
+ */
 export function ZaycevRadioWidget({ params }: { params: Params }) {
   const bitrate = params.bitrate ?? '128k';
   const playerEntity = params.mediaPlayerEntity;
   const e = useEntity(playerEntity || '');
   const callService = useCallService();
-
-  const visible = params.channels && params.channels.length > 0
-    ? ZAYCEV_CHANNELS.filter((c) => params.channels!.includes(c.id))
-    : ZAYCEV_CHANNELS;
-
-  // Текущий играющий канал определяется по media_content_id: если он совпадает
-  // с одним из наших URL — подсвечиваем эту кнопку. Так пользователь видит,
-  // что именно слушает прямо сейчас.
-  const currentMediaId = e?.attributes.media_content_id as string | undefined;
-  const playingChannel = currentMediaId?.match(/abs\.zaycev\.fm\/(\w+?)(48|128|256)k/)?.[1];
-  const isPlaying = e?.state === 'playing';
-  const isAnyZaycevPlaying = !!playingChannel;
-
-  const playChannel = (channelId: string) => {
-    if (!playerEntity) return;
-    callService('media_player', 'play_media', playerEntity, {
-      media_content_id: streamUrl(channelId, bitrate),
-      media_content_type: 'music',
-    });
-  };
-
-  const stop = () => {
-    if (!playerEntity) return;
-    callService('media_player', 'media_stop', playerEntity);
-  };
-
-  const pause = () => {
-    if (!playerEntity) return;
-    callService('media_player', isPlaying ? 'media_pause' : 'media_play', playerEntity);
-  };
+  const [ref, size] = useWidgetSize();
+  const tier = sizeTier(size);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   if (!playerEntity) {
     return (
@@ -93,66 +77,245 @@ export function ZaycevRadioWidget({ params }: { params: Params }) {
     );
   }
 
+  const currentMediaId = e?.attributes.media_content_id as string | undefined;
+  const playingChannel = currentMediaId?.match(/abs\.zaycev\.fm\/(\w+?)(48|128|256)k/)?.[1];
+  const isPlaying = e?.state === 'playing';
+  const currentChannel = playingChannel
+    ? ZAYCEV_CHANNELS.find((c) => c.id === playingChannel)
+    : null;
+  const playerName = (e?.attributes.friendly_name as string) || playerEntity;
   const label = params.label ?? 'Zaycev FM';
-  const playerName = e?.attributes.friendly_name ?? playerEntity;
 
+  const togglePlay = () => {
+    if (playingChannel) {
+      callService('media_player', isPlaying ? 'media_pause' : 'media_play', playerEntity);
+    } else {
+      // Если ничего не играет — запустить первый канал
+      const first = params.channels?.[0] ?? ZAYCEV_CHANNELS[0].id;
+      callService('media_player', 'play_media', playerEntity, {
+        media_content_id: streamUrl(first, bitrate),
+        media_content_type: 'music',
+      });
+    }
+  };
+  const stop = () => callService('media_player', 'media_stop', playerEntity);
+
+  const openSheet = () => setSheetOpen(true);
+
+  const sheet = (
+    <ZaycevRadioSheet
+      entityId={playerEntity}
+      bitrate={bitrate}
+      channels={params.channels}
+      open={sheetOpen}
+      onClose={() => setSheetOpen(false)}
+    />
+  );
+
+  // Цветовой акцент радио — тёплый янтарь (отличает от обычного плеера,
+  // у которого accent зависит от обложки или дефолтный синий).
+  const radioAccent = 'rgb(251 191 36)'; // amber-400
+  const radioAccentGlow = playingChannel
+    ? {
+        borderColor: 'rgba(251, 191, 36, 0.35)',
+        boxShadow: '0 0 18px rgba(251, 191, 36, 0.18)',
+      }
+    : undefined;
+
+  if (!size.measured) {
+    return <div ref={ref} className="glass h-full w-full" />;
+  }
+
+  // Tiny: только play/pause (минимальный 2×1 виджет)
+  if (tier === 'tiny') {
+    return (
+      <>
+        <button
+          ref={ref}
+          onClick={togglePlay}
+          title={label}
+          aria-label={isPlaying ? 'Пауза' : 'Играть'}
+          className="glass h-full w-full flex items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+        >
+          {isPlaying ? (
+            <Pause size={18} className="text-amber-400" aria-hidden="true" />
+          ) : (
+            <Radio size={18} className="text-amber-400" aria-hidden="true" />
+          )}
+        </button>
+        {sheet}
+      </>
+    );
+  }
+
+  // Small (≥80px по обеим сторонам): иконка-радио + play под ней
+  if (tier === 'small') {
+    return (
+      <>
+        <div
+          ref={ref}
+          className="glass h-full w-full p-2 flex flex-col items-center justify-center gap-1"
+          style={radioAccentGlow}
+        >
+          <button
+            type="button"
+            onClick={openSheet}
+            aria-label="Открыть Zaycev FM"
+            className="w-10 h-10 rounded-md bg-amber-500/15 flex items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+          >
+            {currentChannel ? (
+              <span className="text-xl leading-none" aria-hidden="true">
+                {currentChannel.emoji}
+              </span>
+            ) : (
+              <Radio size={20} className="text-amber-400" aria-hidden="true" />
+            )}
+          </button>
+          <PressButton
+            onClick={togglePlay}
+            size={32}
+            ariaLabel={isPlaying ? 'Пауза' : 'Играть'}
+          >
+            {isPlaying ? (
+              <Pause size={14} aria-hidden="true" />
+            ) : (
+              <Play size={14} aria-hidden="true" />
+            )}
+          </PressButton>
+        </div>
+        {sheet}
+      </>
+    );
+  }
+
+  // Medium / large: горизонтальная карточка с иконкой-радио, заголовком и
+  // transport-кнопками — компоновка как у MediaPlayerWidget, чтобы было
+  // привычно. Уникальность: квадратная плашка с эмодзи канала вместо
+  // обложки, и постоянный бейдж «📻 РАДИО» в подзаголовке.
+  const isShort = size.h < 130;
+  const showStop = size.w >= 200;
+  const coverPx = isShort ? Math.min(size.h - 16, 60) : 48;
+
+  if (isShort) {
+    return (
+      <>
+        <div
+          ref={ref}
+          className="glass h-full w-full p-2 flex items-center gap-2 overflow-hidden"
+          style={radioAccentGlow}
+        >
+          <button
+            type="button"
+            onClick={openSheet}
+            aria-label="Открыть Zaycev FM"
+            className="flex items-center gap-2 min-w-0 flex-1 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+          >
+            <div
+              className="rounded-md bg-amber-500/15 flex items-center justify-center shrink-0"
+              style={{ width: coverPx, height: coverPx }}
+            >
+              {currentChannel ? (
+                <span style={{ fontSize: coverPx * 0.55 }} aria-hidden="true">
+                  {currentChannel.emoji}
+                </span>
+              ) : (
+                <Radio size={Math.round(coverPx * 0.5)} className="text-amber-400" aria-hidden="true" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <MarqueeText className="text-sm font-medium block w-full">
+                {currentChannel ? currentChannel.name : label}
+              </MarqueeText>
+              <div className="text-[10px] text-text-tertiary truncate">
+                📻 {currentChannel ? `Zaycev FM · ${bitrate}` : 'Тап — выбрать канал'}
+              </div>
+            </div>
+          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            <PressButton
+              onClick={togglePlay}
+              size={36}
+              ariaLabel={isPlaying ? 'Пауза' : 'Играть'}
+              bg="rgba(251, 191, 36, 0.25)"
+              bgPressed="rgba(251, 191, 36, 0.45)"
+            >
+              {isPlaying ? (
+                <Pause size={14} aria-hidden="true" />
+              ) : (
+                <Play size={14} aria-hidden="true" />
+              )}
+            </PressButton>
+            {showStop && playingChannel && (
+              <PressButton onClick={stop} size={32} ariaLabel="Стоп">
+                <Square size={12} aria-hidden="true" />
+              </PressButton>
+            )}
+          </div>
+        </div>
+        {sheet}
+      </>
+    );
+  }
+
+  // Вертикальный layout (h ≥ 130)
   return (
-    <div className="glass h-full w-full p-3 flex flex-col gap-2 overflow-hidden">
-      {/* Заголовок: название + индикатор играющего канала + transport controls */}
-      <div className="flex items-center gap-2 shrink-0 min-w-0">
-        <div className="text-sm font-medium truncate flex-1 min-w-0">
-          {label}
-          {isAnyZaycevPlaying && (
-            <span className="ml-1.5 text-[10px] text-text-tertiary">
-              · {ZAYCEV_CHANNELS.find((c) => c.id === playingChannel)?.name ?? playingChannel}
-            </span>
+    <>
+      <div
+        ref={ref}
+        className="glass h-full w-full p-3 flex flex-col gap-2 overflow-hidden"
+        style={radioAccentGlow}
+      >
+        <button
+          type="button"
+          onClick={openSheet}
+          aria-label="Открыть Zaycev FM"
+          className="flex gap-3 items-center min-w-0 w-full shrink-0 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+        >
+          <div className="w-12 h-12 rounded-md bg-amber-500/15 flex items-center justify-center shrink-0">
+            {currentChannel ? (
+              <span className="text-2xl leading-none" aria-hidden="true">
+                {currentChannel.emoji}
+              </span>
+            ) : (
+              <Radio size={24} className="text-amber-400" aria-hidden="true" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <div className="text-[10px] uppercase tracking-wider text-amber-500 dark:text-amber-300 font-semibold flex items-center gap-1">
+              <Radio size={10} aria-hidden="true" />
+              <span>радио</span>
+            </div>
+            <MarqueeText className="text-sm font-medium block w-full">
+              {currentChannel ? currentChannel.name : label}
+            </MarqueeText>
+            <div className="text-[10px] text-text-tertiary truncate">
+              {currentChannel ? `${playerName} · ${bitrate}` : 'Тап — выбрать канал'}
+            </div>
+          </div>
+        </button>
+
+        <div className="flex items-center justify-center gap-1.5 my-auto shrink-0">
+          <PressButton
+            onClick={togglePlay}
+            size={44}
+            ariaLabel={isPlaying ? 'Пауза' : 'Играть'}
+            bg="rgba(251, 191, 36, 0.25)"
+            bgPressed="rgba(251, 191, 36, 0.45)"
+          >
+            {isPlaying ? (
+              <Pause size={18} aria-hidden="true" />
+            ) : (
+              <Play size={18} aria-hidden="true" />
+            )}
+          </PressButton>
+          {playingChannel && (
+            <PressButton onClick={stop} size={36} ariaLabel="Стоп">
+              <Square size={14} aria-hidden="true" />
+            </PressButton>
           )}
         </div>
-        {isAnyZaycevPlaying && (
-          <>
-            <PressButton onClick={pause} size={28} ariaLabel={isPlaying ? 'Пауза' : 'Играть'}>
-              {isPlaying ? <Pause size={12} aria-hidden="true" /> : <Play size={12} aria-hidden="true" />}
-            </PressButton>
-            <PressButton onClick={stop} size={28} ariaLabel="Стоп">
-              <Square size={12} aria-hidden="true" />
-            </PressButton>
-          </>
-        )}
       </div>
-      <div className="text-[10px] text-text-tertiary truncate shrink-0">
-        → {playerName} · {bitrate}
-      </div>
-
-      {/* Сетка каналов */}
-      <div className="flex-1 min-h-0 overflow-auto">
-        <div className="grid grid-cols-3 @[280px]:grid-cols-4 @[400px]:grid-cols-5 @[520px]:grid-cols-6 gap-1.5">
-          {visible.map((ch) => {
-            const active = playingChannel === ch.id;
-            return (
-              <PressButton
-                key={ch.id}
-                onClick={() => playChannel(ch.id)}
-                ariaLabel={`Играть ${ch.name}`}
-                bg={active ? 'rgb(var(--accent) / 0.18)' : 'none'}
-                className={clsx(
-                  'flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-lg',
-                  active
-                    ? 'border border-accent/40 shadow-[0_0_12px_rgb(var(--accent)/0.4)]'
-                    : 'ctrl-btn'
-                )}
-              >
-                <span className="text-lg leading-none" aria-hidden="true">{ch.emoji}</span>
-                <span className={clsx(
-                  'text-[10px] leading-tight truncate w-full text-center px-0.5',
-                  active ? 'text-accent font-medium' : 'text-text-secondary'
-                )}>
-                  {ch.name}
-                </span>
-              </PressButton>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+      {sheet}
+    </>
   );
 }
