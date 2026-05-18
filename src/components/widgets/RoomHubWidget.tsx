@@ -40,13 +40,21 @@ interface Params {
    *  как компактные чипы с авто-распознаванием типа: давление, освещённость,
    *  CO₂, дверь, окно, движение и т.д. */
   sensorEntities?: string[];
+  /** Знаков после запятой для основной температуры комнаты (tempEntity).
+   *  По умолчанию 0 — «23°». Для точного датчика котла удобно 1 или 2. */
+  tempDecimals?: number;
+  /** Знаков после запятой для основной влажности (humidityEntity). */
+  humidityDecimals?: number;
+  /** Точность отображения для каждой дополнительной сущности из sensorEntities
+   *  (entity_id → знаков после запятой). Если пусто — берётся preset. */
+  sensorDecimals?: Record<string, number>;
 }
 
-function fmt(n: any, unit = ''): string {
+function fmt(n: any, unit = '', decimals = 0): string {
   if (n === undefined || n === null || n === 'unavailable' || n === 'unknown') return '—';
   const num = Number(n);
   if (Number.isNaN(num)) return String(n);
-  return `${Math.round(num)}${unit}`;
+  return `${num.toFixed(decimals)}${unit}`;
 }
 
 export function RoomHubWidget({ params }: { params: Params }) {
@@ -136,12 +144,12 @@ export function RoomHubWidget({ params }: { params: Params }) {
           isActive && 'glass-active'
         )}
         style={baseStyle}
-        title={`${params.name}${t !== undefined ? ` · ${fmt(t, '°')}` : ''}`}
+        title={`${params.name}${t !== undefined ? ` · ${fmt(t, '°', params.tempDecimals ?? 0)}` : ''}`}
       >
         <GlanceIcon value={params.icon} size={20} fallback="🏠" />
         <div className="text-sm font-medium truncate flex-1 min-w-0">{params.name}</div>
         {t !== undefined && (
-          <span className="text-base font-semibold tabular-nums shrink-0">{fmt(t, '°')}</span>
+          <span className="text-base font-semibold tabular-nums shrink-0">{fmt(t, '°', params.tempDecimals ?? 0)}</span>
         )}
         {isActive && (
           <span
@@ -167,7 +175,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
       >
         <GlanceIcon value={params.icon} size={28} fallback="🏠" />
         {t !== undefined && (
-          <span className="text-sm font-semibold tabular-nums">{fmt(t, '°')}</span>
+          <span className="text-sm font-semibold tabular-nums">{fmt(t, '°', params.tempDecimals ?? 0)}</span>
         )}
       </div>
     );
@@ -265,38 +273,38 @@ export function RoomHubWidget({ params }: { params: Params }) {
         </div>
         <div className="text-right whitespace-nowrap shrink-0 flex items-center gap-2">
           {t !== undefined && params.tempEntity && (
-            <SensorHistoryButton entityId={params.tempEntity} unit="°" decimals={1}>
+            <SensorHistoryButton entityId={params.tempEntity} unit="°" decimals={params.tempDecimals ?? 1}>
               <div
                 className={clsx(
                   'flex items-center gap-1 font-semibold tabular-nums leading-none',
                   'text-sm'
                 )}
-                title={`Температура: ${fmt(t, '°')} · нажмите для графика`}
+                title={`Температура: ${fmt(t, '°', params.tempDecimals ?? 0)} · нажмите для графика`}
               >
                 <GlanceIcon
                   value="thermometer"
                   size={14}
                   className="text-orange-700 dark:text-orange-300"
                 />
-                <span>{fmt(t, '°')}</span>
+                <span>{fmt(t, '°', params.tempDecimals ?? 0)}</span>
               </div>
             </SensorHistoryButton>
           )}
           {h !== undefined && params.humidityEntity && (
-            <SensorHistoryButton entityId={params.humidityEntity} unit="%" decimals={0}>
+            <SensorHistoryButton entityId={params.humidityEntity} unit="%" decimals={params.humidityDecimals ?? 0}>
               <div
                 className={clsx(
                   'flex items-center gap-1 font-semibold tabular-nums leading-none',
                   'text-sm'
                 )}
-                title={`Влажность: ${fmt(h, '%')} · нажмите для графика`}
+                title={`Влажность: ${fmt(h, '%', params.humidityDecimals ?? 0)} · нажмите для графика`}
               >
                 <GlanceIcon
                   value="water-percent"
                   size={14}
                   className="text-sky-700 dark:text-sky-300"
                 />
-                <span>{fmt(h, '%')}</span>
+                <span>{fmt(h, '%', params.humidityDecimals ?? 0)}</span>
               </div>
             </SensorHistoryButton>
           )}
@@ -433,7 +441,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
       {showSensors && numericSensors.length > 0 && (
         <div className="flex flex-wrap gap-1.5 shrink-0">
           {numericSensors.map((sid) => (
-            <SensorChip key={sid} entityId={sid} height={28} />
+            <SensorChip key={sid} entityId={sid} height={28} decimals={params.sensorDecimals?.[sid]} />
           ))}
         </div>
       )}

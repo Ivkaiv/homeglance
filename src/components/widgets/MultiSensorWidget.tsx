@@ -7,6 +7,10 @@ interface Params {
   /** Список entity_id сенсоров (sensor.* / binary_sensor.*) — через ConfigSheet, multi-entity. */
   entities?: string[];
   label?: string;
+  /** Знаков после запятой для каждой числовой сущности (entity_id → decimals).
+   *  Пусто — берётся из preset (preset.decimals: 0 для температуры по умолчанию,
+   *  1 для влажности и т.д.). */
+  decimals?: Record<string, number>;
 }
 
 /**
@@ -43,7 +47,7 @@ export function MultiSensorWidget({ params }: { params: Params }) {
       )}
       <div className="flex flex-wrap gap-1.5 overflow-auto min-h-0">
         {list.map((id) => (
-          <SensorChip key={id} entityId={id} height={chipHeight} />
+          <SensorChip key={id} entityId={id} height={chipHeight} decimals={params.decimals?.[id]} />
         ))}
       </div>
     </div>

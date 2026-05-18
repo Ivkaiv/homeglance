@@ -10,6 +10,8 @@ interface Props {
   entityId: string;
   /** Высота чипа — пусть совпадает с размером кнопок в room hub. */
   height?: number;
+  /** Override знаков после запятой (если не задано — preset.decimals). */
+  decimals?: number;
 }
 
 /**
@@ -21,7 +23,8 @@ interface Props {
  *
  * Пример: 🌡 22°  | 💧 45% | 🚪 Открыта
  */
-export function SensorChip({ entityId, height = 36 }: Props) {
+export function SensorChip({ entityId, height = 36, decimals }: Props) {
+  const dec = decimals ?? undefined;
   const e = useEntity(entityId);
 
   const detected = detectSensorType(e);
@@ -40,7 +43,7 @@ export function SensorChip({ entityId, height = 36 }: Props) {
     unit = '';
   } else {
     const n = Number(e!.state);
-    val = Number.isFinite(n) ? n.toFixed(preset.decimals) : e!.state;
+    val = Number.isFinite(n) ? n.toFixed(dec ?? preset.decimals) : e!.state;
     unit = e?.attributes.unit_of_measurement ?? preset.unit;
   }
 
@@ -89,7 +92,7 @@ export function SensorChip({ entityId, height = 36 }: Props) {
   // Числовые сенсоры → кликабельные с графиком. Бинарные/недоступные — статичные.
   if (isBinary || isBad) return chipBody;
   return (
-    <SensorHistoryButton entityId={entityId} unit={unit} decimals={preset.decimals} className="rounded-full">
+    <SensorHistoryButton entityId={entityId} unit={unit} decimals={dec ?? preset.decimals} className="rounded-full">
       {chipBody}
     </SensorHistoryButton>
   );
