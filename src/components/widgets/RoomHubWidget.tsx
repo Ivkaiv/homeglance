@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import clsx from 'clsx';
 import { useStates, useCallService } from '@/lib/ha/ConnectionProvider';
+import { formatTemp, applyStep } from '@/lib/ha/climate-temp';
 import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { PressButton } from '@/components/ui/PressButton';
@@ -512,7 +513,9 @@ export function RoomHubWidget({ params }: { params: Params }) {
             const step = params.climateSteps?.[cid] ?? params.climateStep ?? 0.5;
             const setTemp = (delta: number) => {
               if (target === undefined) return;
-              callService('climate', 'set_temperature', cid, { temperature: target + delta });
+              callService('climate', 'set_temperature', cid, {
+                temperature: applyStep(target + delta, step),
+              });
             };
             const label = c.attributes.friendly_name || cid;
             const isOff = c.state === 'off';
@@ -638,7 +641,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
                       aria-hidden="true"
                     />
                   )}
-                  {target !== undefined ? `${Math.round(target)}°` : '—'}
+                  {target !== undefined ? `${formatTemp(target, step)}°` : '—'}
                 </button>
                 <PressButton
                   onClick={() => setTemp(+step)}

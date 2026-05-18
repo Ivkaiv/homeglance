@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
+import { formatTemp, applyStep } from '@/lib/ha/climate-temp';
 import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { PressButton } from '@/components/ui/PressButton';
@@ -32,7 +33,9 @@ export function ClimateWidget({ params }: { params: Params }) {
 
   const setTemp = (delta: number) => {
     if (target === undefined) return;
-    callService('climate', 'set_temperature', params.entity, { temperature: target + delta });
+    callService('climate', 'set_temperature', params.entity, {
+      temperature: applyStep(target + delta, step),
+    });
   };
 
   const glow = isHeating ? { boxShadow: '0 0 24px rgba(249, 115, 22, 0.3)' } : undefined;
@@ -100,7 +103,7 @@ export function ClimateWidget({ params }: { params: Params }) {
               <span className="text-xl font-light tabular-nums">{tempCurrent}</span>
               {hasTarget && size.w < 200 && (
                 <span className="text-[10px] text-orange-700 dark:text-orange-200/85 tabular-nums whitespace-nowrap">
-                  → {Math.round(target!)}°
+                  → {formatTemp(target!, step)}°
                 </span>
               )}
             </div>
@@ -113,19 +116,19 @@ export function ClimateWidget({ params }: { params: Params }) {
               <PressButton
                 onClick={() => setTemp(-step)}
                 size={26}
-                ariaLabel={`Уменьшить (текущая ${Math.round(target!)}°)`}
+                ariaLabel={`Уменьшить (текущая ${formatTemp(target!, step)}°)`}
               >
                 <Minus size={12} aria-hidden="true" />
               </PressButton>
               {size.w >= 200 && (
                 <div className="text-xs font-semibold tabular-nums text-orange-700 dark:text-orange-100 min-w-[26px] text-center">
-                  {Math.round(target!)}°
+                  {formatTemp(target!, step)}°
                 </div>
               )}
               <PressButton
                 onClick={() => setTemp(+step)}
                 size={26}
-                ariaLabel={`Увеличить (текущая ${Math.round(target!)}°)`}
+                ariaLabel={`Увеличить (текущая ${formatTemp(target!, step)}°)`}
               >
                 <Plus size={12} aria-hidden="true" />
               </PressButton>
@@ -180,17 +183,17 @@ export function ClimateWidget({ params }: { params: Params }) {
             <PressButton
               onClick={() => setTemp(-step)}
               size={32}
-              ariaLabel={`Уменьшить (текущая ${Math.round(target!)}°)`}
+              ariaLabel={`Уменьшить (текущая ${formatTemp(target!, step)}°)`}
             >
               <Minus size={14} aria-hidden="true" />
             </PressButton>
             <div className="text-base font-semibold tabular-nums text-orange-700 dark:text-orange-100">
-              {Math.round(target!)}°
+              {formatTemp(target!, step)}°
             </div>
             <PressButton
               onClick={() => setTemp(+step)}
               size={32}
-              ariaLabel={`Увеличить (текущая ${Math.round(target!)}°)`}
+              ariaLabel={`Увеличить (текущая ${formatTemp(target!, step)}°)`}
             >
               <Plus size={14} aria-hidden="true" />
             </PressButton>

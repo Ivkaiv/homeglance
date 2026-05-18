@@ -3,6 +3,7 @@
 import { ModalSheet } from '@/components/ui/ModalSheet';
 import { PressButton } from '@/components/ui/PressButton';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
+import { formatTemp, applyStep } from '@/lib/ha/climate-temp';
 import { Plus, Minus, Power, Flame, Snowflake, Wind, Droplets, Wand2, Activity } from 'lucide-react';
 
 interface Props {
@@ -82,7 +83,7 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
 
   const setTemp = (delta: number) => {
     if (target === undefined) return;
-    const next = Math.max(minTemp, Math.min(maxTemp, target + delta));
+    const next = applyStep(Math.max(minTemp, Math.min(maxTemp, target + delta)), step);
     callService('climate', 'set_temperature', entityId, { temperature: next });
   };
 
@@ -172,7 +173,7 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
           </PressButton>
           <div className="text-center min-w-[110px]">
             <div className="text-5xl font-light tabular-nums leading-none">
-              {Math.round(target)}°
+              {formatTemp(target, step)}°
             </div>
             {current !== undefined && (
               <div className="text-xs text-text-tertiary mt-2 tabular-nums">
