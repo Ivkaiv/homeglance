@@ -31,6 +31,9 @@ export class MAClient {
 
   private players: MAPlayer[] = [];
   private queues: Record<string, MAQueue> = {};
+  /** Локальный Date.now() момента последнего обновления данных — якорь для
+   *  экстраполяции прогресса (часы MA-сервера и браузера расходятся). */
+  private lastUpdate = 0;
 
   private listeners = new Set<Listener>();
   private statusListeners = new Set<StatusListener>();
@@ -155,9 +158,10 @@ export class MAClient {
   }
 
   private onEvent(event: string): void {
-    // queue_time_updated сыплется раз в секунду — игнорируем, UI сам
-    // экстраполирует прогресс. Остальные события стоят перечитки состояния.
-    if (event === 'queue_time_updated') return;
+    // Любое событие про плеер/очередь — повод перечитать состояние.
+    // queue_time_updated сыплется ~раз в секунду: это нам и нужно — так
+    // elapsed_time остаётся свежим, а прогресс точным (debounce 500 мс
+    // схлопывает всплески).
     if (event.startsWith('player') || event.startsWith('queue')) {
       this.debouncedRefetch();
     }
@@ -181,7 +185,13 @@ export class MAClient {
     const rec: Record<string, MAQueue> = {};
     for (const q of Array.isArray(queues) ? queues : []) rec[q.queue_id] = q;
     this.queues = rec;
+    this.lastUpdate = Date.now();
     this.notify();
+  }
+
+  /** Date.now() момента последнего успешного обновления данных. */
+  getLastUpdate(): number {
+    return this.lastUpdate;
   }
 
   /** Послать команду MA и дождаться результата. */

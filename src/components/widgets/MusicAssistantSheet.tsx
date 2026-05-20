@@ -65,10 +65,14 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
   const album = media?.album || '';
   const duration = media?.duration ?? 0;
 
-  // Экстраполяция прошедшего времени от elapsed_time_last_updated.
+  // Прогресс «живой»: берём elapsed_time (MA отдаёт его свежим в players/all)
+  // и доводим локально от момента последнего обновления данных. Якорь —
+  // client.getLastUpdate() (Date.now() браузера), НЕ серверный
+  // elapsed_time_last_updated: часы MA-сервера и браузера расходятся, из-за
+  // чего трек стартовал сразу с ~20 сек.
   let position = player?.elapsed_time ?? 0;
-  if (playing && player?.elapsed_time_last_updated) {
-    position += (now - player.elapsed_time_last_updated * 1000) / 1000;
+  if (playing) {
+    position += Math.max(0, (now - client.getLastUpdate()) / 1000);
   }
   if (duration > 0) position = Math.min(position, duration);
   if (position < 0) position = 0;
