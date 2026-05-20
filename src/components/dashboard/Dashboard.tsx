@@ -42,6 +42,10 @@ const WeatherPageView = dynamic(
   () => import('@/components/weather-page/WeatherPageView').then((m) => m.WeatherPageView),
   { ssr: false }
 );
+const MusicPageView = dynamic(
+  () => import('@/components/music-page/MusicPageView').then((m) => m.MusicPageView),
+  { ssr: false }
+);
 
 // Grid скопирован 1:1 из reference-проекта ha-pwa-lab: 24/16/12/9 колонок
 // × ROW_HEIGHT 32px, minSize виджетов 2×2 (см. ADR 007).
@@ -264,7 +268,7 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
                 <LayoutGrid size={14} aria-hidden="true" />
                 <span className="hidden sm:inline">{t('dashboard.pages')}</span>
               </button>
-              {current.kind !== 'weather' && (
+              {current.kind !== 'weather' && current.kind !== 'music' && (
                 <button
                   onClick={() => setAdding(true)}
                   aria-label={t('dashboard.addWidget')}
@@ -303,7 +307,11 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
         </div>
       </header>
 
-      {current.kind === 'weather' && current.weather ? (
+      {current.kind === 'music' && current.music ? (
+        <main key={current.id} className="page-fade-in">
+          <MusicPageView config={current.music} pageTitle={current.title} />
+        </main>
+      ) : current.kind === 'weather' && current.weather ? (
         <main key={current.id} className="page-fade-in">
           <WeatherPageView config={current.weather} pageTitle={current.title} />
         </main>

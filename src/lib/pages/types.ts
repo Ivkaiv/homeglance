@@ -54,17 +54,26 @@ export interface WeatherPageConfig {
   pressureUnit?: 'mmHg' | 'hPa' | 'inHg';
 }
 
+/** Настройки страницы типа «Музыка» (плеер Music Assistant).
+ *  Подключение к Music Assistant глобальное, поэтому конфиг минимальный. */
+export interface MusicPageConfig {
+  /** Устройство вывода по умолчанию (player_id Music Assistant). */
+  defaultPlayerId?: string;
+}
+
 export interface Page {
   id: string;
   title: string;
   /** Эмодзи или mdi-имя иконки (mdi:home, etc.) */
   icon: string;
   /** Тип страницы. По умолчанию 'grid' (сетка виджетов). */
-  kind?: 'grid' | 'weather';
+  kind?: 'grid' | 'weather' | 'music';
   /** Виджеты — для kind='grid' */
   widgets: WidgetConfig[];
   /** Конфигурация — для kind='weather' */
   weather?: WeatherPageConfig;
+  /** Конфигурация — для kind='music' */
+  music?: MusicPageConfig;
   /** Защита от случайного удаления */
   protected?: boolean;
   /** Скрыта в dock-баре (но остаётся в редакторе страниц) */

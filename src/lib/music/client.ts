@@ -8,7 +8,7 @@
  */
 
 import { getMAConfig } from './config';
-import type { MAMessage, MAPlayer, MAQueue, MAStatus } from './types';
+import type { MAMessage, MAPlayer, MAQueue, MASearchResults, MAStatus } from './types';
 
 type Listener = () => void;
 type StatusListener = (s: MAStatus) => void;
@@ -278,6 +278,20 @@ export class MAClient {
       media,
       option: 'play',
     });
+  }
+
+  /** Поиск по медиатеке всех источников. */
+  async search(query: string, limit = 12): Promise<MASearchResults> {
+    const r = (await this.command('music/search', {
+      search_query: query,
+      limit,
+    })) as Partial<MASearchResults> | null;
+    return {
+      tracks: r?.tracks ?? [],
+      artists: r?.artists ?? [],
+      albums: r?.albums ?? [],
+      playlists: r?.playlists ?? [],
+    };
   }
 }
 

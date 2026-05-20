@@ -85,6 +85,14 @@ export interface MAImage {
   remotely_accessible?: boolean;
 }
 
+/** Результат поиска по медиатеке (music/search). */
+export interface MASearchResults {
+  tracks: MAMediaItem[];
+  artists: MAMediaItem[];
+  albums: MAMediaItem[];
+  playlists: MAMediaItem[];
+}
+
 /** Музыкальный источник (провайдер): Звук, локальная фонотека и т.п. */
 export interface MAProvider {
   instance_id: string;

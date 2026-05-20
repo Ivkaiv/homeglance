@@ -140,6 +140,7 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
         title: p.title,
         icon: p.icon,
         weather: p.weather,
+        music: p.music,
       });
     } else {
       addPage({
@@ -147,6 +148,7 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
         icon: p.icon,
         kind: p.kind,
         weather: p.weather,
+        music: p.music,
       });
     }
     setEditing(null);
@@ -192,6 +194,9 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
                       {p.title}
                       {p.kind === 'weather' && (
                         <span className="text-[10px] text-amber-300/80 ml-2">погода</span>
+                      )}
+                      {p.kind === 'music' && (
+                        <span className="text-[10px] text-fuchsia-300/80 ml-2">музыка</span>
                       )}
                       {p.hidden && (
                         <span className="text-[10px] text-text-tertiary ml-2">скрыта</span>
@@ -402,7 +407,7 @@ function PageEditor({
         {isNew && (
           <div>
             <div className="text-xs text-text-secondary mb-1">Тип страницы</div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setPage({ ...page, kind: 'grid' })}
@@ -434,6 +439,24 @@ function PageEditor({
                 }`}
               >
                 🌤 Погода
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setPage({
+                    ...page,
+                    kind: 'music',
+                    icon: page.icon === '📄' ? '🎵' : page.icon,
+                    music: page.music || {},
+                  })
+                }
+                className={`px-3 py-2 rounded-md border text-sm ${
+                  page.kind === 'music'
+                    ? 'bg-accent/20 border-accent/40 text-accent'
+                    : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-text-secondary'
+                }`}
+              >
+                🎵 Музыка
               </button>
             </div>
           </div>
