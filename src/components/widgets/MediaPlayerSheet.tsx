@@ -16,7 +16,10 @@ import {
   Shuffle,
   Repeat,
   Repeat1,
+  Radio,
+  ChevronDown,
 } from 'lucide-react';
+import { ZAYCEV_CHANNELS, zaycevStreamUrl, type ZaycevBitrate } from '@/lib/zaycev';
 
 // Битмаска SUPPORT_* из media_player в Home Assistant
 const SUPPORT_PAUSE = 1;
@@ -40,6 +43,10 @@ interface Props {
   entityId: string;
   open: boolean;
   onClose: () => void;
+  /** Показать ли сворачиваемую секцию радиоканалов Zaycev FM. */
+  radio?: boolean;
+  /** Битрейт радио-стрима. По умолчанию 128 kbps. */
+  radioBitrate?: ZaycevBitrate;
 }
 
 /**
@@ -47,7 +54,7 @@ interface Props {
  * shuffle/repeat и переключение источника. Открывается тапом по mini-плееру
  * в RoomHubWidget. Использует общую ModalSheet (нижняя шторка с focus-trap).
  */
-export function MediaPlayerSheet({ entityId, open, onClose }: Props) {
+export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate }: Props) {
   const e = useEntity(entityId);
   const callService = useCallService();
   // now нужен только чтобы пересчитывать прогресс «живым» при playing —
@@ -62,6 +69,30 @@ export function MediaPlayerSheet({ entityId, open, onClose }: Props) {
     const id = window.setInterval(() => setNow(Date.now()), 500);
     return () => window.clearInterval(id);
   }, [open, playing]);
+
+  // ── Радио (Zaycev FM) ──────────────────────────────────────────────
+  // radioOpen — раскрыта ли секция со списком каналов (по умолчанию нет).
+  // lastRequested — какой канал мы запросили последним: AlexxIT/YandexStation
+  // прячет наш URL за proxy, поэтому media_content_id перестаёт указывать на
+  // abs.zaycev.fm, и без локальной памяти подсветка активного канала не
+  // работала бы.
+  const [radioOpen, setRadioOpen] = useState(false);
+  const [lastRequested, setLastRequested] = useState<string | null>(null);
+
+  // Секция радио снова сворачивается при закрытии попапа — чтобы при
+  // следующем открытии она была свёрнута, как и задумано по умолчанию.
+  useEffect(() => {
+    if (!open) setRadioOpen(false);
+  }, [open]);
+
+  // Сбрасываем «запомненный» канал, когда плеер ушёл в terminal-состояние
+  // (off / idle / unavailable) — значит пользователь сам всё выключил.
+  const stateStr = e?.state;
+  useEffect(() => {
+    if (lastRequested && stateStr && ['off', 'idle', 'unavailable'].includes(stateStr)) {
+      setLastRequested(null);
+    }
+  }, [stateStr, lastRequested]);
 
   // Хуки должны вызываться до любого return — иначе React падает на смене состояния.
   const rawCover = e?.attributes.entity_picture as string | undefined;
@@ -127,6 +158,24 @@ export function MediaPlayerSheet({ entityId, open, onClose }: Props) {
 
   const cmd = (svc: string, data?: Record<string, unknown>) =>
     callService('media_player', svc, entityId, data);
+
+  // Текущий радиоканал: прямое совпадение в media_content_id (если плеер не
+  // прячет URL), либо локально запомненный канал (AlexxIT прячет за proxy).
+  const radioMediaId = a.media_content_id as string | undefined;
+  const radioDirectMatch = radioMediaId?.match(
+    /abs\.zaycev\.fm\/(\w+?)(?:48|128|256)k/,
+  )?.[1];
+  const activeRadioChannel = radioDirectMatch || lastRequested || undefined;
+  const radioBitrateValue: ZaycevBitrate = radioBitrate ?? '128k';
+  const playRadio = (channelId: string) => {
+    setLastRequested(channelId);
+    cmd('play_media', {
+      media_content_id: zaycevStreamUrl(channelId, radioBitrateValue),
+      // 'stream.mp3' — AlexxIT/YandexStation требует именно такой тип, чтобы
+      // понять что media_id — прямой HTTP-MP3 стрим, а не идентификатор трека.
+      media_content_type: 'stream.mp3',
+    });
+  };
 
   // Подкрашиваем плеер цветом, добытым из обложки. Если обложки нет или CDN
   // не отдал CORS — возвращаемся к стандартному --accent темы (зелёный).
@@ -352,6 +401,72 @@ export function MediaPlayerSheet({ entityId, open, onClose }: Props) {
           <span className="text-xs text-text-tertiary tabular-nums w-10 text-right">
             {Math.round((muted ? 0 : volume) * 100)}%
           </span>
+        </div>
+      )}
+
+      {/* Радио — сворачиваемая секция с каналами Zaycev FM. Появляется
+          только если в настройках виджета включена галочка «Радио». */}
+      {radio && (
+        <div className="border-t border-black/5 dark:border-white/5 pt-1">
+          <button
+            type="button"
+            onClick={() => setRadioOpen((v) => !v)}
+            aria-expanded={radioOpen}
+            className="w-full flex items-center gap-2 py-2 px-1 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+          >
+            <Radio size={16} aria-hidden="true" />
+            <span className="flex-1 text-left">Радио · Zaycev FM</span>
+            {activeRadioChannel && !radioOpen && (
+              <span className="text-xs text-text-tertiary truncate max-w-[40%]">
+                {ZAYCEV_CHANNELS.find((c) => c.id === activeRadioChannel)?.name}
+              </span>
+            )}
+            <ChevronDown
+              size={16}
+              aria-hidden="true"
+              className="shrink-0 transition-transform"
+              style={radioOpen ? { transform: 'rotate(180deg)' } : undefined}
+            />
+          </button>
+          {radioOpen && (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2 mb-1">
+              {ZAYCEV_CHANNELS.map((ch) => {
+                const active = activeRadioChannel === ch.id;
+                return (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => playRadio(ch.id)}
+                    aria-label={`Включить ${ch.name}`}
+                    className={`flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-lg border transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 ${
+                      active
+                        ? ''
+                        : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10'
+                    }`}
+                    style={
+                      active
+                        ? {
+                            background: accentSoft(0.15),
+                            borderColor: accentSoft(0.4),
+                            boxShadow: `0 0 16px ${accentSoft(0.35)}`,
+                          }
+                        : undefined
+                    }
+                  >
+                    <span className="text-2xl leading-none" aria-hidden="true">
+                      {ch.emoji}
+                    </span>
+                    <span
+                      className="text-[11px] leading-tight truncate w-full text-center px-0.5"
+                      style={active ? { color: accentColor } : undefined}
+                    >
+                      {ch.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

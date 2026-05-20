@@ -41,7 +41,6 @@ import {
   GLUCOSE_META,
   GLUCOSE_CHART_META,
   GLUCOSE_STATS_META,
-  ZAYCEV_RADIO_META,
   weatherComputeMinSize,
   controlPanelComputeMinSize,
   roomHubComputeMinSize,
@@ -230,12 +229,5 @@ export function registerBuiltinWidgets(): void {
       import('./GlucoseStatsWidget').then((m) => m.GlucoseStatsWidget)
     ),
   });
-  register({
-    meta: ZAYCEV_RADIO_META,
-    Component: lazyLoad(() =>
-      import('./ZaycevRadioWidget').then((m) => m.ZaycevRadioWidget)
-    ),
-  });
-
   registered = true;
 }

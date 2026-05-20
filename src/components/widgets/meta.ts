@@ -348,6 +348,25 @@ export const MEDIA_PLAYER_META: WidgetMeta = {
       hint: 'Например, Яндекс.Станция, AirPlay-приёмник, Sonos' },
     { key: 'label', label: 'Подпись над плеером', kind: 'text', hint: 'По умолчанию — имя плеера из HA' },
     { key: 'icon', label: 'Иконка', kind: 'icon', default: 'music' },
+    {
+      key: 'radio',
+      label: 'Радио Zaycev FM в попапе',
+      kind: 'boolean',
+      default: false,
+      hint: 'Добавляет во всплывающее окно плеера сворачиваемую секцию с жанровыми радиоканалами Zaycev FM. Канал играет на этом же плеере — нужен плеер, принимающий произвольный HTTP-mp3 (Яндекс.Станция через AlexxIT, DLNA, AirPlay)',
+    },
+    {
+      key: 'radioBitrate',
+      label: 'Качество радио-стрима',
+      kind: 'select',
+      default: '128k',
+      options: [
+        { value: '48k', label: '48 kbps (экономия трафика)' },
+        { value: '128k', label: '128 kbps (рекомендуется)' },
+        { value: '256k', label: '256 kbps (макс. качество)' },
+      ],
+      hint: 'Действует, только если включено «Радио Zaycev FM»',
+    },
   ],
 };
 
@@ -1128,72 +1147,6 @@ export const GLUCOSE_STATS_META: WidgetMeta = {
     { key: 'gmiEntity', label: 'GMI / HbA1c', kind: 'entity', domain: 'sensor.', group: 'sensors' },
     { key: 'highEntity', label: '% времени выше нормы', kind: 'entity', domain: 'sensor.', group: 'sensors' },
     { key: 'lowEntity', label: '% времени ниже нормы', kind: 'entity', domain: 'sensor.', group: 'sensors' },
-  ],
-};
-
-// ── Zaycev FM Radio ──────────────────────────────────────────────────────────
-// 18 жанровых каналов, проигрываются через прямые HTTP-MP3 стримы с
-// abs.zaycev.fm. Тап на канал → media_player.play_media с этим URL. Работает
-// на любом плеере, который умеет принимать произвольный HTTP-mp3:
-// Yandex.Station (через AlexxIT/YandexStation), DLNA, AirPlay, Cast.
-export const ZAYCEV_RADIO_META: WidgetMeta = {
-  type: 'zaycev_radio',
-  name: 'Zaycev FM (радио)',
-  emoji: '📻',
-  description:
-    '18 жанровых каналов Zaycev FM. Компактная карточка в стиле плеера: текущий канал, кнопка play. Список каналов и громкость — в попапе по тапу.',
-  category: 'media',
-  defaultSize: { w: 4, h: 2 },
-  // На 3×2 подзаголовок «📻 Тап — выбрать канал» / название трека
-  // обрезались многоточием почти сразу. 4×2 даёт нормальное место под
-  // заголовок + бегущую строку с треком + transport-кнопки.
-  minSize: { w: 4, h: 2 },
-  paramSchema: [
-    {
-      key: 'mediaPlayerEntity',
-      label: 'На чём играть',
-      kind: 'entity',
-      domain: 'media_player.',
-      required: true,
-      hint: 'Яндекс.Станция, DLNA-колонка, AirPlay — что-нибудь, что принимает произвольный HTTP-mp3',
-    },
-    {
-      key: 'bitrate',
-      label: 'Качество',
-      kind: 'select',
-      default: '128k',
-      options: [
-        { value: '48k', label: '48 kbps (экономия трафика)' },
-        { value: '128k', label: '128 kbps (рекомендуется)' },
-        { value: '256k', label: '256 kbps (макс. качество)' },
-      ],
-    },
-    {
-      key: 'channels',
-      label: 'Какие каналы показать',
-      kind: 'multi-select',
-      hint: 'Пусто = все 18. Можно ограничить только нужными жанрами',
-      options: [
-        { value: 'pop', label: '🎤 Pop' },
-        { value: 'rock', label: '🎸 Rock' },
-        { value: 'club', label: '🪩 Club' },
-        { value: 'disco', label: '🕺 Disco' },
-        { value: 'rurock', label: '🎸 РуРок' },
-        { value: 'shanson', label: '🚬 Шансон' },
-        { value: 'rus', label: '🇷🇺 Русское' },
-        { value: 'rnb', label: '🎵 R&B' },
-        { value: 'relax', label: '🌊 Relax' },
-        { value: 'zaychata', label: '🐰 Зайчата' },
-        { value: 'kpop', label: '🎎 K-Pop' },
-        { value: 'rap', label: '🎤 Рэп' },
-        { value: 'metal', label: '🤘 Metal' },
-        { value: 'bass', label: '🔊 Bass' },
-        { value: 'love', label: '❤️ Love' },
-        { value: 'folk', label: '🪕 Folk' },
-        { value: 'classic', label: '🎻 Classic' },
-      ],
-    },
-    { key: 'label', label: 'Подпись', kind: 'text', placeholder: 'Zaycev FM' },
   ],
 };
 

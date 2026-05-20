@@ -14,6 +14,10 @@ interface Params {
   entity: string;
   label?: string;
   icon?: string;
+  /** Показать ли в попапе плеера секцию радиоканалов Zaycev FM. */
+  radio?: boolean;
+  /** Битрейт радио-стрима — 48/128/256 kbps. По умолчанию 128. */
+  radioBitrate?: '48k' | '128k' | '256k';
 }
 
 export function MediaPlayerWidget({ params }: { params: Params }) {
@@ -28,6 +32,8 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
       entityId={params.entity}
       open={sheetOpen}
       onClose={() => setSheetOpen(false)}
+      radio={params.radio}
+      radioBitrate={params.radioBitrate}
     />
   );
 
