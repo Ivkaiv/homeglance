@@ -6,6 +6,9 @@ import {
   Pause,
   SkipBack,
   SkipForward,
+  Shuffle,
+  Repeat,
+  Repeat1,
   Volume2,
   Volume1,
   VolumeX,
@@ -16,6 +19,7 @@ import {
   Disc3,
   Mic2,
   ListMusic,
+  History,
 } from 'lucide-react';
 import { PressButton } from '@/components/ui/PressButton';
 import { MarqueeText } from '@/components/ui/MarqueeText';
@@ -24,10 +28,11 @@ import {
   useMusic,
   useMAConnection,
   useMAPlayers,
+  useMAQueue,
 } from '@/lib/music/MusicProvider';
 import { maImageProxy } from '@/lib/music/config';
 import type { MusicPageConfig } from '@/lib/pages/types';
-import type { MAMediaItem, MASearchResults } from '@/lib/music/types';
+import type { MAMediaItem } from '@/lib/music/types';
 
 interface Props {
   config: MusicPageConfig;
@@ -43,17 +48,65 @@ function fmtTime(sec: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+/** Иконка и подпись по типу медиа-элемента. */
+function kindInfo(item: MAMediaItem): { Icon: typeof Music; label: string } {
+  switch (item.media_type) {
+    case 'album':
+      return { Icon: Disc3, label: 'Альбом' };
+    case 'artist':
+      return { Icon: Mic2, label: 'Артист' };
+    case 'playlist':
+      return { Icon: ListMusic, label: 'Плейлист' };
+    default:
+      return { Icon: Music, label: 'Трек' };
+  }
+}
+
+/** Строка результата — обложка/иконка, название, подпись, кнопка play. */
+function MediaRow({ item, onPlay }: { item: MAMediaItem; onPlay: (i: MAMediaItem) => void }) {
+  const { Icon, label } = kindInfo(item);
+  const thumb = maImageProxy(item.metadata?.images?.[0]?.path ?? item.image?.path);
+  const sub = item.artists?.[0]?.name || label;
+  return (
+    <button
+      type="button"
+      onClick={() => onPlay(item)}
+      aria-label={`Включить ${item.name ?? ''}`}
+      className="flex items-center gap-2.5 py-2 px-2 rounded-lg text-left hover:bg-black/5 dark:hover:bg-white/5 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+    >
+      {thumb ? (
+        <img
+          src={thumb}
+          alt=""
+          width={40}
+          height={40}
+          loading="lazy"
+          className="w-10 h-10 rounded object-cover shrink-0 bg-black/10 dark:bg-white/10"
+        />
+      ) : (
+        <div className="w-10 h-10 rounded bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
+          <Icon size={18} className="text-text-tertiary" aria-hidden="true" />
+        </div>
+      )}
+      <span className="flex-1 min-w-0">
+        <span className="block text-sm truncate">{item.name ?? '—'}</span>
+        <span className="block text-[11px] text-text-tertiary truncate">{sub}</span>
+      </span>
+      <Play size={15} className="text-text-tertiary shrink-0" aria-hidden="true" />
+    </button>
+  );
+}
+
 /**
  * Полноэкранная страница «Музыка» — плеер Music Assistant: что играет,
- * управление, выбор устройства вывода и поиск музыки по медиатеке.
- * Рендерится Dashboard'ом для страниц с kind='music' (как WeatherPageView).
+ * управление (включая shuffle/repeat и «что дальше»), выбор устройства
+ * вывода, поиск музыки и недавно прослушанное.
  */
 export function MusicPageView({ config, pageTitle }: Props) {
   useMAConnection();
   const { client, status } = useMusic();
   const players = useMAPlayers();
 
-  // Выбранное устройство вывода. Ключ общий с виджетом — настройки совпадают.
   const [savedId, setSavedId] = useState<string | null>(() => {
     if (typeof window === 'undefined') return config.defaultPlayerId ?? null;
     return window.localStorage.getItem(OUTPUT_KEY) ?? config.defaultPlayerId ?? null;
@@ -72,6 +125,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
     players.find((p) => p.playback_state === 'playing') ??
     players[0];
   const playerId = active?.player_id;
+  const queue = useMAQueue(playerId);
 
   // ── Прогресс ───────────────────────────────────────────────────────────
   const playing = active?.playback_state === 'playing';
@@ -99,13 +153,17 @@ export function MusicPageView({ config, pageTitle }: Props) {
 
   const volume = active?.volume_level ?? 0;
   const muted = active?.volume_muted ?? false;
+  const shuffle = queue?.shuffle_enabled ?? false;
+  const repeatMode = (queue?.repeat_mode ?? 'off') as 'off' | 'one' | 'all';
+  const nextName = queue?.next_item?.name || queue?.next_item?.media_item?.name || '';
+
   const run = (fn: () => Promise<unknown>) => {
     fn().catch(() => {});
   };
 
   // ── Поиск ──────────────────────────────────────────────────────────────
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<MASearchResults | null>(null);
+  const [results, setResults] = useState<MAMediaItem[] | null>(null);
   const [searching, setSearching] = useState(false);
 
   const doSearch = () => {
@@ -114,26 +172,31 @@ export function MusicPageView({ config, pageTitle }: Props) {
     setSearching(true);
     client
       .search(q)
-      .then((r) => setResults(r))
-      .catch(() => setResults({ tracks: [], artists: [], albums: [], playlists: [] }))
+      .then((r) => setResults([...r.albums, ...r.tracks, ...r.playlists, ...r.artists]))
+      .catch(() => setResults([]))
       .finally(() => setSearching(false));
   };
+
+  // ── Недавнее ───────────────────────────────────────────────────────────
+  const [recent, setRecent] = useState<MAMediaItem[]>([]);
+  useEffect(() => {
+    if (status !== 'connected') return;
+    client
+      .getRecentlyPlayed(12)
+      .then(setRecent)
+      .catch(() => setRecent([]));
+  }, [status, client]);
 
   const playItem = (item: MAMediaItem) => {
     if (!playerId || !item.uri) return;
     run(() => client.playMedia(playerId, item.uri as string));
   };
 
-  // Плоский список результатов: альбомы и треки — то, что можно сразу включить.
-  const flatResults = useMemo(() => {
-    if (!results) return [];
-    return [
-      ...results.albums.map((i) => ({ item: i, kind: 'album' as const })),
-      ...results.tracks.map((i) => ({ item: i, kind: 'track' as const })),
-      ...results.playlists.map((i) => ({ item: i, kind: 'playlist' as const })),
-      ...results.artists.map((i) => ({ item: i, kind: 'artist' as const })),
-    ];
-  }, [results]);
+  const cycleRepeat = () => {
+    if (!playerId) return;
+    const next = repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off';
+    run(() => client.setRepeat(playerId, next));
+  };
 
   return (
     <main key="music-page" className="page-fade-in">
@@ -199,8 +262,19 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 </div>
               </div>
 
-              {/* Transport */}
-              <div className="flex items-center justify-center gap-3">
+              {/* Transport + shuffle/repeat */}
+              <div className="flex items-center justify-center gap-2">
+                <PressButton
+                  size={40}
+                  ariaLabel={shuffle ? 'Выключить перемешивание' : 'Перемешать'}
+                  onClick={() => playerId && run(() => client.setShuffle(playerId, !shuffle))}
+                >
+                  <Shuffle
+                    size={16}
+                    aria-hidden="true"
+                    style={shuffle ? { color: accentColor } : undefined}
+                  />
+                </PressButton>
                 <PressButton
                   size={48}
                   ariaLabel="Предыдущий"
@@ -227,6 +301,17 @@ export function MusicPageView({ config, pageTitle }: Props) {
                   onClick={() => playerId && run(() => client.next(playerId))}
                 >
                   <SkipForward size={20} aria-hidden="true" />
+                </PressButton>
+                <PressButton size={40} ariaLabel="Режим повтора" onClick={cycleRepeat}>
+                  {repeatMode === 'one' ? (
+                    <Repeat1 size={16} aria-hidden="true" style={{ color: accentColor }} />
+                  ) : (
+                    <Repeat
+                      size={16}
+                      aria-hidden="true"
+                      style={repeatMode === 'all' ? { color: accentColor } : undefined}
+                    />
+                  )}
                 </PressButton>
               </div>
 
@@ -262,6 +347,12 @@ export function MusicPageView({ config, pageTitle }: Props) {
                   {Math.round(muted ? 0 : volume)}%
                 </span>
               </div>
+
+              {nextName && (
+                <div className="text-xs text-text-tertiary w-full truncate text-center">
+                  Далее: {nextName}
+                </div>
+              )}
             </div>
 
             {/* ── Выбор выхода ── */}
@@ -335,65 +426,16 @@ export function MusicPageView({ config, pageTitle }: Props) {
               {searching && (
                 <div className="text-sm text-text-tertiary text-center py-4">Ищу…</div>
               )}
-              {!searching && results && flatResults.length === 0 && (
+              {!searching && results && results.length === 0 && (
                 <div className="text-sm text-text-tertiary text-center py-4">
                   Ничего не нашлось.
                 </div>
               )}
-              {!searching && flatResults.length > 0 && (
+              {!searching && results && results.length > 0 && (
                 <div className="flex flex-col gap-1">
-                  {flatResults.map(({ item, kind }, i) => {
-                    const Icon =
-                      kind === 'album'
-                        ? Disc3
-                        : kind === 'artist'
-                          ? Mic2
-                          : kind === 'playlist'
-                            ? ListMusic
-                            : Music;
-                    const sub =
-                      kind === 'album'
-                        ? item.artists?.[0]?.name || 'Альбом'
-                        : kind === 'artist'
-                          ? 'Артист'
-                          : kind === 'playlist'
-                            ? 'Плейлист'
-                            : item.artists?.[0]?.name || 'Трек';
-                    return (
-                      <button
-                        key={`${item.uri ?? i}-${kind}`}
-                        type="button"
-                        onClick={() => playItem(item)}
-                        aria-label={`Включить ${item.name ?? ''}`}
-                        className="flex items-center gap-2.5 py-2 px-2 rounded-lg text-left hover:bg-black/5 dark:hover:bg-white/5 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                      >
-                        {(() => {
-                          const thumb = maImageProxy(
-                            item.metadata?.images?.[0]?.path ?? item.image?.path
-                          );
-                          return thumb ? (
-                            <img
-                              src={thumb}
-                              alt=""
-                              width={40}
-                              height={40}
-                              loading="lazy"
-                              className="w-10 h-10 rounded object-cover shrink-0 bg-black/10 dark:bg-white/10"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
-                              <Icon size={18} className="text-text-tertiary" aria-hidden="true" />
-                            </div>
-                          );
-                        })()}
-                        <span className="flex-1 min-w-0">
-                          <span className="block text-sm truncate">{item.name ?? '—'}</span>
-                          <span className="block text-[11px] text-text-tertiary truncate">{sub}</span>
-                        </span>
-                        <Play size={15} className="text-text-tertiary shrink-0" aria-hidden="true" />
-                      </button>
-                    );
-                  })}
+                  {results.map((item, i) => (
+                    <MediaRow key={`${item.uri ?? i}`} item={item} onPlay={playItem} />
+                  ))}
                 </div>
               )}
               {!results && !searching && (
@@ -402,6 +444,21 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 </div>
               )}
             </div>
+
+            {/* ── Недавнее ── */}
+            {recent.length > 0 && (
+              <div className="glass p-4">
+                <div className="flex items-center gap-2 text-xs font-medium text-text-secondary mb-2">
+                  <History size={14} aria-hidden="true" />
+                  <span>Недавнее</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  {recent.map((item, i) => (
+                    <MediaRow key={`recent-${item.uri ?? i}`} item={item} onPlay={playItem} />
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

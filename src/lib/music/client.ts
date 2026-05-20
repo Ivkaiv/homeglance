@@ -8,7 +8,14 @@
  */
 
 import { getMAConfig } from './config';
-import type { MAMessage, MAPlayer, MAQueue, MASearchResults, MAStatus } from './types';
+import type {
+  MAMediaItem,
+  MAMessage,
+  MAPlayer,
+  MAQueue,
+  MASearchResults,
+  MAStatus,
+} from './types';
 
 type Listener = () => void;
 type StatusListener = (s: MAStatus) => void;
@@ -292,6 +299,30 @@ export class MAClient {
       albums: r?.albums ?? [],
       playlists: r?.playlists ?? [],
     };
+  }
+
+  /** Недавно прослушанное. */
+  async getRecentlyPlayed(limit = 12): Promise<MAMediaItem[]> {
+    const r = (await this.command('music/recently_played_items', { limit })) as
+      | MAMediaItem[]
+      | null;
+    return Array.isArray(r) ? r : [];
+  }
+
+  /** Перемешивание очереди. */
+  setShuffle(playerId: string, enabled: boolean) {
+    return this.command('player_queues/shuffle', {
+      queue_id: playerId,
+      shuffle_enabled: enabled,
+    });
+  }
+
+  /** Режим повтора: 'off' | 'one' | 'all'. */
+  setRepeat(playerId: string, mode: 'off' | 'one' | 'all') {
+    return this.command('player_queues/repeat', {
+      queue_id: playerId,
+      repeat_mode: mode,
+    });
   }
 }
 
