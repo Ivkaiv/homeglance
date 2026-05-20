@@ -370,6 +370,31 @@ export const MEDIA_PLAYER_META: WidgetMeta = {
   ],
 };
 
+// ── Music Assistant ──────────────────────────────────────────────────────────
+// Музыкальный плеер на базе Music Assistant (отдельный музыкальный сервер).
+// Glance общается с ним по WebSocket. Источники музыки (Звук и др.) и
+// устройства вывода настраиваются в самом Music Assistant; виджет показывает
+// «что играет», управление и позволяет выбрать выход.
+export const MUSIC_ASSISTANT_META: WidgetMeta = {
+  type: 'music_assistant',
+  name: 'Музыка (Music Assistant)',
+  emoji: '🎶',
+  description:
+    'Плеер на базе Music Assistant: что играет, управление, громкость и выбор устройства вывода. Источники и колонки настраиваются в самом Music Assistant.',
+  category: 'media',
+  defaultSize: { w: 5, h: 3 },
+  minSize: { w: 3, h: 2 },
+  paramSchema: [
+    {
+      key: 'label',
+      label: 'Подпись',
+      kind: 'text',
+      placeholder: 'Музыка',
+      hint: 'Показывается, когда устройство ещё не выбрано',
+    },
+  ],
+};
+
 // ── Camera ───────────────────────────────────────────────────────────────────
 export const CAMERA_META: WidgetMeta = {
   type: 'camera',

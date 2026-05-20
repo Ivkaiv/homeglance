@@ -19,6 +19,7 @@
  * server-side.
  */
 const http = require('http');
+const fs = require('fs');
 const { spawn } = require('child_process');
 const path = require('path');
 const { WebSocket, WebSocketServer } = require('ws');
@@ -29,7 +30,32 @@ const SUPERVISOR_TOKEN = process.env.SUPERVISOR_TOKEN || process.env.HASSIO_TOKE
 const SUPERVISOR_HOST = process.env.SUPERVISOR_HOST || 'supervisor';
 const HAS_SUPERVISOR = Boolean(SUPERVISOR_TOKEN);
 
-console.log(`[server] starting custom proxy server, supervisor=${HAS_SUPERVISOR ? 'yes' : 'no'}`);
+// Music Assistant — отдельный музыкальный сервер. Если задан MA_TOKEN, server.js
+// поднимает WS-мост `/api/glance/ma-ws`: сам авторизуется в MA, токен в браузер
+// не уходит. MA_URL по умолчанию — известный адрес на NUC.
+// Под HA Add-on пользовательские настройки лежат в /data/options.json — читаем
+// оттуда url/token, чтобы не плодить wrapper-скрипт поверх server.js.
+try {
+  const optsPath = path.join(process.env.GLANCE_DATA_DIR || '/data', 'options.json');
+  if (fs.existsSync(optsPath)) {
+    const opts = JSON.parse(fs.readFileSync(optsPath, 'utf8'));
+    if (!process.env.MA_URL && opts.music_assistant_url) {
+      process.env.MA_URL = String(opts.music_assistant_url);
+    }
+    if (!process.env.MA_TOKEN && opts.music_assistant_token) {
+      process.env.MA_TOKEN = String(opts.music_assistant_token);
+    }
+  }
+} catch (e) {
+  console.error('[server] options.json read failed:', e.message);
+}
+const MA_URL = process.env.MA_URL || 'http://192.168.1.31:8095';
+const MA_TOKEN = process.env.MA_TOKEN || '';
+const HAS_MA = Boolean(MA_TOKEN);
+
+console.log(
+  `[server] starting custom proxy server, supervisor=${HAS_SUPERVISOR ? 'yes' : 'no'}, music-assistant=${HAS_MA ? 'yes' : 'no'}`
+);
 
 // 1) Запускаем Next standalone на 127.0.0.1:NEXT_PORT
 //    next-server.js — это переименованный standalone server (см. Dockerfile),
@@ -149,6 +175,72 @@ function handleHAProxy(clientWs) {
   });
 }
 
+// 3b) WS proxy для Music Assistant. У MA свой протокол (не HA): после connect
+//     сервер шлёт hello, затем клиент авторизуется командой `auth`. Прокси
+//     делает auth сам с MA_TOKEN, придерживает hello и отдаёт его клиенту
+//     только после успешной авторизации — клиент в браузере токена не видит.
+function handleMAProxy(clientWs) {
+  console.log('[ma-ws] client connected, opening upstream to Music Assistant');
+  const maWsUrl = MA_URL.replace(/^http/, 'ws').replace(/\/+$/, '') + '/ws';
+  const upstream = new WebSocket(maWsUrl);
+
+  let authed = false;
+  let helloMsg = null;
+  const queueFromClient = [];
+
+  const safeSend = (sock, data) => {
+    if (sock.readyState === WebSocket.OPEN) {
+      try { sock.send(data); } catch {}
+    }
+  };
+
+  upstream.on('message', (data) => {
+    const text = data.toString();
+    if (authed) {
+      safeSend(clientWs, text);
+      return;
+    }
+    let msg;
+    try { msg = JSON.parse(text); } catch { return; }
+
+    // hello от MA (server_id, без message_id) — придержим, авторизуемся
+    if (msg.server_id && msg.message_id === undefined) {
+      helloMsg = text;
+      safeSend(upstream, JSON.stringify({
+        command: 'auth',
+        message_id: '__hg_proxy_auth__',
+        args: { token: MA_TOKEN },
+      }));
+      return;
+    }
+    // ответ на нашу auth-команду
+    if (msg.message_id === '__hg_proxy_auth__') {
+      if (msg.error_code !== undefined) {
+        console.error('[ma-ws] Music Assistant auth failed:', msg.details);
+        try { clientWs.close(); } catch {}
+        try { upstream.close(); } catch {}
+        return;
+      }
+      authed = true;
+      // теперь клиент может работать — отдаём ему придержанный hello
+      if (helloMsg) safeSend(clientWs, helloMsg);
+      for (const m of queueFromClient) safeSend(upstream, m);
+      queueFromClient.length = 0;
+    }
+  });
+
+  clientWs.on('message', (data) => {
+    if (authed) safeSend(upstream, data.toString());
+    else queueFromClient.push(data.toString());
+  });
+  clientWs.on('close', () => { try { upstream.close(); } catch {} });
+  upstream.on('close', () => { try { clientWs.close(); } catch {} });
+  upstream.on('error', (e) => {
+    console.error('[ma-ws] upstream error:', e.message);
+    try { clientWs.close(); } catch {}
+  });
+}
+
 const proxyWs = (req, socket, head) => {
   // Прокси к next standalone (не используется, но на случай HMR)
   const upstream = http.request({
@@ -181,6 +273,12 @@ function start() {
     if (req.url === '/api/glance/ha-ws' && HAS_SUPERVISOR) {
       wss.handleUpgrade(req, socket, head, (clientWs) => {
         handleHAProxy(clientWs);
+      });
+      return;
+    }
+    if (req.url === '/api/glance/ma-ws' && HAS_MA) {
+      wss.handleUpgrade(req, socket, head, (clientWs) => {
+        handleMAProxy(clientWs);
       });
       return;
     }

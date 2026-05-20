@@ -25,6 +25,7 @@ import {
   COVER_META,
   PERSON_META,
   MEDIA_PLAYER_META,
+  MUSIC_ASSISTANT_META,
   CAMERA_META,
   CONTROL_PANEL_META,
   ROOM_HUB_META,
@@ -128,6 +129,12 @@ export function registerBuiltinWidgets(): void {
     meta: MEDIA_PLAYER_META,
     Component: lazyLoad(() =>
       import('./MediaPlayerWidget').then((m) => m.MediaPlayerWidget)
+    ),
+  });
+  register({
+    meta: MUSIC_ASSISTANT_META,
+    Component: lazyLoad(() =>
+      import('./MusicAssistantWidget').then((m) => m.MusicAssistantWidget)
     ),
   });
   register({

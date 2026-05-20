@@ -1,5 +1,5 @@
 name: Homeglance
-version: "0.1.0-alpha.72"
+version: "0.1.0-alpha.73"
 
 slug: homeglance
 description: Modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.
@@ -23,3 +23,9 @@ hassio_api: false
 ingress: true
 ingress_port: 3040
 image: ghcr.io/ivkaiv/{arch}-homeglance
+options:
+  music_assistant_url: "http://192.168.1.31:8095"
+  music_assistant_token: ""
+schema:
+  music_assistant_url: "str?"
+  music_assistant_token: "password?"
