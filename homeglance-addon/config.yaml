@@ -1,5 +1,5 @@
 name: Homeglance
-version: "0.1.0-alpha.80"
+version: "0.1.0-alpha.81"
 
 slug: homeglance
 description: Modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.

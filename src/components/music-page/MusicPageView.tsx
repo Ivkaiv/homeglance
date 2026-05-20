@@ -235,6 +235,18 @@ export function MusicPageView({ config, pageTitle }: Props) {
   const nextName = queue?.next_item?.name || queue?.next_item?.media_item?.name || '';
   const playingUri = media?.uri ?? null;
 
+  // Адрес трека, пригодный для «волны» и «избранного». current_media.uri у
+  // Яндекс.Станции часто приходит как голый ID Яндекс.Музыки (напр. «6098481») —
+  // по нему MA ничего не сделает. Настоящий MA-адрес содержит схему («://»).
+  // Если у плеера адрес кривой, но очередь активна — берём адрес из очереди.
+  const queueTrackUri = queue?.current_item?.media_item?.uri ?? null;
+  const isMaUri = (u?: string | null): boolean => !!u && u.includes('://');
+  const actionUri: string | null = isMaUri(media?.uri)
+    ? (media?.uri as string)
+    : queue?.state === 'playing' && isMaUri(queueTrackUri)
+      ? (queueTrackUri as string)
+      : null;
+
   const run = (fn: () => Promise<unknown>) => {
     fn().catch(() => {});
   };
@@ -321,18 +333,26 @@ export function MusicPageView({ config, pageTitle }: Props) {
   const [waveBusy, setWaveBusy] = useState(false);
 
   const startWave = () => {
-    if (!playerId || !media?.uri) return;
+    if (!playerId || !media || waveBusy) return;
+    if (!actionUri) {
+      showToast('Этот трек запущен не через Glance — волну не построить');
+      return;
+    }
     setWaveBusy(true);
     client
-      .playRadio(playerId, media.uri)
+      .playRadio(playerId, actionUri)
       .then(() => showToast('Волна запущена — играем похожее'))
       .catch(() => showToast('Не удалось запустить волну'))
       .finally(() => setWaveBusy(false));
   };
   const favoriteCurrent = () => {
-    if (!media?.uri || favBusy) return;
+    if (!media || favBusy) return;
+    if (!actionUri) {
+      showToast('Этот трек запущен не через Glance — избранное недоступно');
+      return;
+    }
     setFavBusy(true);
-    const uri = media.uri;
+    const uri = actionUri;
     client
       .addFavorite(uri)
       .then(() => {
@@ -342,7 +362,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
       .catch(() => showToast('Не удалось добавить в избранное'))
       .finally(() => setFavBusy(false));
   };
-  const isFav = !!media?.uri && favUri === media.uri;
+  const isFav = !!actionUri && favUri === actionUri;
 
   const stationWarning = isYandexStation(playerId);
 
@@ -501,7 +521,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 <button
                   type="button"
                   onClick={startWave}
-                  disabled={!media?.uri || waveBusy}
+                  disabled={!media || waveBusy}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-text-secondary disabled:opacity-40 hover:bg-black/10 dark:hover:bg-white/10 active:scale-[0.97] transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
                 >
                   {waveBusy ? (
@@ -514,7 +534,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 <button
                   type="button"
                   onClick={favoriteCurrent}
-                  disabled={!media?.uri || favBusy}
+                  disabled={!media || favBusy}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-text-secondary disabled:opacity-40 hover:bg-black/10 dark:hover:bg-white/10 active:scale-[0.97] transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
                 >
                   {favBusy ? (
