@@ -41,5 +41,8 @@ export function getMAConfig(): MAConnectionConfig | null {
  */
 export function maImageProxy(url?: string | null): string | null {
   if (!url) return null;
-  return `api/glance/ma-image?url=${encodeURIComponent(url)}`;
+  // Часть обложек плейлистов Звука содержат плейсхолдер {size} в пути —
+  // без подстановки конкретного размера такая картинка не загрузится.
+  const resolved = url.replace('{size}', '600x600');
+  return `api/glance/ma-image?url=${encodeURIComponent(resolved)}`;
 }

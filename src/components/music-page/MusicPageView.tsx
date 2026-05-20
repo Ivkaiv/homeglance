@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Play,
   Pause,
@@ -24,6 +24,9 @@ import {
   ArrowLeft,
   Waves,
   Heart,
+  Loader2,
+  AudioLines,
+  AlertTriangle,
 } from 'lucide-react';
 import { PressButton } from '@/components/ui/PressButton';
 import { MarqueeText } from '@/components/ui/MarqueeText';
@@ -52,6 +55,11 @@ function fmtTime(sec: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+/** Яндекс.Станция в Music Assistant рвёт очередь — для альбомов непригодна. */
+function isYandexStation(playerId?: string): boolean {
+  return !!playerId && playerId.includes('yandex_station');
+}
+
 /** Иконка и подпись по типу медиа-элемента. */
 function kindInfo(item: MAMediaItem): { Icon: typeof Music; label: string } {
   switch (item.media_type) {
@@ -69,24 +77,40 @@ function kindInfo(item: MAMediaItem): { Icon: typeof Music; label: string } {
 /**
  * Строка медиа-элемента. Трек — сразу включается; альбом/артист/плейлист —
  * открывается (drill-down). Тип определяет завершающую иконку.
+ *
+ * pendingUri / playingUri дают визуальный отклик: пока команда «летит» —
+ * крутится спиннер, играющий трек подсвечен. Без этого было непонятно,
+ * нажалось ли вообще.
  */
 function MediaRow({
   item,
   onActivate,
+  pendingUri,
+  playingUri,
+  accentColor,
 }: {
   item: MAMediaItem;
   onActivate: (i: MAMediaItem) => void;
+  pendingUri?: string | null;
+  playingUri?: string | null;
+  accentColor: string;
 }) {
   const { Icon, label } = kindInfo(item);
   const thumb = maImageProxy(item.metadata?.images?.[0]?.path ?? item.image?.path);
   const sub = item.artists?.[0]?.name || label;
   const isTrack = item.media_type === 'track' || !item.media_type;
+  const isPending = !!item.uri && item.uri === pendingUri;
+  const isPlaying = !!item.uri && item.uri === playingUri;
   return (
     <button
       type="button"
       onClick={() => onActivate(item)}
       aria-label={`${isTrack ? 'Включить' : 'Открыть'} ${item.name ?? ''}`}
-      className="flex items-center gap-2.5 py-2 px-2 rounded-lg text-left hover:bg-black/5 dark:hover:bg-white/5 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+      className={`flex items-center gap-2.5 py-2 px-2 rounded-lg text-left transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 active:scale-[0.98] ${
+        isPlaying
+          ? 'bg-accent/10'
+          : 'hover:bg-black/5 dark:hover:bg-white/5 active:bg-black/10 dark:active:bg-white/10'
+      }`}
     >
       {thumb ? (
         <img
@@ -103,10 +127,29 @@ function MediaRow({
         </div>
       )}
       <span className="flex-1 min-w-0">
-        <span className="block text-sm truncate">{item.name ?? '—'}</span>
+        <span
+          className="block text-sm truncate"
+          style={isPlaying ? { color: accentColor } : undefined}
+        >
+          {item.name ?? '—'}
+        </span>
         <span className="block text-[11px] text-text-tertiary truncate">{sub}</span>
       </span>
-      {isTrack ? (
+      {isPending ? (
+        <Loader2
+          size={16}
+          className="shrink-0 animate-spin"
+          style={{ color: accentColor }}
+          aria-hidden="true"
+        />
+      ) : isPlaying ? (
+        <AudioLines
+          size={16}
+          className="shrink-0"
+          style={{ color: accentColor }}
+          aria-hidden="true"
+        />
+      ) : isTrack ? (
         <Play size={15} className="text-text-tertiary shrink-0" aria-hidden="true" />
       ) : (
         <ChevronRight size={16} className="text-text-tertiary shrink-0" aria-hidden="true" />
@@ -145,6 +188,22 @@ export function MusicPageView({ config, pageTitle }: Props) {
   const playerId = active?.player_id;
   const queue = useMAQueue(playerId);
 
+  // ── Тост: короткое всплывающее уведомление ─────────────────────────────
+  // Главное лекарство от «непонятно, нажалось или нет» — каждое действие
+  // подтверждается видимой плашкой.
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = (msg: string) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2600);
+  };
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
+
   // ── Прогресс ───────────────────────────────────────────────────────────
   const playing = active?.playback_state === 'playing';
   const [now, setNow] = useState(() => Date.now());
@@ -174,10 +233,25 @@ export function MusicPageView({ config, pageTitle }: Props) {
   const shuffle = queue?.shuffle_enabled ?? false;
   const repeatMode = (queue?.repeat_mode ?? 'off') as 'off' | 'one' | 'all';
   const nextName = queue?.next_item?.name || queue?.next_item?.media_item?.name || '';
+  const playingUri = media?.uri ?? null;
 
   const run = (fn: () => Promise<unknown>) => {
     fn().catch(() => {});
   };
+
+  // ── Запуск трека/альбома с подтверждением ──────────────────────────────
+  // pendingUri — то, что мы только что попросили включить. Пока MA не
+  // переключился (или не истёк таймаут) — строка крутит спиннер.
+  const [pendingUri, setPendingUri] = useState<string | null>(null);
+  useEffect(() => {
+    if (!pendingUri) return;
+    if (playingUri === pendingUri) {
+      setPendingUri(null);
+      return;
+    }
+    const t = setTimeout(() => setPendingUri(null), 9000);
+    return () => clearTimeout(t);
+  }, [pendingUri, playingUri]);
 
   // ── Поиск ──────────────────────────────────────────────────────────────
   const [query, setQuery] = useState('');
@@ -223,6 +297,9 @@ export function MusicPageView({ config, pageTitle }: Props) {
 
   const playItem = (item: MAMediaItem) => {
     if (!playerId || !item.uri) return;
+    setPendingUri(item.uri);
+    const what = item.name ? `«${item.name}»` : 'трек';
+    showToast(`Запускаю ${what} на «${active?.name ?? 'плеере'}»`);
     run(() => client.playMedia(playerId, item.uri as string));
   };
 
@@ -240,17 +317,34 @@ export function MusicPageView({ config, pageTitle }: Props) {
 
   // ── «Волна» и избранное по текущему треку ──────────────────────────────
   const [favUri, setFavUri] = useState<string | null>(null);
+  const [favBusy, setFavBusy] = useState(false);
+  const [waveBusy, setWaveBusy] = useState(false);
+
   const startWave = () => {
-    if (playerId && media?.uri) run(() => client.playRadio(playerId, media.uri as string));
+    if (!playerId || !media?.uri) return;
+    setWaveBusy(true);
+    client
+      .playRadio(playerId, media.uri)
+      .then(() => showToast('Волна запущена — играем похожее'))
+      .catch(() => showToast('Не удалось запустить волну'))
+      .finally(() => setWaveBusy(false));
   };
   const favoriteCurrent = () => {
-    if (!media?.uri) return;
+    if (!media?.uri || favBusy) return;
+    setFavBusy(true);
+    const uri = media.uri;
     client
-      .addFavorite(media.uri)
-      .then(() => setFavUri(media.uri ?? null))
-      .catch(() => {});
+      .addFavorite(uri)
+      .then(() => {
+        setFavUri(uri);
+        showToast('Добавлено в избранное');
+      })
+      .catch(() => showToast('Не удалось добавить в избранное'))
+      .finally(() => setFavBusy(false));
   };
   const isFav = !!media?.uri && favUri === media.uri;
+
+  const stationWarning = isYandexStation(playerId);
 
   return (
     <main key="music-page" className="page-fade-in">
@@ -407,25 +501,33 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 <button
                   type="button"
                   onClick={startWave}
-                  disabled={!media?.uri}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-text-secondary disabled:opacity-40 hover:bg-black/10 dark:hover:bg-white/10 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                  disabled={!media?.uri || waveBusy}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-text-secondary disabled:opacity-40 hover:bg-black/10 dark:hover:bg-white/10 active:scale-[0.97] transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
                 >
-                  <Waves size={15} aria-hidden="true" />
-                  Волна
+                  {waveBusy ? (
+                    <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Waves size={15} aria-hidden="true" />
+                  )}
+                  {waveBusy ? 'Запускаю…' : 'Волна'}
                 </button>
                 <button
                   type="button"
                   onClick={favoriteCurrent}
-                  disabled={!media?.uri}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-text-secondary disabled:opacity-40 hover:bg-black/10 dark:hover:bg-white/10 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                  disabled={!media?.uri || favBusy}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-text-secondary disabled:opacity-40 hover:bg-black/10 dark:hover:bg-white/10 active:scale-[0.97] transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
                 >
-                  <Heart
-                    size={15}
-                    aria-hidden="true"
-                    fill={isFav ? accentColor : 'none'}
-                    style={isFav ? { color: accentColor } : undefined}
-                  />
-                  {isFav ? 'В избранном' : 'В избранное'}
+                  {favBusy ? (
+                    <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Heart
+                      size={15}
+                      aria-hidden="true"
+                      fill={isFav ? accentColor : 'none'}
+                      style={isFav ? { color: accentColor } : undefined}
+                    />
+                  )}
+                  {favBusy ? 'Добавляю…' : isFav ? 'В избранном' : 'В избранное'}
                 </button>
               </div>
 
@@ -449,9 +551,12 @@ export function MusicPageView({ config, pageTitle }: Props) {
                     <button
                       key={p.player_id}
                       type="button"
-                      onClick={() => selectPlayer(p.player_id)}
+                      onClick={() => {
+                        selectPlayer(p.player_id);
+                        showToast(`Выход: ${p.name}`);
+                      }}
                       aria-label={`Выход: ${p.name}`}
-                      className={`flex items-center gap-2 py-2 px-2.5 rounded-lg text-left transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 ${
+                      className={`flex items-center gap-2 py-2 px-2.5 rounded-lg text-left transition active:scale-[0.98] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 ${
                         selected
                           ? 'bg-black/8 dark:bg-white/10'
                           : 'hover:bg-black/5 dark:hover:bg-white/5'
@@ -479,62 +584,17 @@ export function MusicPageView({ config, pageTitle }: Props) {
                   );
                 })}
               </div>
-            </div>
-
-            {/* ── Открытый альбом / артист / плейлист ── */}
-            {detail && (
-              <div className="glass p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <button
-                    type="button"
-                    onClick={() => setDetail(null)}
-                    aria-label="Назад"
-                    className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                  >
-                    <ArrowLeft size={16} aria-hidden="true" />
-                  </button>
-                  {(() => {
-                    const dThumb = maImageProxy(
-                      detail.metadata?.images?.[0]?.path ?? detail.image?.path
-                    );
-                    return dThumb ? (
-                      <img
-                        src={dThumb}
-                        alt=""
-                        className="w-12 h-12 rounded object-cover shrink-0 bg-black/10 dark:bg-white/10"
-                      />
-                    ) : null;
-                  })()}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{detail.name}</div>
-                    <div className="text-[11px] text-text-tertiary">
-                      {kindInfo(detail).label}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => playItem(detail)}
-                    className="px-3 py-1.5 rounded-lg bg-accent/20 border border-accent/40 text-accent text-xs shrink-0 flex items-center gap-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                  >
-                    <Play size={13} aria-hidden="true" />
-                    Играть всё
-                  </button>
+              {stationWarning && (
+                <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-[12px] leading-snug text-amber-700 dark:text-amber-300">
+                  <AlertTriangle size={15} className="shrink-0 mt-0.5" aria-hidden="true" />
+                  <span>
+                    Яндекс.Станция через Music Assistant проигрывает один трек и
+                    обрывает очередь. Для альбомов и плейлистов выберите ТВ-приставку
+                    или другой плеер.
+                  </span>
                 </div>
-                {detailLoading ? (
-                  <div className="text-sm text-text-tertiary text-center py-4">Загрузка…</div>
-                ) : detailTracks.length === 0 ? (
-                  <div className="text-sm text-text-tertiary text-center py-4">
-                    Треки не загрузились.
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-1">
-                    {detailTracks.map((t, i) => (
-                      <MediaRow key={`d-${t.uri ?? i}`} item={t} onActivate={onActivate} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
 
             {/* ── Поиск музыки ── */}
             <div className="glass p-4">
@@ -553,14 +613,17 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 <button
                   type="button"
                   onClick={doSearch}
-                  className="px-4 py-2 rounded-lg bg-accent/20 border border-accent/40 text-accent text-sm shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                  className="px-4 py-2 rounded-lg bg-accent/20 border border-accent/40 text-accent text-sm shrink-0 active:scale-[0.97] transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
                 >
                   Поиск
                 </button>
               </div>
 
               {searching && (
-                <div className="text-sm text-text-tertiary text-center py-4">Ищу…</div>
+                <div className="flex items-center justify-center gap-2 text-sm text-text-tertiary py-4">
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
+                  Ищу…
+                </div>
               )}
               {!searching && results && results.length === 0 && (
                 <div className="text-sm text-text-tertiary text-center py-4">
@@ -570,7 +633,14 @@ export function MusicPageView({ config, pageTitle }: Props) {
               {!searching && results && results.length > 0 && (
                 <div className="flex flex-col gap-1">
                   {results.map((item, i) => (
-                    <MediaRow key={`${item.uri ?? i}`} item={item} onActivate={onActivate} />
+                    <MediaRow
+                      key={`${item.uri ?? i}`}
+                      item={item}
+                      onActivate={onActivate}
+                      pendingUri={pendingUri}
+                      playingUri={playingUri}
+                      accentColor={accentColor}
+                    />
                   ))}
                 </div>
               )}
@@ -590,7 +660,14 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 </div>
                 <div className="flex flex-col gap-1">
                   {recent.map((item, i) => (
-                    <MediaRow key={`recent-${item.uri ?? i}`} item={item} onActivate={onActivate} />
+                    <MediaRow
+                      key={`recent-${item.uri ?? i}`}
+                      item={item}
+                      onActivate={onActivate}
+                      pendingUri={pendingUri}
+                      playingUri={playingUri}
+                      accentColor={accentColor}
+                    />
                   ))}
                 </div>
               </div>
@@ -598,6 +675,103 @@ export function MusicPageView({ config, pageTitle }: Props) {
           </>
         )}
       </div>
+
+      {/* ── Открытый альбом / артист / плейлист — полноэкранный слой ── */}
+      {detail && (
+        <div
+          className="fixed inset-0 z-50 bg-bg-primary/95 backdrop-blur-sm overflow-y-auto page-fade-in"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="max-w-(--breakpoint-md) mx-auto p-4 sm:p-6 flex flex-col gap-4">
+            {/* Шапка: назад + обложка + «играть всё» */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setDetail(null)}
+                aria-label="Назад"
+                className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-center shrink-0 active:scale-95 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+              >
+                <ArrowLeft size={18} aria-hidden="true" />
+              </button>
+              <span className="text-sm text-text-secondary">Назад к поиску</span>
+            </div>
+
+            <div className="glass p-5 flex flex-col items-center gap-3 text-center">
+              {(() => {
+                const dThumb = maImageProxy(
+                  detail.metadata?.images?.[0]?.path ?? detail.image?.path
+                );
+                return dThumb ? (
+                  <img
+                    src={dThumb}
+                    alt=""
+                    className="w-40 h-40 rounded-2xl object-cover bg-black/10 dark:bg-white/10"
+                  />
+                ) : (
+                  <div className="w-40 h-40 rounded-2xl bg-black/10 dark:bg-white/10 flex items-center justify-center">
+                    {(() => {
+                      const { Icon } = kindInfo(detail);
+                      return <Icon size={48} className="text-text-tertiary" aria-hidden="true" />;
+                    })()}
+                  </div>
+                );
+              })()}
+              <div className="min-w-0 w-full">
+                <div className="text-lg font-semibold truncate">{detail.name}</div>
+                <div className="text-xs text-text-tertiary mt-0.5">
+                  {kindInfo(detail).label}
+                  {detail.artists?.[0]?.name ? ` · ${detail.artists[0].name}` : ''}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => playItem(detail)}
+                className="mt-1 px-5 py-2 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm flex items-center gap-1.5 active:scale-95 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+              >
+                <Play size={15} aria-hidden="true" />
+                Играть всё
+              </button>
+            </div>
+
+            <div className="glass p-4">
+              {detailLoading ? (
+                <div className="flex items-center justify-center gap-2 text-sm text-text-tertiary py-6">
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                  Загрузка…
+                </div>
+              ) : detailTracks.length === 0 ? (
+                <div className="text-sm text-text-tertiary text-center py-6">
+                  Треки не загрузились.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {detailTracks.map((t, i) => (
+                    <MediaRow
+                      key={`d-${t.uri ?? i}`}
+                      item={t}
+                      onActivate={onActivate}
+                      pendingUri={pendingUri}
+                      playingUri={playingUri}
+                      accentColor={accentColor}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Тост ── */}
+      {toast && (
+        <div
+          className="fixed left-1/2 -translate-x-1/2 bottom-6 z-[60] max-w-[90vw] px-4 py-2.5 rounded-xl bg-black/85 text-white text-sm text-center shadow-lg backdrop-blur-sm pointer-events-none page-fade-in"
+          role="status"
+        >
+          {toast}
+        </div>
+      )}
     </main>
   );
 }

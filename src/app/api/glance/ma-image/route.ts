@@ -11,7 +11,14 @@
  * CDN обложек.
  */
 
-const ALLOWED_HOSTS = ['cdn-image.zvuk.com', 'avatars.yandex.net'];
+// Звук отдаёт обложки с разных хостов: альбомы/артисты — cdn-image.zvuk.com,
+// а плейлисты — напрямую с zvuk.com (/static/avatar/...). Нужны оба.
+const ALLOWED_HOSTS = [
+  'cdn-image.zvuk.com',
+  'zvuk.com',
+  'www.zvuk.com',
+  'avatars.yandex.net',
+];
 
 export const dynamic = 'force-dynamic';
 
