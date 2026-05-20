@@ -126,6 +126,7 @@ export function PagesProvider({ children }: { children: ReactNode }) {
       kind,
       widgets: init?.widgets || [],
       weather: init?.weather,
+      music: init?.music,
       protected: false,
     };
     setPages((prev) => {

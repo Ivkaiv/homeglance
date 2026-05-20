@@ -307,9 +307,9 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
         </div>
       </header>
 
-      {current.kind === 'music' && current.music ? (
+      {current.kind === 'music' ? (
         <main key={current.id} className="page-fade-in">
-          <MusicPageView config={current.music} pageTitle={current.title} />
+          <MusicPageView config={current.music ?? {}} pageTitle={current.title} />
         </main>
       ) : current.kind === 'weather' && current.weather ? (
         <main key={current.id} className="page-fade-in">
