@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Play,
   Pause,
@@ -20,6 +20,10 @@ import {
   Mic2,
   ListMusic,
   History,
+  ChevronRight,
+  ArrowLeft,
+  Waves,
+  Heart,
 } from 'lucide-react';
 import { PressButton } from '@/components/ui/PressButton';
 import { MarqueeText } from '@/components/ui/MarqueeText';
@@ -62,16 +66,26 @@ function kindInfo(item: MAMediaItem): { Icon: typeof Music; label: string } {
   }
 }
 
-/** Строка результата — обложка/иконка, название, подпись, кнопка play. */
-function MediaRow({ item, onPlay }: { item: MAMediaItem; onPlay: (i: MAMediaItem) => void }) {
+/**
+ * Строка медиа-элемента. Трек — сразу включается; альбом/артист/плейлист —
+ * открывается (drill-down). Тип определяет завершающую иконку.
+ */
+function MediaRow({
+  item,
+  onActivate,
+}: {
+  item: MAMediaItem;
+  onActivate: (i: MAMediaItem) => void;
+}) {
   const { Icon, label } = kindInfo(item);
   const thumb = maImageProxy(item.metadata?.images?.[0]?.path ?? item.image?.path);
   const sub = item.artists?.[0]?.name || label;
+  const isTrack = item.media_type === 'track' || !item.media_type;
   return (
     <button
       type="button"
-      onClick={() => onPlay(item)}
-      aria-label={`Включить ${item.name ?? ''}`}
+      onClick={() => onActivate(item)}
+      aria-label={`${isTrack ? 'Включить' : 'Открыть'} ${item.name ?? ''}`}
       className="flex items-center gap-2.5 py-2 px-2 rounded-lg text-left hover:bg-black/5 dark:hover:bg-white/5 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
     >
       {thumb ? (
@@ -92,15 +106,19 @@ function MediaRow({ item, onPlay }: { item: MAMediaItem; onPlay: (i: MAMediaItem
         <span className="block text-sm truncate">{item.name ?? '—'}</span>
         <span className="block text-[11px] text-text-tertiary truncate">{sub}</span>
       </span>
-      <Play size={15} className="text-text-tertiary shrink-0" aria-hidden="true" />
+      {isTrack ? (
+        <Play size={15} className="text-text-tertiary shrink-0" aria-hidden="true" />
+      ) : (
+        <ChevronRight size={16} className="text-text-tertiary shrink-0" aria-hidden="true" />
+      )}
     </button>
   );
 }
 
 /**
  * Полноэкранная страница «Музыка» — плеер Music Assistant: что играет,
- * управление (включая shuffle/repeat и «что дальше»), выбор устройства
- * вывода, поиск музыки и недавно прослушанное.
+ * управление (shuffle/repeat/«Далее»), «волна» и избранное, выбор устройства
+ * вывода, поиск с открытием альбомов/артистов, недавно прослушанное.
  */
 export function MusicPageView({ config, pageTitle }: Props) {
   useMAConnection();
@@ -172,7 +190,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
     setSearching(true);
     client
       .search(q)
-      .then((r) => setResults([...r.albums, ...r.tracks, ...r.playlists, ...r.artists]))
+      .then((r) => setResults([...r.albums, ...r.artists, ...r.playlists, ...r.tracks]))
       .catch(() => setResults([]))
       .finally(() => setSearching(false));
   };
@@ -187,9 +205,31 @@ export function MusicPageView({ config, pageTitle }: Props) {
       .catch(() => setRecent([]));
   }, [status, client]);
 
+  // ── Открытие альбома / артиста / плейлиста ─────────────────────────────
+  const [detail, setDetail] = useState<MAMediaItem | null>(null);
+  const [detailTracks, setDetailTracks] = useState<MAMediaItem[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  const openDetail = (item: MAMediaItem) => {
+    setDetail(item);
+    setDetailTracks([]);
+    setDetailLoading(true);
+    client
+      .getItemTracks(item)
+      .then(setDetailTracks)
+      .catch(() => setDetailTracks([]))
+      .finally(() => setDetailLoading(false));
+  };
+
   const playItem = (item: MAMediaItem) => {
     if (!playerId || !item.uri) return;
     run(() => client.playMedia(playerId, item.uri as string));
+  };
+
+  // Трек включаем, контейнер (альбом/артист/плейлист) открываем.
+  const onActivate = (item: MAMediaItem) => {
+    if (item.media_type === 'track' || !item.media_type) playItem(item);
+    else openDetail(item);
   };
 
   const cycleRepeat = () => {
@@ -197,6 +237,20 @@ export function MusicPageView({ config, pageTitle }: Props) {
     const next = repeatMode === 'off' ? 'all' : repeatMode === 'all' ? 'one' : 'off';
     run(() => client.setRepeat(playerId, next));
   };
+
+  // ── «Волна» и избранное по текущему треку ──────────────────────────────
+  const [favUri, setFavUri] = useState<string | null>(null);
+  const startWave = () => {
+    if (playerId && media?.uri) run(() => client.playRadio(playerId, media.uri as string));
+  };
+  const favoriteCurrent = () => {
+    if (!media?.uri) return;
+    client
+      .addFavorite(media.uri)
+      .then(() => setFavUri(media.uri ?? null))
+      .catch(() => {});
+  };
+  const isFav = !!media?.uri && favUri === media.uri;
 
   return (
     <main key="music-page" className="page-fade-in">
@@ -348,6 +402,33 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 </span>
               </div>
 
+              {/* Волна + избранное по текущему треку */}
+              <div className="flex items-center gap-2 w-full">
+                <button
+                  type="button"
+                  onClick={startWave}
+                  disabled={!media?.uri}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-text-secondary disabled:opacity-40 hover:bg-black/10 dark:hover:bg-white/10 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                >
+                  <Waves size={15} aria-hidden="true" />
+                  Волна
+                </button>
+                <button
+                  type="button"
+                  onClick={favoriteCurrent}
+                  disabled={!media?.uri}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm text-text-secondary disabled:opacity-40 hover:bg-black/10 dark:hover:bg-white/10 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                >
+                  <Heart
+                    size={15}
+                    aria-hidden="true"
+                    fill={isFav ? accentColor : 'none'}
+                    style={isFav ? { color: accentColor } : undefined}
+                  />
+                  {isFav ? 'В избранном' : 'В избранное'}
+                </button>
+              </div>
+
               {nextName && (
                 <div className="text-xs text-text-tertiary w-full truncate text-center">
                   Далее: {nextName}
@@ -400,6 +481,61 @@ export function MusicPageView({ config, pageTitle }: Props) {
               </div>
             </div>
 
+            {/* ── Открытый альбом / артист / плейлист ── */}
+            {detail && (
+              <div className="glass p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setDetail(null)}
+                    aria-label="Назад"
+                    className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                  >
+                    <ArrowLeft size={16} aria-hidden="true" />
+                  </button>
+                  {(() => {
+                    const dThumb = maImageProxy(
+                      detail.metadata?.images?.[0]?.path ?? detail.image?.path
+                    );
+                    return dThumb ? (
+                      <img
+                        src={dThumb}
+                        alt=""
+                        className="w-12 h-12 rounded object-cover shrink-0 bg-black/10 dark:bg-white/10"
+                      />
+                    ) : null;
+                  })()}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{detail.name}</div>
+                    <div className="text-[11px] text-text-tertiary">
+                      {kindInfo(detail).label}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => playItem(detail)}
+                    className="px-3 py-1.5 rounded-lg bg-accent/20 border border-accent/40 text-accent text-xs shrink-0 flex items-center gap-1 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
+                  >
+                    <Play size={13} aria-hidden="true" />
+                    Играть всё
+                  </button>
+                </div>
+                {detailLoading ? (
+                  <div className="text-sm text-text-tertiary text-center py-4">Загрузка…</div>
+                ) : detailTracks.length === 0 ? (
+                  <div className="text-sm text-text-tertiary text-center py-4">
+                    Треки не загрузились.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    {detailTracks.map((t, i) => (
+                      <MediaRow key={`d-${t.uri ?? i}`} item={t} onActivate={onActivate} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* ── Поиск музыки ── */}
             <div className="glass p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -434,7 +570,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
               {!searching && results && results.length > 0 && (
                 <div className="flex flex-col gap-1">
                   {results.map((item, i) => (
-                    <MediaRow key={`${item.uri ?? i}`} item={item} onPlay={playItem} />
+                    <MediaRow key={`${item.uri ?? i}`} item={item} onActivate={onActivate} />
                   ))}
                 </div>
               )}
@@ -454,7 +590,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 </div>
                 <div className="flex flex-col gap-1">
                   {recent.map((item, i) => (
-                    <MediaRow key={`recent-${item.uri ?? i}`} item={item} onPlay={playItem} />
+                    <MediaRow key={`recent-${item.uri ?? i}`} item={item} onActivate={onActivate} />
                   ))}
                 </div>
               </div>

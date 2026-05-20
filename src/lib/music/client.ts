@@ -324,6 +324,37 @@ export class MAClient {
       repeat_mode: mode,
     });
   }
+
+  /** Треки внутри альбома / плейлиста / артиста (для drill-down). */
+  async getItemTracks(item: MAMediaItem): Promise<MAMediaItem[]> {
+    const map: Record<string, string> = {
+      album: 'music/albums/album_tracks',
+      playlist: 'music/playlists/playlist_tracks',
+      artist: 'music/artists/artist_tracks',
+    };
+    const cmd = item.media_type ? map[item.media_type] : undefined;
+    if (!cmd || !item.item_id || !item.provider) return [];
+    const r = (await this.command(cmd, {
+      item_id: item.item_id,
+      provider_instance_id_or_domain: item.provider,
+    })) as MAMediaItem[] | null;
+    return Array.isArray(r) ? r : [];
+  }
+
+  /** Запустить «волну» (радио-режим) на основе элемента. */
+  playRadio(playerId: string, uri: string) {
+    return this.command('player_queues/play_media', {
+      queue_id: playerId,
+      media: uri,
+      option: 'play',
+      radio_mode: true,
+    });
+  }
+
+  /** Добавить элемент в избранное источника (по uri). */
+  addFavorite(uri: string) {
+    return this.command('music/favorites/add_item', { item: uri });
+  }
 }
 
 let singleton: MAClient | null = null;
