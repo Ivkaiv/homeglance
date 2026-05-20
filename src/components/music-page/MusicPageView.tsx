@@ -25,6 +25,7 @@ import {
   useMAConnection,
   useMAPlayers,
 } from '@/lib/music/MusicProvider';
+import { maImageProxy } from '@/lib/music/config';
 import type { MusicPageConfig } from '@/lib/pages/types';
 import type { MAMediaItem, MASearchResults } from '@/lib/music/types';
 
@@ -82,7 +83,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
   }, [playing]);
 
   const media = active?.current_media ?? null;
-  const cover = media?.image_url && media.image_url.startsWith('http') ? media.image_url : null;
+  const cover = maImageProxy(media?.image_url);
   const accent = useImageAccent(cover);
   const accentRgb = accent?.match(/\d+/g)?.join(' ') ?? null;
   const accentColor = accentRgb ? `rgb(${accentRgb})` : 'rgb(var(--accent))';
@@ -366,7 +367,25 @@ export function MusicPageView({ config, pageTitle }: Props) {
                         aria-label={`Включить ${item.name ?? ''}`}
                         className="flex items-center gap-2.5 py-2 px-2 rounded-lg text-left hover:bg-black/5 dark:hover:bg-white/5 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
                       >
-                        <Icon size={18} className="text-text-tertiary shrink-0" aria-hidden="true" />
+                        {(() => {
+                          const thumb = maImageProxy(
+                            item.metadata?.images?.[0]?.path ?? item.image?.path
+                          );
+                          return thumb ? (
+                            <img
+                              src={thumb}
+                              alt=""
+                              width={40}
+                              height={40}
+                              loading="lazy"
+                              className="w-10 h-10 rounded object-cover shrink-0 bg-black/10 dark:bg-white/10"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
+                              <Icon size={18} className="text-text-tertiary" aria-hidden="true" />
+                            </div>
+                          );
+                        })()}
                         <span className="flex-1 min-w-0">
                           <span className="block text-sm truncate">{item.name ?? '—'}</span>
                           <span className="block text-[11px] text-text-tertiary truncate">{sub}</span>

@@ -32,3 +32,14 @@ export function getMAConfig(): MAConnectionConfig | null {
   const wsUrl = new URL('api/glance/ma-ws', baseUrl).href.replace(/^http/, 'ws');
   return { wsUrl, token: null };
 }
+
+/**
+ * URL обложки через серверный прокси Glance. Нужен, потому что MA отдаёт
+ * http://-ссылки на imageproxy (mixed-content под https-Ingress), а прямые
+ * CDN-ссылки кросс-доменные. Путь относительный — чтобы корректно
+ * резолвился под HA Ingress (см. <base href> в layout.tsx).
+ */
+export function maImageProxy(url?: string | null): string | null {
+  if (!url) return null;
+  return `api/glance/ma-image?url=${encodeURIComponent(url)}`;
+}

@@ -16,6 +16,7 @@ import { ModalSheet } from '@/components/ui/ModalSheet';
 import { PressButton } from '@/components/ui/PressButton';
 import { useImageAccent } from '@/lib/useImageAccent';
 import { useMusic, useMAPlayers } from '@/lib/music/MusicProvider';
+import { maImageProxy } from '@/lib/music/config';
 
 interface Props {
   open: boolean;
@@ -53,7 +54,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
   }, [open, playing]);
 
   const media = player?.current_media ?? null;
-  const cover = media?.image_url && media.image_url.startsWith('http') ? media.image_url : null;
+  const cover = maImageProxy(media?.image_url);
   const accent = useImageAccent(cover);
   const accentRgb = accent?.match(/\d+/g)?.join(' ') ?? null;
   const accentColor = accentRgb ? `rgb(${accentRgb})` : 'rgb(var(--accent))';

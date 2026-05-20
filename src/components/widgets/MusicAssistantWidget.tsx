@@ -12,6 +12,7 @@ import {
   useMAConnection,
   useMAPlayers,
 } from '@/lib/music/MusicProvider';
+import { maImageProxy } from '@/lib/music/config';
 import type { MAPlayer } from '@/lib/music/types';
 import { MusicAssistantSheet } from './MusicAssistantSheet';
 
@@ -63,9 +64,8 @@ export function MusicAssistantWidget({ params }: { params: Params }) {
   const playing = active?.playback_state === 'playing';
   const title = media?.title || (active ? 'Ничего не играет' : '—');
   const artist = media?.artist || '';
-  const cover = media?.image_url;
-  const coverForAccent = cover?.startsWith('http') ? cover : null;
-  const accent = useImageAccent(coverForAccent);
+  const cover = maImageProxy(media?.image_url);
+  const accent = useImageAccent(cover);
   const accentRgb = accent?.match(/\d+/g)?.join(' ') ?? null;
   const playBg = accentRgb ? `rgb(${accentRgb} / 0.25)` : 'rgb(var(--accent) / 0.25)';
   const playBgPressed = accentRgb ? `rgb(${accentRgb} / 0.45)` : 'rgb(var(--accent) / 0.45)';
@@ -135,11 +135,11 @@ export function MusicAssistantWidget({ params }: { params: Params }) {
         ref={ref}
         className="glass h-full w-full p-2.5 flex items-center gap-2.5 overflow-hidden relative"
       >
-        {coverForAccent && (
+        {cover && (
           <div
             className="absolute inset-0 pointer-events-none opacity-25"
             style={{
-              backgroundImage: `url(${coverForAccent})`,
+              backgroundImage: `url(${cover})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               filter: 'blur(22px)',
