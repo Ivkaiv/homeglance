@@ -37,7 +37,8 @@
 3. Зарегистрировать в `src/components/widgets/index.tsx` (lazy через `next/dynamic`)
 4. Открыть PR со скриншотом
 
-Подробнее в [docs/04-widgets.md](docs/04-widgets.md).
+Если делаете виджет, который подключается отдельным `.js`-файлом без сборки
+проекта — см. [docs/sdk.md](docs/sdk.md).
 
 ## Стиль кода
 

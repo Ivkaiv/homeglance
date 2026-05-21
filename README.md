@@ -12,7 +12,7 @@
 ## Возможности
 
 - **Drag-and-drop сетка** — плитки можно двигать, ресайзить, удалять
-- **15+ виджетов** — свет, переключатели, сенсоры, климат, медиа, камера, шторы, погода, человек, заметки, часы, действия (скрипты/сцены), панели управления, хабы комнат
+- **28 виджетов** — свет, переключатели, замки, сенсоры, климат, медиа, камеры, шторы, погода, человек, карта, календарь, энергопотребление, заметки, часы, действия (скрипты/сцены/webhook), панели управления, хабы комнат, мониторинг глюкозы
 - **Несколько страниц** с dock-bar внизу — переключение свайпом
 - **Multi-user** — несколько профилей с PIN-защитой, каждый со своей раскладкой
 - **PWA** — устанавливается как нативное приложение на iOS, Android, desktop
@@ -35,8 +35,7 @@
 **Zero-config авторизация.** Под HA Ingress add-on автоматически
 подключается к HA через `SUPERVISOR_TOKEN` — никаких токенов вручную
 создавать не нужно. WS- и REST-запросы к HA проксируются server-side,
-токен не покидает контейнер. Архитектура описана в
-[ADR 004](agent-state/adr/004-ha-ingress-server-side-proxy.md).
+токен не покидает контейнер.
 
 **Persistent storage.** Профили, виджеты, темы хранятся в `/data` mount,
 который Supervisor сохраняет между рестартами, обновлениями и
@@ -135,23 +134,12 @@ bun dev
 
 ## Документация
 
-Полная архитектурная документация — в директории [`docs/`](docs/):
+Руководства для пользователя — в директории [`docs/`](docs/):
 
-- [Vision & Philosophy](docs/01-vision.md)
-- [Architecture](docs/02-architecture.md)
-- [Visual Design](docs/03-design.md)
-- [Widget System](docs/04-widgets.md)
-- [Pages & Navigation](docs/05-navigation.md)
-- [Multi-user](docs/06-multi-user.md)
-- [Authentication](docs/07-auth.md)
-- [Storage & Sync](docs/08-storage.md)
-- [Theming](docs/09-theming.md)
-- [Roadmap](docs/10-roadmap.md)
-- [Tech Stack](docs/11-stack.md)
-- [Repository Layout](docs/12-repo.md)
-- [HACS Distribution](docs/13-hacs.md)
-- [Contributing](docs/14-contributing.md)
-- [HACS Plugin](docs/16-hacs-plugin.md)
+- [Установка и первый запуск](docs/getting-started.md) — подключение к Home Assistant, создание токена, мастер настройки
+- [Руководство пользователя](docs/user-guide.md) — редактирование дашборда, страницы, профили, темы
+- [Справочник виджетов](docs/widgets.md) — все встроенные плитки
+- [Свои виджеты (SDK)](docs/sdk.md) — для разработчиков
 
 ## Технологии
 
@@ -164,20 +152,15 @@ bun dev
 
 ## Статус
 
-**Alpha.** Работает у автора в продакшене несколько недель, но публичных пользователей пока нет. До v1.0:
-
-- [x] Phase 0–5 — foundation, layout, multi-page, multi-user, виджеты, room hub
-- [x] Phase 6 — error boundaries, skeletons, code-split (-22× initial bundle), Lighthouse a11y/best/seo = 100
-- [ ] Phase 7 — публикация на GitHub, HACS plugin, Docker
-- [ ] Phase 8+ — i18n (en/ru), экспорт раскладок, push-уведомления, кастомные виджеты
-
-См. [Roadmap](docs/10-roadmap.md).
+**Alpha.** Работает у автора в продакшене, активно развивается. Возможны
+изменения и шероховатости. Баг-репорты и предложения — через
+[GitHub Issues](https://github.com/Ivkaiv/homeglance/issues).
 
 ## Contributing
 
 Любые вклады welcome. Перед PR прочитайте [CONTRIBUTING.md](CONTRIBUTING.md) и [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Если хотите добавить новый виджет — это самый простой способ контрибьютнуть, см. [docs/04-widgets.md](docs/04-widgets.md).
+Если хотите добавить новый виджет — см. [docs/sdk.md](docs/sdk.md).
 
 ## License
 
