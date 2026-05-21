@@ -5,8 +5,9 @@
 **Homeglance** (внутри приложения — просто **Glance**) — это PWA-панель для Home Assistant, которая работает рядом со стандартным Lovelace, не заменяя его. Цель: дать обычному пользователю опыт уровня iOS-«рабочего стола» — drag-and-drop виджеты, плавные анимации, эффекты «жидкого стекла», темы, многопользовательский режим. Без YAML, без правок HA-конфига.
 
 <p align="center">
-  <img src="docs/screenshots/dashboard-mobile.png" alt="Главный экран Homeglance на смартфоне" width="280" />
-  <img src="docs/screenshots/media-player-sheet.png" alt="Полноэкранный sheet медиа-плеера со свечением обложки" width="280" />
+  <img src="docs/screenshots/home-dark.webp" alt="Главный экран Homeglance" width="250" />
+  <img src="docs/screenshots/music-light.webp" alt="Музыкальный плеер" width="250" />
+  <img src="docs/screenshots/weather-dark.webp" alt="Страница погоды" width="250" />
 </p>
 
 ## Возможности
@@ -18,6 +19,19 @@
 - **PWA** — устанавливается как нативное приложение на iOS, Android, desktop
 - **Темы dark / light / auto** — следуют системе
 - **Подключение к HA через WebSocket** — никаких изменений в HA-конфиге
+
+## Скриншоты
+
+Glance в светлой и тёмной теме — она переключается в настройках или следует
+за системной.
+
+| | ☀️ Светлая | 🌙 Тёмная |
+|---|---|---|
+| **Главная** | <img src="docs/screenshots/home-light.webp" width="240" /> | <img src="docs/screenshots/home-dark.webp" width="240" /> |
+| **Комната** | <img src="docs/screenshots/kitchen-light.webp" width="240" /> | <img src="docs/screenshots/kitchen-dark.webp" width="240" /> |
+| **Погода** | <img src="docs/screenshots/weather-light.webp" width="240" /> | <img src="docs/screenshots/weather-dark.webp" width="240" /> |
+| **Музыка** | <img src="docs/screenshots/music-light.webp" width="240" /> | <img src="docs/screenshots/music-dark.webp" width="240" /> |
+| **Мониторинг глюкозы** | <img src="docs/screenshots/glucose-light.webp" width="240" /> | <img src="docs/screenshots/glucose-dark.webp" width="240" /> |
 
 ## Установка
 
