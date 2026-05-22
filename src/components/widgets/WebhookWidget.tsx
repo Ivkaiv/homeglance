@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Webhook, Check, AlertCircle } from 'lucide-react';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   /** ID HA webhook'а (без префикса). Например `my-button` для
@@ -29,18 +30,19 @@ interface Params {
  * (✓ успех / × ошибка) на 1.5 секунды.
  */
 export function WebhookWidget({ params }: { params: Params }) {
+  const t = useT();
   const { client } = useConnection();
   const [status, setStatus] = useState<'idle' | 'busy' | 'ok' | 'fail'>('idle');
 
   if (!params.webhookId) {
     return (
       <div className="glass h-full w-full p-3 flex items-center justify-center text-text-tertiary text-xs text-center">
-        ⚙️ Укажи Webhook ID
+        {t('w.webhook.configure')}
       </div>
     );
   }
 
-  const label = params.label || 'Webhook';
+  const label = params.label || t('w.webhook.label');
   const buttonText = params.buttonText || label;
 
   const trigger = async () => {
@@ -94,7 +96,7 @@ export function WebhookWidget({ params }: { params: Params }) {
       </div>
       <span className="text-xs font-medium truncate max-w-full px-1">{buttonText}</span>
       {status === 'busy' && (
-        <span className="text-[9px] text-text-tertiary">отправка…</span>
+        <span className="text-[9px] text-text-tertiary">{t('w.webhook.sending')}</span>
       )}
     </button>
   );

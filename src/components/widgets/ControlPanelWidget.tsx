@@ -7,6 +7,7 @@ import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
 import { MdiIcon, getMdiPath, GlanceIcon } from '@/components/icons/MdiIcon';
 import { PressButton } from '@/components/ui/PressButton';
 import { Check, Loader2 } from 'lucide-react';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   /** Заголовок панели (опционально). Если пустой — шапка не показывается. */
@@ -55,6 +56,7 @@ const FALLBACK_EMOJI: Record<string, string> = {
  *   выполнения видна крутилка → галочка.
  */
 export function ControlPanelWidget({ params }: { params: Params }) {
+  const t = useT();
   const states = useStates();
   const callService = useCallService();
   const [ref, size] = useWidgetSize();
@@ -75,7 +77,7 @@ export function ControlPanelWidget({ params }: { params: Params }) {
         ref={ref}
         className="glass h-full w-full p-3 flex items-center justify-center text-text-tertiary text-xs text-center"
       >
-        ⚙️ Добавь сущности в настройках
+        {t('w.controlPanel.configure')}
       </div>
     );
   }
@@ -229,7 +231,7 @@ export function ControlPanelWidget({ params }: { params: Params }) {
           <div
             className="rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-xs text-text-secondary tabular-nums"
             style={{ width: btnSize, height: btnSize }}
-            title={`Ещё ${overflow + 1} устройств(а)`}
+            title={t('w.controlPanel.overflow', { count: overflow + 1 })}
           >
             +{overflow + 1}
           </div>

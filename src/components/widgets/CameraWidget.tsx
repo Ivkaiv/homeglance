@@ -6,6 +6,7 @@ import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
 import { Camera, Maximize2, X } from 'lucide-react';
 import { getClient } from '@/lib/ha/client';
 import { createPortal } from 'react-dom';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -35,12 +36,13 @@ interface Params {
  * для пользователей без камер.
  */
 export function CameraWidget({ params }: { params: Params }) {
+  const t = useT();
   const e = useEntity(params.entity);
   const [ref, size] = useWidgetSize();
   const tier = sizeTier(size);
   const [fullscreen, setFullscreen] = useState(false);
 
-  const label = params.label ?? e?.attributes.friendly_name ?? 'Камера';
+  const label = params.label ?? e?.attributes.friendly_name ?? t('w.camera.label');
   const isUnavail = !e || e.state === 'unavailable' || e.state === 'unknown';
   const mode = params.mode ?? 'auto';
   const muted = params.muted ?? true;
@@ -58,7 +60,7 @@ export function CameraWidget({ params }: { params: Params }) {
       >
         <Camera size={tier === 'tiny' ? 18 : 28} aria-hidden="true" />
         <div className="text-[10px] truncate text-center px-2">{label}</div>
-        <div className="text-[9px] text-text-tertiary opacity-60">подключаюсь…</div>
+        <div className="text-[9px] text-text-tertiary opacity-60">{t('w.camera.connecting')}</div>
       </div>
     );
   }
@@ -72,12 +74,12 @@ export function CameraWidget({ params }: { params: Params }) {
         ref={ref as any}
         onClick={() => setFullscreen(true)}
         title={label}
-        aria-label={`Открыть камеру ${label}`}
+        aria-label={t('w.camera.openAriaLabel', { label })}
         className="glass h-full w-full overflow-hidden relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
       >
         <SnapshotImage
           entity={params.entity}
-          alt={`Снимок: ${label}`}
+          alt={t('w.camera.snapshotAlt', { label })}
           refreshSec={refreshSec}
           className="absolute inset-0 w-full h-full object-cover"
           fallback={<Camera size={20} aria-hidden="true" />}
@@ -105,7 +107,7 @@ export function CameraWidget({ params }: { params: Params }) {
         ref={ref as any}
         onClick={() => setFullscreen(true)}
         title={label}
-        aria-label={`Открыть камеру ${label}`}
+        aria-label={t('w.camera.openAriaLabel', { label })}
         className="glass h-full w-full overflow-hidden relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
       >
         <LiveOrSnapshot
@@ -160,6 +162,7 @@ function FullscreenView({
   muted: boolean;
   onClose: () => void;
 }) {
+  const t = useT();
   return (
     <div
       className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center"
@@ -170,7 +173,7 @@ function FullscreenView({
           ev.stopPropagation();
           onClose();
         }}
-        aria-label="Закрыть"
+        aria-label={t('common.close')}
         className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/10 dark:bg-white/10 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/20 dark:hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
       >
         <X size={18} aria-hidden="true" />
@@ -217,6 +220,7 @@ function LiveOrSnapshot({
   autoplay: boolean;
   className?: string;
 }) {
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
   const [streamFailed, setStreamFailed] = useState(false);
@@ -305,7 +309,7 @@ function LiveOrSnapshot({
         playsInline
         // Без controls — клик ведёт открытие fullscreen (через родительский button).
         className={className}
-        aria-label={`Видео с камеры ${label}`}
+        aria-label={t('w.camera.videoAriaLabel', { label })}
       />
     );
   }
@@ -317,7 +321,7 @@ function LiveOrSnapshot({
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-text-tertiary">
         <Camera size={28} aria-hidden="true" />
         <div className="text-[10px]">
-          {streamFailed ? 'видео недоступно' : 'подключаюсь…'}
+          {streamFailed ? t('w.camera.videoUnavailable') : t('w.camera.connecting')}
         </div>
       </div>
     );
@@ -333,7 +337,7 @@ function LiveOrSnapshot({
       fallback={
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-text-tertiary">
           <Camera size={28} aria-hidden="true" />
-          <div className="text-[10px]">снимок недоступен</div>
+          <div className="text-[10px]">{t('w.camera.snapshotUnavailable')}</div>
         </div>
       }
     />

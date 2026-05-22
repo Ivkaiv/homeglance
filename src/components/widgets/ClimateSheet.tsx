@@ -5,6 +5,7 @@ import { PressButton } from '@/components/ui/PressButton';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { formatTemp, applyStep } from '@/lib/ha/climate-temp';
 import { Plus, Minus, Power, Flame, Snowflake, Wind, Droplets, Wand2, Activity } from 'lucide-react';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Props {
   entityId: string;
@@ -22,14 +23,14 @@ const HVAC_ICONS: Record<string, JSX.Element> = {
   fan_only: <Wind size={16} aria-hidden="true" />,
 };
 
-const HVAC_LABELS_RU: Record<string, string> = {
-  off: 'Выключено',
-  heat: 'Обогрев',
-  cool: 'Охлаждение',
-  auto: 'Авто',
-  heat_cool: 'Тепло/Холод',
-  dry: 'Осушение',
-  fan_only: 'Вентилятор',
+const HVAC_MODE_KEYS: Record<string, string> = {
+  off: 'w.climateSheet.mode.off',
+  heat: 'w.climateSheet.mode.heat',
+  cool: 'w.climateSheet.mode.cool',
+  auto: 'w.climateSheet.mode.auto',
+  heat_cool: 'w.climateSheet.mode.heat_cool',
+  dry: 'w.climateSheet.mode.dry',
+  fan_only: 'w.climateSheet.mode.fan_only',
 };
 
 const HVAC_TONES: Record<string, string> = {
@@ -51,14 +52,15 @@ const HVAC_TONES: Record<string, string> = {
  * preset mode, swing mode. Что не поддерживается — то секция скрывается.
  */
 export function ClimateSheet({ entityId, open, onClose }: Props) {
+  const t = useT();
   const e = useEntity(entityId);
   const callService = useCallService();
 
   if (!e) {
     return (
-      <ModalSheet open={open} onClose={onClose} title="Климат недоступен" position="center">
+      <ModalSheet open={open} onClose={onClose} title={t('w.climateSheet.unavailable')} position="center">
         <div className="text-sm text-text-secondary">
-          Сущность сейчас offline или не отдаёт состояние.
+          {t('w.climateSheet.offlineBody')}
         </div>
       </ModalSheet>
     );
@@ -109,15 +111,15 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
     hvacAction !== 'off' &&
     !isOff;
 
-  const ACTION_LABELS_RU: Record<string, string> = {
-    heating: 'греет',
-    cooling: 'охлаждает',
-    drying: 'осушает',
-    fan: 'вентиляция',
-    idle: 'ожидание',
-    off: 'выключено',
-    preheating: 'подогрев',
-    defrosting: 'разморозка',
+  const ACTION_LABEL_KEYS: Record<string, string> = {
+    heating: 'w.climateSheet.action.heating',
+    cooling: 'w.climateSheet.action.cooling',
+    drying: 'w.climateSheet.action.drying',
+    fan: 'w.climateSheet.action.fan',
+    idle: 'w.climateSheet.action.idle',
+    off: 'w.climateSheet.action.off',
+    preheating: 'w.climateSheet.action.heating',
+    defrosting: 'w.climateSheet.action.cooling',
   };
   const ACTION_DOTS: Record<string, string> = {
     heating: 'bg-orange-400',
@@ -129,7 +131,7 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
   };
 
   const subtitleNode = isOff ? (
-    <span>Выключено</span>
+    <span>{t('w.climateSheet.off')}</span>
   ) : (
     <span className="inline-flex items-center gap-2">
       {isActive && (
@@ -140,13 +142,13 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
           aria-hidden="true"
         />
       )}
-      <span>{HVAC_LABELS_RU[e.state] ?? e.state}</span>
+      <span>{t(HVAC_MODE_KEYS[e.state] ?? e.state)}</span>
       {hvacAction && hvacAction !== e.state && (
         <span className="text-text-tertiary">·</span>
       )}
       {hvacAction && hvacAction !== e.state && (
         <span className={isActive ? 'text-text-secondary' : 'text-text-tertiary'}>
-          {ACTION_LABELS_RU[hvacAction] ?? hvacAction}
+          {t(ACTION_LABEL_KEYS[hvacAction] ?? hvacAction)}
         </span>
       )}
     </span>
@@ -158,7 +160,7 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
       onClose={onClose}
       title={friendlyName}
       subtitle={subtitleNode}
-      ariaLabel={`Управление ${friendlyName}`}
+      ariaLabel={t('w.climateSheet.ariaLabel', { name: friendlyName })}
     >
       {/* Целевая температура — большой блок с +/- по бокам. */}
       {target !== undefined && (
@@ -167,7 +169,7 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
             onClick={() => setTemp(-step)}
             disabled={isOff}
             size={56}
-            ariaLabel="Уменьшить целевую температуру"
+            ariaLabel={t('w.climateSheet.decrease')}
           >
             <Minus size={20} aria-hidden="true" />
           </PressButton>
@@ -177,7 +179,7 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
             </div>
             {current !== undefined && (
               <div className="text-xs text-text-tertiary mt-2 tabular-nums">
-                сейчас {Math.round(current)}°
+                {t('w.climateSheet.currentTemp', { temp: Math.round(current) })}
               </div>
             )}
           </div>
@@ -185,7 +187,7 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
             onClick={() => setTemp(+step)}
             disabled={isOff}
             size={56}
-            ariaLabel="Увеличить целевую температуру"
+            ariaLabel={t('w.climateSheet.increase')}
           >
             <Plus size={20} aria-hidden="true" />
           </PressButton>
@@ -194,13 +196,13 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
 
       {/* HVAC modes — основные режимы работы. */}
       {hvacModes.length > 0 && (
-        <ChipGroup label="Режим" value={e.state} onChange={setMode} options={hvacModes}
+        <ChipGroup label={t('w.climateSheet.modeLabel')} value={e.state} onChange={setMode} options={hvacModes}
           renderLabel={(m) => (
             <span className="inline-flex items-center gap-1.5 leading-none">
               <span className="inline-flex items-center justify-center w-3.5 h-3.5">
                 {HVAC_ICONS[m] ?? <Activity size={14} aria-hidden="true" />}
               </span>
-              <span className="leading-none">{HVAC_LABELS_RU[m] ?? m}</span>
+              <span className="leading-none">{t(HVAC_MODE_KEYS[m] ?? m)}</span>
             </span>
           )}
           tones={HVAC_TONES}
@@ -208,15 +210,15 @@ export function ClimateSheet({ entityId, open, onClose }: Props) {
       )}
 
       {fanModes.length > 0 && (
-        <ChipGroup label="Вентилятор" value={fanMode ?? ''} onChange={setFan} options={fanModes} />
+        <ChipGroup label={t('w.climateSheet.fanLabel')} value={fanMode ?? ''} onChange={setFan} options={fanModes} />
       )}
 
       {presetModes.length > 0 && (
-        <ChipGroup label="Пресет" value={presetMode ?? ''} onChange={setPreset} options={presetModes} />
+        <ChipGroup label={t('w.climateSheet.presetLabel')} value={presetMode ?? ''} onChange={setPreset} options={presetModes} />
       )}
 
       {swingModes.length > 0 && (
-        <ChipGroup label="Жалюзи" value={swingMode ?? ''} onChange={setSwing} options={swingModes} />
+        <ChipGroup label={t('w.climateSheet.swingLabel')} value={swingMode ?? ''} onChange={setSwing} options={swingModes} />
       )}
     </ModalSheet>
   );

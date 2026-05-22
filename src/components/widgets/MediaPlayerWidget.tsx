@@ -9,6 +9,7 @@ import { MarqueeText } from '@/components/ui/MarqueeText';
 import { PressButton } from '@/components/ui/PressButton';
 import { MediaPlayerSheet } from './MediaPlayerSheet';
 import { Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -21,6 +22,7 @@ interface Params {
 }
 
 export function MediaPlayerWidget({ params }: { params: Params }) {
+  const t = useT();
   const e = useEntity(params.entity);
   const callService = useCallService();
   const [ref, size] = useWidgetSize();
@@ -38,7 +40,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
   );
 
   const isBad = !e || e.state === 'unavailable' || e.state === 'unknown' || e.state === 'off';
-  const label = params.label ?? e?.attributes.friendly_name ?? 'Плеер';
+  const label = params.label ?? e?.attributes.friendly_name ?? t('w.mediaPlayer.label');
   const playing = e?.state === 'playing';
   const title = e?.attributes.media_title || '—';
   const artist = e?.attributes.media_artist || '';
@@ -67,7 +69,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
 
   const haIcon = e?.attributes.icon as string | undefined;
   const iconValue = params.icon || haIcon || 'music';
-  const playPauseLabel = playing ? 'Пауза' : 'Воспроизвести';
+  const playPauseLabel = playing ? t('w.player.pause') : t('w.player.play');
 
   if (!size.measured) {
     return <div ref={ref} className="glass h-full w-full" />;
@@ -101,13 +103,13 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
           <button
             type="button"
             onClick={openSheet}
-            aria-label="Открыть плеер"
+            aria-label={t('w.player.open')}
             className="rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
           >
             {cover ? (
               <img
                 src={cover}
-                alt={title ? `Обложка: ${title}` : ''}
+                alt={title ? t('w.mediaPlayer.coverAlt', { title }) : ''}
                 width={40}
                 height={40}
                 loading="lazy"
@@ -162,14 +164,14 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
         <button
           type="button"
           onClick={openSheet}
-          aria-label="Открыть плеер"
+          aria-label={t('w.player.open')}
           className="relative flex items-center gap-2 min-w-0 flex-1 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
         >
           {showCover && (
             cover ? (
               <img
                 src={cover}
-                alt={title ? `Обложка: ${title}` : ''}
+                alt={title ? t('w.mediaPlayer.coverAlt', { title }) : ''}
                 width={coverPx}
                 height={coverPx}
                 loading="lazy"
@@ -198,7 +200,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
               onClick={() => cmd('media_previous_track')}
               disabled={isBad}
               size={32}
-              ariaLabel="Предыдущий"
+              ariaLabel={t('w.player.previous')}
             >
               <SkipBack size={12} aria-hidden="true" />
             </PressButton>
@@ -218,7 +220,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
               onClick={() => cmd('media_next_track')}
               disabled={isBad}
               size={32}
-              ariaLabel="Следующий"
+              ariaLabel={t('w.player.next')}
             >
               <SkipForward size={12} aria-hidden="true" />
             </PressButton>
@@ -254,7 +256,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
       <button
         type="button"
         onClick={openSheet}
-        aria-label="Открыть плеер"
+        aria-label={t('w.player.open')}
         className="relative flex gap-3 items-center min-w-0 w-full shrink-0 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
       >
         {showCover && (
@@ -262,7 +264,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
             {cover ? (
               <img
                 src={cover}
-                alt={title ? `Обложка: ${title}` : ''}
+                alt={title ? t('w.mediaPlayer.coverAlt', { title }) : ''}
                 width={48}
                 height={48}
                 loading="lazy"
@@ -290,7 +292,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
             onClick={() => cmd('media_previous_track')}
             disabled={isBad}
             size={36}
-            ariaLabel="Предыдущий"
+            ariaLabel={t('w.player.previous')}
           >
             <SkipBack size={14} aria-hidden="true" />
           </PressButton>
@@ -310,7 +312,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
             onClick={() => cmd('media_next_track')}
             disabled={isBad}
             size={36}
-            ariaLabel="Следующий"
+            ariaLabel={t('w.player.next')}
           >
             <SkipForward size={14} aria-hidden="true" />
           </PressButton>
@@ -328,7 +330,7 @@ export function MediaPlayerWidget({ params }: { params: Params }) {
             value={volume}
             onChange={(ev) => cmd('volume_set', { volume_level: Number(ev.target.value) })}
             disabled={isBad}
-            aria-label="Громкость"
+            aria-label={t('w.player.volume')}
             className="no-drag flex-1 min-w-0 accent-accent"
           />
           <span className="text-[10px] text-text-tertiary tabular-nums w-8 text-right shrink-0">

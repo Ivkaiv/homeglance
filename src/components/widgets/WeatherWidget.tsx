@@ -3,6 +3,7 @@
 import { useEntity, useWeatherForecast } from '@/lib/ha/ConnectionProvider';
 import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
 import { WeatherIcon } from '@/components/icons/WeatherIcon';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -25,47 +26,35 @@ const ALL_FIELDS = [
   'forecast',
 ];
 
-const FIELD_OPTIONS = [
-  { value: 'apparent', label: 'Ощущается как' },
-  { value: 'humidity', label: 'Влажность' },
-  { value: 'wind', label: 'Ветер' },
-  { value: 'pressure', label: 'Давление' },
-  { value: 'uv', label: 'УФ-индекс' },
-  { value: 'gust', label: 'Порывы ветра' },
-  { value: 'visibility', label: 'Видимость' },
-  { value: 'cloud', label: 'Облачность %' },
-  { value: 'dew_point', label: 'Точка росы' },
-  { value: 'forecast', label: 'Прогноз на 5 дней' },
-];
-
-const STATE_RU: Record<string, string> = {
-  sunny: 'Солнечно',
-  clear: 'Ясно',
-  'clear-night': 'Ясная ночь',
-  cloudy: 'Облачно',
-  partlycloudy: 'Переменно',
-  rainy: 'Дождь',
-  pouring: 'Ливень',
-  snowy: 'Снег',
-  'snowy-rainy': 'Снег с дождём',
-  fog: 'Туман',
-  mist: 'Дымка',
-  windy: 'Ветрено',
-  hail: 'Град',
-  lightning: 'Гроза',
-  'lightning-rainy': 'Гроза с дождём',
-  exceptional: 'Опасная погода',
-  unknown: '—',
-  unavailable: 'Нет данных',
+const WEATHER_STATE_KEYS: Record<string, string> = {
+  sunny: 'w.weather.state.sunny',
+  clear: 'w.weather.state.sunny',
+  'clear-night': 'w.weather.state.clear-night',
+  cloudy: 'w.weather.state.cloudy',
+  partlycloudy: 'w.weather.state.partlycloudy',
+  rainy: 'w.weather.state.rainy',
+  pouring: 'w.weather.state.pouring',
+  snowy: 'w.weather.state.snowy',
+  'snowy-rainy': 'w.weather.state.snowy-rainy',
+  fog: 'w.weather.state.fog',
+  mist: 'w.weather.state.fog',
+  windy: 'w.weather.state.windy',
+  hail: 'w.weather.state.hail',
+  lightning: 'w.weather.state.lightning',
+  'lightning-rainy': 'w.weather.state.lightning-rainy',
+  exceptional: 'w.weather.state.exceptional',
 };
 
-const WEEKDAY_RU = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-
-function windDirRu(deg: number | undefined): string {
-  if (deg === undefined || deg === null) return '';
-  const dirs = ['С', 'СВ', 'В', 'ЮВ', 'Ю', 'ЮЗ', 'З', 'СЗ'];
-  return dirs[Math.round(deg / 45) % 8];
-}
+const WIND_DIR_KEYS = [
+  'w.weather.wind.N',
+  'w.weather.wind.NE',
+  'w.weather.wind.E',
+  'w.weather.wind.SE',
+  'w.weather.wind.S',
+  'w.weather.wind.SW',
+  'w.weather.wind.W',
+  'w.weather.wind.NW',
+];
 
 function fmtTemp(t: any): string {
   if (t === undefined || t === null) return '—';
@@ -73,6 +62,7 @@ function fmtTemp(t: any): string {
 }
 
 export function WeatherWidget({ params }: { params: Params }) {
+  const t = useT();
   const e = useEntity(params.entity);
   const forecast = useWeatherForecast(params.entity, 'daily');
   const [ref, size] = useWidgetSize();
@@ -86,15 +76,19 @@ export function WeatherWidget({ params }: { params: Params }) {
   const windBearing = e?.attributes.wind_bearing;
   const windGust = e?.attributes.wind_gust_speed;
   const pressure = e?.attributes.pressure;
-  const pressureUnit = e?.attributes.pressure_unit || 'мм';
+  const pressureUnit = e?.attributes.pressure_unit || t('w.weather.mmPerH');
   const visibility = e?.attributes.visibility;
   const uv = e?.attributes.uv_index;
   const cloud = e?.attributes.cloud_coverage;
   const dewPoint = e?.attributes.dew_point;
-  const stateRu = STATE_RU[cond] || cond;
-  const cityLabel = params.city || params.label || 'Погода';
+  const stateStr = WEATHER_STATE_KEYS[cond] ? t(WEATHER_STATE_KEYS[cond]) : cond;
+  const cityLabel = params.city || params.label || t('w.weather.label');
   const fields = params.fields ?? ALL_FIELDS;
   const show = (k: string) => fields.includes(k);
+  const windDir = (deg: number | undefined): string => {
+    if (deg === undefined || deg === null) return '';
+    return t(WIND_DIR_KEYS[Math.round(deg / 45) % 8]);
+  };
 
   if (!size.measured) {
     return <div ref={ref} className="glass h-full w-full" />;
@@ -105,7 +99,7 @@ export function WeatherWidget({ params }: { params: Params }) {
       <div
         ref={ref}
         className="glass h-full w-full flex items-center justify-center"
-        title={`${stateRu}, ${fmtTemp(temp)}`}
+        title={`${stateStr}, ${fmtTemp(temp)}`}
       >
         <WeatherIcon condition={cond} size={26} />
       </div>
@@ -117,12 +111,12 @@ export function WeatherWidget({ params }: { params: Params }) {
       <div
         ref={ref}
         className="glass h-full w-full p-2 flex flex-col items-center justify-center gap-1"
-        title={`${stateRu}, ${fmtTemp(temp)}`}
+        title={`${stateStr}, ${fmtTemp(temp)}`}
       >
         <WeatherIcon condition={cond} size={32} />
         <div className="text-xl font-light tabular-nums leading-none">{fmtTemp(temp)}</div>
         {size.h >= 110 && (
-          <div className="text-[10px] text-text-secondary truncate text-center">{stateRu}</div>
+          <div className="text-[10px] text-text-secondary truncate text-center">{stateStr}</div>
         )}
       </div>
     );
@@ -134,7 +128,7 @@ export function WeatherWidget({ params }: { params: Params }) {
       <div
         ref={ref}
         className="glass h-full w-full p-2 flex items-center gap-3 overflow-hidden"
-        title={`${stateRu}, ${fmtTemp(temp)}`}
+        title={`${stateStr}, ${fmtTemp(temp)}`}
       >
         <WeatherIcon condition={cond} size={36} />
         <div className="flex flex-col leading-none min-w-0 flex-1">
@@ -142,7 +136,7 @@ export function WeatherWidget({ params }: { params: Params }) {
             {cityLabel}
           </div>
           <div className="text-2xl font-light tabular-nums leading-tight">{fmtTemp(temp)}</div>
-          <div className="text-[11px] text-text-secondary mt-0.5 truncate">{stateRu}</div>
+          <div className="text-[11px] text-text-secondary mt-0.5 truncate">{stateStr}</div>
         </div>
         {show('humidity') && humidity !== undefined && size.w >= 200 && (
           <div className="text-xs text-text-tertiary tabular-nums shrink-0 whitespace-nowrap">
@@ -168,10 +162,10 @@ export function WeatherWidget({ params }: { params: Params }) {
           <div className="text-4xl font-light tabular-nums leading-none mt-1">
             {fmtTemp(temp)}
           </div>
-          <div className="text-sm text-text-secondary mt-1 truncate">{stateRu}</div>
+          <div className="text-sm text-text-secondary mt-1 truncate">{stateStr}</div>
           {showApparent && (
             <div className="text-[11px] text-text-tertiary mt-0.5">
-              Ощущается как {fmtTemp(apparent)}
+              {t('w.weather.feelsLike')} {fmtTemp(apparent)}
             </div>
           )}
         </div>
@@ -185,23 +179,23 @@ export function WeatherWidget({ params }: { params: Params }) {
         {show('humidity') && humidity !== undefined && <span>💧 {Math.round(humidity)}%</span>}
         {show('wind') && wind !== undefined && (
           <span>
-            💨 {Math.round(wind)} м/с{windBearing !== undefined && ` ${windDirRu(windBearing)}`}
+            💨 {Math.round(wind)} {t('w.weatherRoom.windUnit.ms')}{windBearing !== undefined && ` ${windDir(windBearing)}`}
           </span>
         )}
         {show('pressure') && pressure !== undefined && (
-          <span>📊 {Math.round(pressure)} {pressureUnit === 'mmHg' ? 'мм' : pressureUnit}</span>
+          <span>📊 {Math.round(pressure)} {pressureUnit === 'mmHg' ? t('w.weather.mmPerH') : pressureUnit}</span>
         )}
-        {show('uv') && uv !== undefined && uv >= 1 && <span>☀️ УФ {Math.round(uv)}</span>}
+        {show('uv') && uv !== undefined && uv >= 1 && <span>☀️ {t('w.weather.uv')} {Math.round(uv)}</span>}
       </div>
 
       {showExtended && (
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-tertiary shrink-0">
           {show('gust') && windGust !== undefined && wind !== undefined && windGust > wind + 1 && (
-            <span>⚡ Порывы {Math.round(windGust)} м/с</span>
+            <span>⚡ {t('w.weather.gusts')} {Math.round(windGust)} {t('w.weatherRoom.windUnit.ms')}</span>
           )}
-          {show('visibility') && visibility !== undefined && <span>👁 {Math.round(visibility)} км</span>}
+          {show('visibility') && visibility !== undefined && <span>👁 {Math.round(visibility)} {t('w.weather.km')}</span>}
           {show('cloud') && cloud !== undefined && <span>☁️ {Math.round(cloud)}%</span>}
-          {show('dew_point') && dewPoint !== undefined && <span>💧 точка росы {fmtTemp(dewPoint)}</span>}
+          {show('dew_point') && dewPoint !== undefined && <span>💧 {t('w.weather.dewPoint')} {fmtTemp(dewPoint)}</span>}
         </div>
       )}
 
@@ -209,7 +203,7 @@ export function WeatherWidget({ params }: { params: Params }) {
         <div className="flex mt-auto pt-2 border-t border-black/10 dark:border-white/10 justify-between items-end gap-1 overflow-hidden">
           {forecast.slice(0, 5).map((day, i) => {
             const dt = day.datetime ? new Date(day.datetime) : null;
-            const dayLabel = i === 0 ? 'Сегодня' : dt ? WEEKDAY_RU[dt.getDay()] : '?';
+            const dayLabel = i === 0 ? t('w.weather.today') : dt ? t(`w.weather.weekday.${dt.getDay()}`) : '?';
             const dayCond = day.condition || 'unknown';
             const tHigh = day.temperature ?? day.native_temperature;
             const tLow = day.templow ?? day.native_templow;

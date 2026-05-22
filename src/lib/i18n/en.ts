@@ -740,4 +740,291 @@ export const en: Dictionary = {
   'wm.glucose_stats.fld.gmiEntity': 'GMI / HbA1c',
   'wm.glucose_stats.fld.highEntity': '% time above range',
   'wm.glucose_stats.fld.lowEntity': '% time below range',
+
+  // ── Shared transport / player strings ────────────────────────────────────
+  'w.player.previous': 'Previous',
+  'w.player.next': 'Next',
+  'w.player.play': 'Play',
+  'w.player.pause': 'Pause',
+  'w.player.open': 'Open player',
+  'w.player.mute': 'Mute',
+  'w.player.unmute': 'Unmute',
+  'w.player.volume': 'Volume',
+  'w.player.seekHint': 'Swipe along the chart to see the value at a point in time',
+
+  // ── climate widget runtime ────────────────────────────────────────────────
+  'w.climate.label': 'Climate',
+  'w.climate.openSettings': 'Open settings {label}',
+  'w.climate.decrease': 'Decrease (current {temp}°)',
+  'w.climate.increase': 'Increase (current {temp}°)',
+
+  // ── climate sheet runtime ─────────────────────────────────────────────────
+  'w.climateSheet.unavailable': 'Climate unavailable',
+  'w.climateSheet.offlineBody': 'The entity is currently offline or not reporting state.',
+  'w.climateSheet.off': 'Off',
+  'w.climateSheet.currentTemp': 'now {temp}°',
+  'w.climateSheet.decrease': 'Decrease target temperature',
+  'w.climateSheet.increase': 'Increase target temperature',
+  'w.climateSheet.ariaLabel': 'Control {name}',
+  'w.climateSheet.modeLabel': 'Mode',
+  'w.climateSheet.fanLabel': 'Fan',
+  'w.climateSheet.presetLabel': 'Preset',
+  'w.climateSheet.swingLabel': 'Swing',
+  'w.climateSheet.mode.off': 'Off',
+  'w.climateSheet.mode.heat': 'Heat',
+  'w.climateSheet.mode.cool': 'Cool',
+  'w.climateSheet.mode.auto': 'Auto',
+  'w.climateSheet.mode.heat_cool': 'Heat/Cool',
+  'w.climateSheet.mode.dry': 'Dry',
+  'w.climateSheet.mode.fan_only': 'Fan only',
+  'w.climateSheet.action.heating': 'heating',
+  'w.climateSheet.action.cooling': 'cooling',
+  'w.climateSheet.action.drying': 'drying',
+  'w.climateSheet.action.fan': 'fan',
+  'w.climateSheet.action.idle': 'idle',
+  'w.climateSheet.action.off': 'off',
+
+  // ── weather widget runtime ────────────────────────────────────────────────
+  'w.weather.label': 'Weather',
+  'w.weather.today': 'Today',
+  'w.weather.feelsLike': 'Feels like',
+  'w.weather.mmPerH': 'mm',
+  'w.weather.uv': 'UV',
+  'w.weather.gusts': 'Gusts',
+  'w.weather.km': 'km',
+  'w.weather.dewPoint': 'dew point',
+  'w.weather.state.sunny': 'Sunny',
+  'w.weather.state.clear-night': 'Clear night',
+  'w.weather.state.partlycloudy': 'Partly cloudy',
+  'w.weather.state.cloudy': 'Cloudy',
+  'w.weather.state.fog': 'Foggy',
+  'w.weather.state.hail': 'Hail',
+  'w.weather.state.lightning': 'Thunderstorm',
+  'w.weather.state.lightning-rainy': 'Thunderstorm with rain',
+  'w.weather.state.pouring': 'Pouring',
+  'w.weather.state.rainy': 'Rainy',
+  'w.weather.state.snowy': 'Snowy',
+  'w.weather.state.snowy-rainy': 'Sleet',
+  'w.weather.state.windy': 'Windy',
+  'w.weather.state.windy-variant': 'Windy with clouds',
+  'w.weather.state.exceptional': 'Extreme',
+  'w.weather.wind.N': 'N',
+  'w.weather.wind.NE': 'NE',
+  'w.weather.wind.E': 'E',
+  'w.weather.wind.SE': 'SE',
+  'w.weather.wind.S': 'S',
+  'w.weather.wind.SW': 'SW',
+  'w.weather.wind.W': 'W',
+  'w.weather.wind.NW': 'NW',
+  'w.weather.weekday.0': 'Sun',
+  'w.weather.weekday.1': 'Mon',
+  'w.weather.weekday.2': 'Tue',
+  'w.weather.weekday.3': 'Wed',
+  'w.weather.weekday.4': 'Thu',
+  'w.weather.weekday.5': 'Fri',
+  'w.weather.weekday.6': 'Sat',
+
+  // ── weather_room widget runtime ───────────────────────────────────────────
+  'w.weatherRoom.feelsLike': 'Feels like',
+  'w.weatherRoom.humidity': 'Humidity',
+  'w.weatherRoom.wind': 'Wind',
+  'w.weatherRoom.gusts': 'Gusts',
+  'w.weatherRoom.pressure': 'Pressure',
+  'w.weatherRoom.uv': 'UV',
+  'w.weatherRoom.uv.extreme': '(extreme)',
+  'w.weatherRoom.uv.veryHigh': '(very high)',
+  'w.weatherRoom.uv.high': '(high)',
+  'w.weatherRoom.uv.moderate': '(moderate)',
+  'w.weatherRoom.uv.low': '(low)',
+  'w.weatherRoom.visibility': 'Visibility',
+  'w.weatherRoom.cloud': 'Cloud',
+  'w.weatherRoom.dewPoint': 'Dew point',
+  'w.weatherRoom.windUnit.ms': 'm/s',
+  'w.weatherRoom.windUnit.kmh': 'km/h',
+  'w.weatherRoom.windUnit.mph': 'mph',
+  'w.weatherRoom.pressureUnit.mmHg': 'mmHg',
+  'w.weatherRoom.pressureUnit.hPa': 'hPa',
+  'w.weatherRoom.pressureUnit.inHg': 'inHg',
+  'w.weatherRoom.visibilityUnit.km': 'km',
+  'w.weatherRoom.visibilityUnit.mi': 'mi',
+
+  // ── energy widget runtime ─────────────────────────────────────────────────
+  'w.energy.label': 'Consumption',
+  'w.energy.configure': '⚙️ Set a power sensor',
+  'w.energy.unitW': 'W',
+  'w.energy.unitKWh': 'kWh',
+  'w.energy.today': 'Today',
+  'w.energy.month': 'Month',
+
+  // ── calendar widget runtime ───────────────────────────────────────────────
+  'w.calendar.label': 'Calendar',
+  'w.calendar.loadError': 'Failed to load events',
+  'w.calendar.emptyDays': 'Next {days} days: no events',
+  'w.calendar.emptyDay': 'Next day: no events',
+  'w.calendar.today': 'Today',
+  'w.calendar.tomorrow': 'Tomorrow',
+  'w.calendar.yesterday': 'Yesterday',
+  'w.calendar.todayCount': '{count} today',
+  'w.calendar.ongoing': 'ongoing',
+  'w.calendar.noTitle': '(no title)',
+
+  // ── camera widget runtime ─────────────────────────────────────────────────
+  'w.camera.label': 'Camera',
+  'w.camera.connecting': 'connecting…',
+  'w.camera.openAriaLabel': 'Open camera {label}',
+  'w.camera.snapshotAlt': 'Snapshot: {label}',
+  'w.camera.videoUnavailable': 'video unavailable',
+  'w.camera.snapshotUnavailable': 'snapshot unavailable',
+  'w.camera.videoAriaLabel': 'Video from camera {label}',
+
+  // ── map widget runtime ────────────────────────────────────────────────────
+  'w.map.configure': '⚙️ Pick a person or device_tracker',
+  'w.map.label': 'Location',
+  'w.map.unknown': 'unknown',
+  'w.map.currentState': 'Now: {state}',
+  'w.map.coordsUnavailable': 'Coordinates unavailable',
+  'w.map.iframeTitle': 'Map: {label}',
+
+  // ── notification feed widget runtime ─────────────────────────────────────
+  'w.notifications.label': 'Notifications',
+  'w.notifications.loading': 'Loading…',
+  'w.notifications.empty': 'No active notifications',
+  'w.notifications.dismiss': 'Dismiss notification',
+
+  // ── multi_sensor widget runtime ───────────────────────────────────────────
+  'w.multiSensor.configure': '⚙️ Add sensors in settings',
+
+  // ── quick_action widget runtime ───────────────────────────────────────────
+  'w.quickAction.configure': '⚙️ Set up the action',
+
+  // ── note widget runtime ───────────────────────────────────────────────────
+  'w.note.defaultText': 'Note',
+
+  // ── iframe widget runtime ─────────────────────────────────────────────────
+  'w.iframe.configure': '⚙️ Enter a URL in settings',
+  'w.iframe.blocked': 'Site does not allow embedding',
+  'w.iframe.openNewTab': 'Open in new tab',
+  'w.iframe.ariaLabel': 'Embedded site',
+
+  // ── webhook widget runtime ────────────────────────────────────────────────
+  'w.webhook.configure': '⚙️ Enter a Webhook ID',
+  'w.webhook.label': 'Webhook',
+  'w.webhook.sending': 'sending…',
+
+  // ── control_panel widget runtime ──────────────────────────────────────────
+  'w.controlPanel.configure': '⚙️ Add entities in settings',
+  'w.controlPanel.overflow': '{count} more devices',
+
+  // ── room_hub widget runtime ───────────────────────────────────────────────
+  'w.roomHub.active': 'active',
+  'w.roomHub.overflow': '{count} more devices',
+  'w.roomHub.tempTitle': 'Temperature: {value}',
+  'w.roomHub.humidTitle': 'Humidity: {value}',
+  'w.roomHub.decrease': 'Decrease {label}',
+  'w.roomHub.increase': 'Increase {label}',
+  'w.roomHub.openSettings': 'Open settings {label}{active}',
+  'w.roomHub.isActive': ' (active)',
+
+  // ── media_player widget runtime ───────────────────────────────────────────
+  'w.mediaPlayer.label': 'Player',
+  'w.mediaPlayer.coverAlt': 'Cover: {title}',
+
+  // ── media_player sheet runtime ────────────────────────────────────────────
+  'w.mediaSheet.unavailable': 'Player unavailable',
+  'w.mediaSheet.offlineBody': 'The player is currently offline or not reporting state.',
+  'w.mediaSheet.seekAriaLabel': 'Seek',
+  'w.mediaSheet.shuffleOff': 'Disable shuffle',
+  'w.mediaSheet.shuffleOn': 'Enable shuffle',
+  'w.mediaSheet.repeatAriaLabel': 'Repeat mode',
+  'w.mediaSheet.radioSection': 'Radio · Zaycev FM',
+  'w.mediaSheet.playChannel': 'Play {name}',
+  'w.mediaSheet.ariaLabel': 'Player controls',
+
+  // ── music_assistant widget runtime ────────────────────────────────────────
+  'w.ma.label': 'Music',
+  'w.ma.connecting': 'Connecting to Music Assistant…',
+  'w.ma.unavailable': 'Music Assistant unavailable',
+  'w.ma.nothingPlaying': 'Nothing playing',
+
+  // ── music_assistant sheet runtime ─────────────────────────────────────────
+  'w.maSheet.outputSection': 'Play on',
+  'w.maSheet.outputAriaLabel': 'Output: {name}',
+  'w.maSheet.playing': 'playing',
+  'w.maSheet.ariaLabel': 'Music player',
+
+  // ── sensor_value / sensor chips runtime ───────────────────────────────────
+  'w.sensor.chartHint': 'tap for chart',
+  'w.sensor.noSignal': 'no signal',
+
+  // ── sensor presets binary labels ──────────────────────────────────────────
+  'sensor.door.open': 'Open',
+  'sensor.door.closed': 'Closed',
+  'sensor.window.open': 'Open',
+  'sensor.window.closed': 'Closed',
+  'sensor.motion.on': 'Motion',
+  'sensor.motion.off': 'Clear',
+  'sensor.occupancy.on': 'Present',
+  'sensor.occupancy.off': 'Clear',
+  'sensor.plug.on': 'On',
+  'sensor.plug.off': 'Off',
+
+  // ── glucose widget runtime ────────────────────────────────────────────────
+  'w.glucose.label': 'Glucose',
+  'w.glucose.noData': 'no data',
+  'w.glucose.unit': 'mmol/L',
+  'w.glucose.silent': 'sensor silent',
+  'w.glucose.target': 'target {low}–{high}',
+  'w.glucose.zone.urgentLow': 'critically low',
+  'w.glucose.zone.low': 'low',
+  'w.glucose.zone.normal': 'normal',
+  'w.glucose.zone.high': 'high',
+  'w.glucose.zone.urgentHigh': 'critically high',
+  'w.glucose.trend.risingQuick': '↑↑ rising fast',
+  'w.glucose.trend.rising': '↑ rising',
+  'w.glucose.trend.risingSlowly': '↗ rising slowly',
+  'w.glucose.trend.steady': '→ steady',
+  'w.glucose.trend.fallingSlowly': '↘ falling slowly',
+  'w.glucose.trend.falling': '↓ falling',
+  'w.glucose.trend.fallingQuick': '↓↓ falling fast',
+  'w.glucose.trend.unknown': '— unknown',
+
+  // ── glucose timeAgo runtime ───────────────────────────────────────────────
+  'w.glucose.ago.justNow': 'just now',
+  'w.glucose.ago.minAgo': '{n} min ago',
+  'w.glucose.ago.hAgo': '{n} h ago',
+
+  // ── glucose chart widget runtime ──────────────────────────────────────────
+  'w.glucoseChart.label': 'Glucose',
+  'w.glucoseChart.loading': 'Loading chart…',
+  'w.glucoseChart.noHistory': 'No accumulated glucose history in HA for the last {hours} h',
+  'w.glucoseChart.range.3h': '3 h',
+  'w.glucoseChart.range.6h': '6 h',
+  'w.glucoseChart.range.12h': '12 h',
+  'w.glucoseChart.range.24h': '24 h',
+
+  // ── glucose stats widget runtime ──────────────────────────────────────────
+  'w.glucoseStats.label7d': 'Last 7 days',
+  'w.glucoseStats.label24h': 'Last 24 hours',
+  'w.glucoseStats.tirTitle': 'Time in range · target ≥70%',
+  'w.glucoseStats.tirLabel': 'Time in range (TIR)',
+  'w.glucoseStats.statAvg': 'Avg',
+  'w.glucoseStats.statGmi': 'GMI',
+  'w.glucoseStats.statBelow': 'Below',
+  'w.glucoseStats.statAbove': 'Above',
+  'w.glucoseStats.statAvgFull': 'Average',
+  'w.glucoseStats.statGmiFull': 'GMI (HbA1c)',
+  'w.glucoseStats.statBelowFull': 'Below range',
+  'w.glucoseStats.statAboveFull': 'Above range',
+
+  // ── chart (SensorHistoryButton / TempChart) runtime ───────────────────────
+  'chart.loading': 'Loading chart…',
+  'chart.noHistory': 'No accumulated history for the last {hours} h',
+  'chart.noHistoryTemp': 'No history',
+  'chart.now': 'now',
+  'chart.min': 'minimum',
+  'chart.avg': 'average',
+  'chart.max': 'maximum',
+  'chart.swipeHint': 'Swipe along the chart to see the value at a point in time',
+  'chart.swipeHintTemp': 'Swipe along the chart to see the temperature at a point in time',
+  'chart.tempLabel': 'Temperature',
 };

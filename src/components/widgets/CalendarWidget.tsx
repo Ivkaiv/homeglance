@@ -5,6 +5,7 @@ import { Calendar, Clock, MapPin } from 'lucide-react';
 import { useConnection, useEntity } from '@/lib/ha/ConnectionProvider';
 import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
 import { WidgetSkeleton } from './_states';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -55,24 +56,25 @@ function sameDay(a: Date, b: Date): boolean {
   );
 }
 
-function formatTime(d: Date): string {
-  return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+function formatTime(d: Date, locale: string): string {
+  return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatDayLabel(d: Date, now: Date): string {
+function formatDayLabel(d: Date, now: Date, locale: string, t: (key: string) => string): string {
   const today = startOfDay(now);
   const target = startOfDay(d);
   const diffDays = Math.round((target.getTime() - today.getTime()) / 86400_000);
-  if (diffDays === 0) return 'Сегодня';
-  if (diffDays === 1) return 'Завтра';
-  if (diffDays === -1) return 'Вчера';
+  if (diffDays === 0) return t('w.calendar.today');
+  if (diffDays === 1) return t('w.calendar.tomorrow');
+  if (diffDays === -1) return t('w.calendar.yesterday');
   if (diffDays >= 2 && diffDays <= 6) {
-    return d.toLocaleDateString('ru-RU', { weekday: 'long' });
+    return d.toLocaleDateString(locale, { weekday: 'long' });
   }
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 }
 
 export function CalendarWidget({ params }: { params: Params }) {
+  const { t, locale } = useI18n();
   const { client, isReady } = useConnection();
   const entityState = useEntity(params.entity);
   const [ref, size] = useWidgetSize();
@@ -82,7 +84,7 @@ export function CalendarWidget({ params }: { params: Params }) {
   const [err, setErr] = useState<string | null>(null);
   const days = Math.max(1, params.days ?? 7);
   const maxEvents = Math.max(1, params.maxEvents ?? 6);
-  const label = params.label || entityState?.attributes.friendly_name || 'Календарь';
+  const label = params.label || entityState?.attributes.friendly_name || t('w.calendar.label');
 
   // Запрашиваем события на ближайшие N дней; перезапрашиваем при смене даты
   // или каждые 5 минут — это просто и достаточно для домашней панели.
@@ -105,7 +107,7 @@ export function CalendarWidget({ params }: { params: Params }) {
         setEvents(sorted);
         setErr(null);
       } catch (e: any) {
-        if (!cancelled) setErr(e?.message || 'Не удалось загрузить события');
+        if (!cancelled) setErr(e?.message || t('w.calendar.loadError'));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -135,7 +137,7 @@ export function CalendarWidget({ params }: { params: Params }) {
       <div
         ref={ref}
         className="glass h-full w-full flex flex-col items-center justify-center gap-0.5"
-        title={`${label}: ${todayCount} сегодня`}
+        title={`${label}: ${t('w.calendar.todayCount', { count: todayCount })}`}
       >
         <Calendar size={18} aria-hidden="true" />
         <span className="text-xs font-semibold tabular-nums">{todayCount}</span>
@@ -165,7 +167,7 @@ export function CalendarWidget({ params }: { params: Params }) {
       <div ref={ref} className="glass h-full w-full p-3 flex flex-col items-center justify-center text-text-tertiary gap-1.5 select-none">
         <Calendar size={20} className="opacity-50" aria-hidden="true" />
         <div className="text-[11px] text-center max-w-[80%] leading-tight">
-          Ближайшие {days} {days === 1 ? 'день' : 'дн.'}: событий нет
+          {days === 1 ? t('w.calendar.emptyDay') : t('w.calendar.emptyDays', { days })}
         </div>
       </div>
     );
@@ -181,7 +183,7 @@ export function CalendarWidget({ params }: { params: Params }) {
         </div>
         {todayCount > 0 && (
           <span className="text-[10px] text-text-tertiary tabular-nums shrink-0">
-            {todayCount} сегодня
+            {t('w.calendar.todayCount', { count: todayCount })}
           </span>
         )}
       </header>
@@ -192,7 +194,7 @@ export function CalendarWidget({ params }: { params: Params }) {
           const end = parseEventEnd(event);
           if (!start) return null;
           const ongoing = end ? now >= start && now < end : false;
-          const dayLabel = formatDayLabel(start, now);
+          const dayLabel = formatDayLabel(start, now, locale, t);
           const showTime = !isAllDay(event);
           return (
             <li
@@ -205,11 +207,11 @@ export function CalendarWidget({ params }: { params: Params }) {
             >
               <div className="flex items-baseline gap-2 min-w-0">
                 <span className="font-medium truncate flex-1 min-w-0">
-                  {event.summary || '(без названия)'}
+                  {event.summary || t('w.calendar.noTitle')}
                 </span>
                 {ongoing && (
                   <span className="text-[9px] uppercase tracking-wider text-accent shrink-0">
-                    идёт
+                    {t('w.calendar.ongoing')}
                   </span>
                 )}
               </div>
@@ -217,7 +219,7 @@ export function CalendarWidget({ params }: { params: Params }) {
                 <span className="inline-flex items-center gap-0.5">
                   <Clock size={10} aria-hidden="true" />
                   {dayLabel}
-                  {showTime ? `, ${formatTime(start)}` : ''}
+                  {showTime ? `, ${formatTime(start, locale)}` : ''}
                 </span>
                 {event.location && (
                   <span className="inline-flex items-center gap-0.5 truncate">

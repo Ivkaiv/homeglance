@@ -2,6 +2,7 @@
 
 import { useEntity } from '@/lib/ha/ConnectionProvider';
 import { SensorHistoryButton } from '@/components/charts/SensorHistoryButton';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   /** Подпись блока. */
@@ -40,6 +41,7 @@ const DEFAULTS_7D = {
  *  среднее, GMI (только в 7d-режиме имеет смысл, но HA отдаёт его всегда),
  *  % выше/ниже нормы. */
 export function GlucoseStatsWidget({ params }: { params: Params }) {
+  const t = useT();
   const period = params.period ?? '24h';
   const defaults = period === '7d' ? DEFAULTS_7D : DEFAULTS_24H;
 
@@ -55,7 +57,7 @@ export function GlucoseStatsWidget({ params }: { params: Params }) {
   const highVal = parseNum(high?.state);
   const lowVal = parseNum(low?.state);
 
-  const label = params.label || (period === '7d' ? 'За 7 дней' : 'За 24 часа');
+  const label = params.label || (period === '7d' ? t('w.glucoseStats.label7d') : t('w.glucoseStats.label24h'));
 
   // GMI рассчитывается по среднему за длинный период (рекомендуется ≥14 дней),
   // поэтому показывать его в 24-часовом блоке бессмысленно — он всё равно даст
@@ -76,7 +78,7 @@ export function GlucoseStatsWidget({ params }: { params: Params }) {
           в графике сверху. */}
       <SensorHistoryButton
         entityId={params.tirEntity || defaults.tir}
-        label="Время в норме (TIR)"
+        label={t('w.glucoseStats.tirLabel')}
         unit="%"
         decimals={0}
         hoursBack={period === '7d' ? 168 : 24}
@@ -86,7 +88,7 @@ export function GlucoseStatsWidget({ params }: { params: Params }) {
         <div className="w-full min-w-0">
           <div className="flex items-baseline justify-between gap-2 mb-1">
             <div className="text-[10px] @[240px]:text-xs uppercase tracking-wide text-text-tertiary truncate">
-              Время в норме · цель ≥70%
+              {t('w.glucoseStats.tirTitle')}
             </div>
             <div className={`text-base @[240px]:text-xl @[320px]:text-2xl font-light tabular-nums leading-none shrink-0 ${tirColor(tirVal)}`}>
               {tirVal !== null ? `${Math.round(tirVal)}%` : '—'}
@@ -115,18 +117,18 @@ export function GlucoseStatsWidget({ params }: { params: Params }) {
         }`}
       >
         <StatTile
-          label="Сред."
-          fullLabel="Среднее"
+          label={t('w.glucoseStats.statAvg')}
+          fullLabel={t('w.glucoseStats.statAvgFull')}
           value={avgVal !== null ? avgVal.toFixed(1) : '—'}
-          unit="ммоль/л"
+          unit={t('w.glucose.unit')}
           entityId={params.avgEntity || defaults.avg}
           color="#38bdf8"
           hoursBack={period === '7d' ? 168 : 24}
         />
         {showGmi && (
           <StatTile
-            label="GMI"
-            fullLabel="GMI (HbA1c)"
+            label={t('w.glucoseStats.statGmi')}
+            fullLabel={t('w.glucoseStats.statGmiFull')}
             value={gmiVal !== null ? gmiVal.toFixed(1) : '—'}
             unit="%"
             entityId={params.gmiEntity || defaults.gmi}
@@ -135,8 +137,8 @@ export function GlucoseStatsWidget({ params }: { params: Params }) {
           />
         )}
         <StatTile
-          label="Ниже"
-          fullLabel="Ниже нормы"
+          label={t('w.glucoseStats.statBelow')}
+          fullLabel={t('w.glucoseStats.statBelowFull')}
           value={lowVal !== null ? `${Math.round(lowVal)}` : '—'}
           unit="%"
           entityId={params.lowEntity || defaults.low}
@@ -145,8 +147,8 @@ export function GlucoseStatsWidget({ params }: { params: Params }) {
           accentClass={lowVal !== null && lowVal > 4 ? 'text-red-500 dark:text-red-300' : ''}
         />
         <StatTile
-          label="Выше"
-          fullLabel="Выше нормы"
+          label={t('w.glucoseStats.statAbove')}
+          fullLabel={t('w.glucoseStats.statAboveFull')}
           value={highVal !== null ? `${Math.round(highVal)}` : '—'}
           unit="%"
           entityId={params.highEntity || defaults.high}

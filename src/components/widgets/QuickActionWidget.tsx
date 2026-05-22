@@ -5,6 +5,7 @@ import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { PressButton } from '@/components/ui/PressButton';
 import { Check, Loader2 } from 'lucide-react';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -22,6 +23,7 @@ const SERVICES: Record<string, { domain: string; service: string }> = {
 };
 
 export function QuickActionWidget({ params }: { params: Params }) {
+  const t = useT();
   const e = useEntity(params.entity);
   const callService = useCallService();
   const [running, setRunning] = useState(false);
@@ -30,7 +32,7 @@ export function QuickActionWidget({ params }: { params: Params }) {
   if (!params.entity) {
     return (
       <div className="glass h-full w-full p-3 flex items-center justify-center text-text-tertiary text-xs text-center">
-        ⚙️ Настрой действие
+        {t('w.quickAction.configure')}
       </div>
     );
   }

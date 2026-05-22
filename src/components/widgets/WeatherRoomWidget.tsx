@@ -1,6 +1,7 @@
 'use client';
 
 import { useEntity, useWeatherForecast } from '@/lib/ha/ConnectionProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -13,25 +14,23 @@ interface Params {
   forecastDays?: number;
 }
 
-const STATE_RU: Record<string, string> = {
-  sunny: 'Солнечно',
-  clear: 'Ясно',
-  'clear-night': 'Ясная ночь',
-  cloudy: 'Облачно',
-  partlycloudy: 'Переменно',
-  rainy: 'Дождь',
-  pouring: 'Ливень',
-  snowy: 'Снег',
-  'snowy-rainy': 'Снег с дождём',
-  fog: 'Туман',
-  mist: 'Дымка',
-  windy: 'Ветрено',
-  hail: 'Град',
-  lightning: 'Гроза',
-  'lightning-rainy': 'Гроза с дождём',
-  exceptional: 'Опасная погода',
-  unknown: '—',
-  unavailable: 'Нет данных',
+const WEATHER_STATE_KEYS: Record<string, string> = {
+  sunny: 'w.weather.state.sunny',
+  clear: 'w.weather.state.sunny',
+  'clear-night': 'w.weather.state.clear-night',
+  cloudy: 'w.weather.state.cloudy',
+  partlycloudy: 'w.weather.state.partlycloudy',
+  rainy: 'w.weather.state.rainy',
+  pouring: 'w.weather.state.pouring',
+  snowy: 'w.weather.state.snowy',
+  'snowy-rainy': 'w.weather.state.snowy-rainy',
+  fog: 'w.weather.state.fog',
+  mist: 'w.weather.state.fog',
+  windy: 'w.weather.state.windy',
+  hail: 'w.weather.state.hail',
+  lightning: 'w.weather.state.lightning',
+  'lightning-rainy': 'w.weather.state.lightning-rainy',
+  exceptional: 'w.weather.state.exceptional',
 };
 
 const STATE_EMOJI: Record<string, string> = {
@@ -53,19 +52,15 @@ const STATE_EMOJI: Record<string, string> = {
   exceptional: '🌪',
 };
 
-const WEEKDAY_RU = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-
-const FIELD_OPTIONS = [
-  { value: 'apparent', label: 'Ощущается как' },
-  { value: 'humidity', label: 'Влажность' },
-  { value: 'wind', label: 'Ветер (скорость + направление)' },
-  { value: 'wind_gust', label: 'Порывы ветра' },
-  { value: 'pressure', label: 'Атмосферное давление' },
-  { value: 'uv', label: 'УФ-индекс' },
-  { value: 'visibility', label: 'Видимость' },
-  { value: 'cloud', label: 'Облачность %' },
-  { value: 'dew_point', label: 'Точка росы' },
-  { value: 'forecast', label: 'Прогноз на несколько дней' },
+const WIND_DIR_KEYS = [
+  'w.weather.wind.N',
+  'w.weather.wind.NE',
+  'w.weather.wind.E',
+  'w.weather.wind.SE',
+  'w.weather.wind.S',
+  'w.weather.wind.SW',
+  'w.weather.wind.W',
+  'w.weather.wind.NW',
 ];
 
 const DEFAULT_FIELDS = [
@@ -77,53 +72,46 @@ const DEFAULT_FIELDS = [
   'forecast',
 ];
 
-function windDirRu(deg: number | undefined): string {
-  if (deg === undefined || deg === null) return '';
-  const dirs = ['С', 'СВ', 'В', 'ЮВ', 'Ю', 'ЮЗ', 'З', 'СЗ'];
-  return dirs[Math.round(deg / 45) % 8];
-}
-
 function convertTemp(c: number | undefined, unit: 'C' | 'F'): string {
   if (c === undefined || c === null) return '—';
   const v = unit === 'F' ? c * 9 / 5 + 32 : c;
   return Math.round(v) + (unit === 'F' ? '°F' : '°');
 }
 
-function convertWind(ms: number | undefined, unit: 'm/s' | 'km/h' | 'mph'): string {
-  if (ms === undefined || ms === null) return '—';
-  const v = unit === 'km/h' ? ms * 3.6 : unit === 'mph' ? ms * 2.237 : ms;
-  return `${Math.round(v)} ${unit === 'm/s' ? 'м/с' : unit === 'km/h' ? 'км/ч' : 'миль/ч'}`;
+function convertWindVal(ms: number | undefined, unit: 'm/s' | 'km/h' | 'mph'): number | null {
+  if (ms === undefined || ms === null) return null;
+  return unit === 'km/h' ? ms * 3.6 : unit === 'mph' ? ms * 2.237 : ms;
 }
 
-function convertPressure(
+function convertPressureVal(
   v: number | undefined,
   fromUnit: string,
   toUnit: 'mmHg' | 'hPa' | 'inHg'
-): string {
-  if (v === undefined || v === null) return '—';
+): { val: number; unitKey: string } | null {
+  if (v === undefined || v === null) return null;
   let hpa: number;
   if (fromUnit === 'mmHg') hpa = v * 1.33322;
   else if (fromUnit === 'inHg') hpa = v * 33.8639;
   else hpa = v;
   let out: number;
-  let label: string;
+  let unitKey: string;
   if (toUnit === 'mmHg') {
     out = hpa / 1.33322;
-    label = 'мм рт. ст.';
+    unitKey = 'w.weatherRoom.pressureUnit.mmHg';
   } else if (toUnit === 'inHg') {
     out = hpa / 33.8639;
-    label = 'inHg';
+    unitKey = 'w.weatherRoom.pressureUnit.inHg';
   } else {
     out = hpa;
-    label = 'гПа';
+    unitKey = 'w.weatherRoom.pressureUnit.hPa';
   }
-  return `${Math.round(out)} ${label}`;
+  return { val: Math.round(out), unitKey };
 }
 
-function convertVisibility(km: number | undefined, unit: 'km' | 'mi'): string {
-  if (km === undefined || km === null) return '—';
+function convertVisibilityVal(km: number | undefined, unit: 'km' | 'mi'): { val: number; unitKey: string } | null {
+  if (km === undefined || km === null) return null;
   const v = unit === 'mi' ? km * 0.621371 : km;
-  return `${Math.round(v)} ${unit === 'mi' ? 'миль' : 'км'}`;
+  return { val: Math.round(v), unitKey: unit === 'mi' ? 'w.weatherRoom.visibilityUnit.mi' : 'w.weatherRoom.visibilityUnit.km' };
 }
 
 interface MetricItem {
@@ -134,6 +122,7 @@ interface MetricItem {
 }
 
 export function WeatherRoomWidget({ params }: { params: Params }) {
+  const t = useT();
   const e = useEntity(params.entity);
   const fields = params.fields ?? DEFAULT_FIELDS;
   const tempUnit = params.tempUnit ?? 'C';
@@ -159,15 +148,21 @@ export function WeatherRoomWidget({ params }: { params: Params }) {
   const cloud = e?.attributes.cloud_coverage;
   const dewPoint = e?.attributes.dew_point;
   const emoji = STATE_EMOJI[cond] || '🌡';
-  const stateRu = STATE_RU[cond] || cond;
-  const cityLabel = params.city || 'Погода';
+  const stateStr = WEATHER_STATE_KEYS[cond] ? t(WEATHER_STATE_KEYS[cond]) : cond;
+  const cityLabel = params.city || t('w.weather.label');
+
+  const windUnitKey = windUnit === 'km/h' ? 'w.weatherRoom.windUnit.kmh' : windUnit === 'mph' ? 'w.weatherRoom.windUnit.mph' : 'w.weatherRoom.windUnit.ms';
+  const windDir = (deg: number | undefined): string => {
+    if (deg === undefined || deg === null) return '';
+    return t(WIND_DIR_KEYS[Math.round(deg / 45) % 8]);
+  };
 
   const metrics: MetricItem[] = [];
   if (fields.includes('apparent') && apparent !== undefined) {
     metrics.push({
       key: 'apparent',
       icon: '🌡',
-      label: 'Ощущается',
+      label: t('w.weatherRoom.feelsLike'),
       value: convertTemp(apparent, tempUnit),
     });
   }
@@ -175,61 +170,64 @@ export function WeatherRoomWidget({ params }: { params: Params }) {
     metrics.push({
       key: 'humidity',
       icon: '💧',
-      label: 'Влажность',
+      label: t('w.weatherRoom.humidity'),
       value: `${Math.round(humidity)}%`,
     });
   }
   if (fields.includes('wind') && wind !== undefined) {
+    const wv = convertWindVal(wind, windUnit);
     metrics.push({
       key: 'wind',
       icon: '💨',
-      label: 'Ветер',
-      value: `${convertWind(wind, windUnit)}${windBearing !== undefined ? ' ' + windDirRu(windBearing) : ''}`,
+      label: t('w.weatherRoom.wind'),
+      value: wv !== null ? `${Math.round(wv)} ${t(windUnitKey)}${windBearing !== undefined ? ' ' + windDir(windBearing) : ''}` : '—',
     });
   }
   if (fields.includes('wind_gust') && windGust !== undefined) {
+    const wv = convertWindVal(windGust, windUnit);
     metrics.push({
       key: 'wind_gust',
       icon: '⚡',
-      label: 'Порывы',
-      value: convertWind(windGust, windUnit),
+      label: t('w.weatherRoom.gusts'),
+      value: wv !== null ? `${Math.round(wv)} ${t(windUnitKey)}` : '—',
     });
   }
   if (fields.includes('pressure') && pressure !== undefined) {
+    const pv = convertPressureVal(pressure, pressureUnitFrom, pressureUnit);
     metrics.push({
       key: 'pressure',
       icon: '📊',
-      label: 'Давление',
-      value: convertPressure(pressure, pressureUnitFrom, pressureUnit),
+      label: t('w.weatherRoom.pressure'),
+      value: pv !== null ? `${pv.val} ${t(pv.unitKey)}` : '—',
     });
   }
   if (fields.includes('uv') && uv !== undefined) {
-    let uvLevel = '';
-    if (uv >= 11) uvLevel = ' (экстрим)';
-    else if (uv >= 8) uvLevel = ' (очень высокий)';
-    else if (uv >= 6) uvLevel = ' (высокий)';
-    else if (uv >= 3) uvLevel = ' (умеренный)';
-    else uvLevel = ' (низкий)';
+    let uvLevelKey = 'w.weatherRoom.uv.low';
+    if (uv >= 11) uvLevelKey = 'w.weatherRoom.uv.extreme';
+    else if (uv >= 8) uvLevelKey = 'w.weatherRoom.uv.veryHigh';
+    else if (uv >= 6) uvLevelKey = 'w.weatherRoom.uv.high';
+    else if (uv >= 3) uvLevelKey = 'w.weatherRoom.uv.moderate';
     metrics.push({
       key: 'uv',
       icon: '☀️',
-      label: 'УФ',
-      value: `${Math.round(uv)}${uvLevel}`,
+      label: t('w.weatherRoom.uv'),
+      value: `${Math.round(uv)} ${t(uvLevelKey)}`,
     });
   }
   if (fields.includes('visibility') && visibility !== undefined) {
+    const vv = convertVisibilityVal(visibility, visibilityUnit);
     metrics.push({
       key: 'visibility',
       icon: '👁',
-      label: 'Видимость',
-      value: convertVisibility(visibility, visibilityUnit),
+      label: t('w.weatherRoom.visibility'),
+      value: vv !== null ? `${vv.val} ${t(vv.unitKey)}` : '—',
     });
   }
   if (fields.includes('cloud') && cloud !== undefined) {
     metrics.push({
       key: 'cloud',
       icon: '☁️',
-      label: 'Облачность',
+      label: t('w.weatherRoom.cloud'),
       value: `${Math.round(cloud)}%`,
     });
   }
@@ -237,7 +235,7 @@ export function WeatherRoomWidget({ params }: { params: Params }) {
     metrics.push({
       key: 'dew_point',
       icon: '💦',
-      label: 'Точка росы',
+      label: t('w.weatherRoom.dewPoint'),
       value: convertTemp(dewPoint, tempUnit),
     });
   }
@@ -259,7 +257,7 @@ export function WeatherRoomWidget({ params }: { params: Params }) {
           <div className="text-5xl font-light tabular-nums leading-none mt-1">
             {convertTemp(temp, tempUnit)}
           </div>
-          <div className="text-sm text-text-secondary mt-1.5 truncate">{stateRu}</div>
+          <div className="text-sm text-text-secondary mt-1.5 truncate">{stateStr}</div>
         </div>
         <div className="text-6xl shrink-0 leading-none">{emoji}</div>
       </div>
@@ -291,7 +289,7 @@ export function WeatherRoomWidget({ params }: { params: Params }) {
         <div className="ch-flex-min-180 mt-auto pt-3 border-t border-black/10 dark:border-white/10 justify-between items-end gap-1 overflow-hidden">
           {forecast.slice(0, forecastDays).map((day, i) => {
             const dt = day.datetime ? new Date(day.datetime) : null;
-            const dayLabel = i === 0 ? 'Сегодня' : dt ? WEEKDAY_RU[dt.getDay()] : '?';
+            const dayLabel = i === 0 ? t('w.weather.today') : dt ? t(`w.weather.weekday.${dt.getDay()}`) : '?';
             const dayCond = day.condition || 'unknown';
             const dayEmoji = STATE_EMOJI[dayCond] || '🌡';
             const tHigh = day.temperature ?? day.native_temperature;

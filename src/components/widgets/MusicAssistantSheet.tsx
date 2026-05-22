@@ -17,6 +17,7 @@ import { PressButton } from '@/components/ui/PressButton';
 import { useImageAccent } from '@/lib/useImageAccent';
 import { useMusic, useMAPlayers } from '@/lib/music/MusicProvider';
 import { maImageProxy } from '@/lib/music/config';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Props {
   open: boolean;
@@ -39,6 +40,7 @@ function fmtTime(sec: number): string {
  * transport, громкость и выбор выхода (на каком устройстве играть).
  */
 export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }: Props) {
+  const t = useT();
   const { client, players } = useMusic();
   const visiblePlayers = useMAPlayers();
   const [now, setNow] = useState(() => Date.now());
@@ -61,7 +63,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
   const accentSoft = (op: number) =>
     accentRgb ? `rgb(${accentRgb} / ${op})` : `rgb(var(--accent) / ${op})`;
 
-  const title = media?.title || 'Ничего не играет';
+  const title = media?.title || t('w.ma.nothingPlaying');
   const artist = media?.artist || '';
   const album = media?.album || '';
   const duration = media?.duration ?? 0;
@@ -93,7 +95,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
       onClose={onClose}
       title={friendly}
       subtitle="Music Assistant"
-      ariaLabel="Музыкальный плеер"
+      ariaLabel={t('w.maSheet.ariaLabel')}
       innerStyle={
         accent
           ? {
@@ -176,14 +178,14 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
       <div className="flex items-center justify-center gap-3 mb-5">
         <PressButton
           size={48}
-          ariaLabel="Предыдущий"
+          ariaLabel={t('w.player.previous')}
           onClick={() => playerId && cmd(() => client.previous(playerId))}
         >
           <SkipBack size={20} aria-hidden="true" />
         </PressButton>
         <PressButton
           size={64}
-          ariaLabel={playing ? 'Пауза' : 'Воспроизвести'}
+          ariaLabel={playing ? t('w.player.pause') : t('w.player.play')}
           bg={accentSoft(0.25)}
           bgPressed={accentSoft(0.45)}
           onClick={() => playerId && cmd(() => client.playPause(playerId))}
@@ -192,7 +194,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
         </PressButton>
         <PressButton
           size={48}
-          ariaLabel="Следующий"
+          ariaLabel={t('w.player.next')}
           onClick={() => playerId && cmd(() => client.next(playerId))}
         >
           <SkipForward size={20} aria-hidden="true" />
@@ -203,7 +205,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
       <div className="flex items-center gap-3 mb-5">
         <PressButton
           size={36}
-          ariaLabel={muted ? 'Включить звук' : 'Отключить звук'}
+          ariaLabel={muted ? t('w.player.unmute') : t('w.player.mute')}
           onClick={() => playerId && cmd(() => client.setMute(playerId, !muted))}
         >
           {muted ? (
@@ -221,7 +223,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
           step={1}
           value={muted ? 0 : volume}
           onChange={(ev) => playerId && cmd(() => client.setVolume(playerId, Number(ev.target.value)))}
-          aria-label="Громкость"
+          aria-label={t('w.player.volume')}
           className="no-drag flex-1 min-w-0"
           style={{ accentColor }}
         />
@@ -234,7 +236,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
       <div className="border-t border-black/5 dark:border-white/5 pt-3">
         <div className="flex items-center gap-2 text-xs font-medium text-text-secondary mb-2 px-1">
           <Speaker size={14} aria-hidden="true" />
-          <span>Где играть</span>
+          <span>{t('w.maSheet.outputSection')}</span>
         </div>
         <div className="flex flex-col gap-1">
           {visiblePlayers.map((p) => {
@@ -245,7 +247,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
                 key={p.player_id}
                 type="button"
                 onClick={() => onSelectPlayer(p.player_id)}
-                aria-label={`Выход: ${p.name}`}
+                aria-label={t('w.maSheet.outputAriaLabel', { name: p.name })}
                 className={`flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-left transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 ${
                   selected
                     ? 'bg-black/8 dark:bg-white/10'
@@ -260,7 +262,7 @@ export function MusicAssistantSheet({ open, onClose, playerId, onSelectPlayer }:
                 />
                 <span className="flex-1 min-w-0 truncate text-sm">{p.name}</span>
                 {isPlaying && !selected && (
-                  <span className="text-[10px] text-text-tertiary shrink-0">играет</span>
+                  <span className="text-[10px] text-text-tertiary shrink-0">{t('w.maSheet.playing')}</span>
                 )}
                 {selected && (
                   <Check size={16} aria-hidden="true" style={{ color: accentColor }} className="shrink-0" />

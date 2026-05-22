@@ -8,6 +8,7 @@ import {
   getSensorPreset,
   type SensorType,
 } from '@/lib/sensor/presets';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -24,6 +25,7 @@ interface Params {
 
 
 export function SensorValueWidget({ params }: { params: Params }) {
+  const t = useT();
   const e = useEntity(params.entity);
 
   const detected = params.type && params.type !== 'auto' ? params.type : detectSensorType(e);
@@ -40,7 +42,7 @@ export function SensorValueWidget({ params }: { params: Params }) {
     val = '—';
     unit = '';
   } else if (isBinary) {
-    val = on ? preset.binary!.onLabel : preset.binary!.offLabel;
+    val = on ? t(preset.binary!.onLabel) : t(preset.binary!.offLabel);
     unit = '';
   } else {
     const n = Number(e!.state);
@@ -61,7 +63,7 @@ export function SensorValueWidget({ params }: { params: Params }) {
   const inner = (
     <div
       className="glass h-full w-full flex flex-col items-center justify-center p-1 @[80px]:p-2 @[140px]:p-3 @[140px]:items-stretch @[140px]:justify-between"
-      title={`${label}: ${val}${unit}${isBinary ? '' : ' · нажмите для графика'}`}
+      title={`${label}: ${val}${unit}${isBinary ? '' : ` · ${t('w.sensor.chartHint')}`}`}
     >
       {/* Header (medium+): label слева, иконка справа.
           Унифицировано: text-sm + icon 14px (как у других виджетов). */}

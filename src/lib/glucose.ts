@@ -61,7 +61,8 @@ export const ZONE_PALETTE: Record<GlucoseZone, {
   text: string;          // текст значения
   textMuted: string;     // приглушённый текст (подпись, единица, метка зоны)
   dot: string;           // точка на графике (полный hex)
-  label: string;
+  /** i18n key for the zone label — translate in component via t(labelKey) */
+  labelKey: string;
 }> = {
   'urgent-low': {
     bg: 'bg-red-500/80 dark:bg-red-500/40',
@@ -69,7 +70,7 @@ export const ZONE_PALETTE: Record<GlucoseZone, {
     text: 'text-white dark:text-rose-50',
     textMuted: 'text-rose-50/90 dark:text-rose-100/90',
     dot: '#b91c1c',
-    label: 'опасно низко',
+    labelKey: 'w.glucose.zone.urgentLow',
   },
   'low': {
     bg: 'bg-red-500/30 dark:bg-red-500/25',
@@ -77,7 +78,7 @@ export const ZONE_PALETTE: Record<GlucoseZone, {
     text: 'text-red-900 dark:text-red-100',
     textMuted: 'text-red-800/80 dark:text-red-200/80',
     dot: '#ef4444',
-    label: 'низко',
+    labelKey: 'w.glucose.zone.low',
   },
   'in-range': {
     bg: 'bg-emerald-500/20 dark:bg-emerald-500/20',
@@ -85,7 +86,7 @@ export const ZONE_PALETTE: Record<GlucoseZone, {
     text: 'text-emerald-900 dark:text-emerald-100',
     textMuted: 'text-emerald-800/75 dark:text-emerald-200/80',
     dot: '#10b981',
-    label: 'норма',
+    labelKey: 'w.glucose.zone.normal',
   },
   'slightly-high': {
     bg: 'bg-amber-500/25 dark:bg-amber-500/20',
@@ -93,7 +94,7 @@ export const ZONE_PALETTE: Record<GlucoseZone, {
     text: 'text-amber-900 dark:text-amber-100',
     textMuted: 'text-amber-800/80 dark:text-amber-200/80',
     dot: '#f59e0b',
-    label: 'выше нормы',
+    labelKey: 'w.glucose.zone.high',
   },
   'high': {
     bg: 'bg-orange-500/30 dark:bg-orange-500/25',
@@ -101,7 +102,7 @@ export const ZONE_PALETTE: Record<GlucoseZone, {
     text: 'text-orange-900 dark:text-orange-100',
     textMuted: 'text-orange-800/80 dark:text-orange-200/80',
     dot: '#f97316',
-    label: 'высоко',
+    labelKey: 'w.glucose.zone.high',
   },
   'urgent-high': {
     bg: 'bg-red-500/80 dark:bg-red-500/45',
@@ -109,7 +110,7 @@ export const ZONE_PALETTE: Record<GlucoseZone, {
     text: 'text-white dark:text-rose-50',
     textMuted: 'text-rose-50/90 dark:text-rose-100/90',
     dot: '#b91c1c',
-    label: 'опасно высоко',
+    labelKey: 'w.glucose.zone.urgentHigh',
   },
   'unknown': {
     bg: 'bg-black/5 dark:bg-white/5',
@@ -117,7 +118,7 @@ export const ZONE_PALETTE: Record<GlucoseZone, {
     text: 'text-text-secondary',
     textMuted: 'text-text-tertiary',
     dot: '#6b7280',
-    label: 'нет данных',
+    labelKey: 'w.glucose.noData',
   },
 };
 
@@ -149,35 +150,40 @@ export function trendArrow(d: TrendDirection): string {
   }
 }
 
-/** Человеческое описание тренда — для accessibility/title. */
-export function trendLabel(d: TrendDirection): string {
+/** i18n key for trend description — translate in component via t(trendLabelKey(d)). */
+export function trendLabelKey(d: TrendDirection): string {
   switch (d) {
-    case 'DoubleUp':      return 'быстро растёт';
-    case 'SingleUp':      return 'растёт';
-    case 'FortyFiveUp':   return 'медленно растёт';
-    case 'Flat':          return 'стабильно';
-    case 'FortyFiveDown': return 'медленно падает';
-    case 'SingleDown':    return 'падает';
-    case 'DoubleDown':    return 'быстро падает';
-    default:              return 'тренд неизвестен';
+    case 'DoubleUp':      return 'w.glucose.trend.risingQuick';
+    case 'SingleUp':      return 'w.glucose.trend.rising';
+    case 'FortyFiveUp':   return 'w.glucose.trend.risingSlowly';
+    case 'Flat':          return 'w.glucose.trend.steady';
+    case 'FortyFiveDown': return 'w.glucose.trend.fallingSlowly';
+    case 'SingleDown':    return 'w.glucose.trend.falling';
+    case 'DoubleDown':    return 'w.glucose.trend.fallingQuick';
+    default:              return 'w.glucose.trend.unknown';
   }
 }
 
-/** «3 мин назад» / «1 ч 12 мин назад». */
-export function timeAgo(ms: number): string {
+/** @deprecated Use trendLabelKey + t() instead. Returns i18n key for backwards compat. */
+export function trendLabel(d: TrendDirection): string {
+  return trendLabelKey(d);
+}
+
+/** Returns { key, params } for time-ago — translate in component via t(key, params). */
+export function timeAgoKey(ms: number): { key: string; params?: Record<string, unknown> } {
   const sec = Math.max(0, Math.round(ms / 1000));
-  if (sec < 30) return 'только что';
-  if (sec < 90) return '1 мин назад';
+  if (sec < 30) return { key: 'w.glucose.ago.justNow' };
+  if (sec < 90) return { key: 'w.glucose.ago.minAgo', params: { n: 1 } };
   const min = Math.round(sec / 60);
-  if (min < 60) return `${min} мин назад`;
+  if (min < 60) return { key: 'w.glucose.ago.minAgo', params: { n: min } };
   const hours = Math.floor(min / 60);
-  const restMin = min % 60;
-  if (hours < 6) {
-    return restMin > 0 ? `${hours} ч ${restMin} мин назад` : `${hours} ч назад`;
-  }
-  if (hours < 24) return `${hours} ч назад`;
-  const days = Math.floor(hours / 24);
-  return `${days} дн назад`;
+  return { key: 'w.glucose.ago.hAgo', params: { n: hours } };
+}
+
+/** @deprecated Use timeAgoKey + t() instead. */
+export function timeAgo(ms: number): string {
+  const { key, params } = timeAgoKey(ms);
+  return key + (params ? JSON.stringify(params) : '');
 }
 
 /** Парсинг даты последнего замера из HA state. Возвращает timestamp (ms)
@@ -204,10 +210,11 @@ export function formatDelta(d: number | null | undefined, decimals = 1): string 
   return `${sign}${Math.abs(v).toFixed(decimals)}`;
 }
 
-/** Список диапазонов истории для UI-переключателя графика. */
-export const RANGE_OPTIONS: Array<{ value: 3 | 6 | 12 | 24; label: string }> = [
-  { value: 3,  label: '3 ч' },
-  { value: 6,  label: '6 ч' },
-  { value: 12, label: '12 ч' },
-  { value: 24, label: '24 ч' },
+/** Список диапазонов истории для UI-переключателя графика.
+ *  labelKey — i18n key, translate in component via t(labelKey). */
+export const RANGE_OPTIONS: Array<{ value: 3 | 6 | 12 | 24; labelKey: string }> = [
+  { value: 3,  labelKey: 'w.glucoseChart.range.3h' },
+  { value: 6,  labelKey: 'w.glucoseChart.range.6h' },
+  { value: 12, labelKey: 'w.glucoseChart.range.12h' },
+  { value: 24, labelKey: 'w.glucoseChart.range.24h' },
 ];

@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useEntity } from '@/lib/ha/ConnectionProvider';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { detectSensorType, getSensorPreset } from '@/lib/sensor/presets';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Props {
   entityId: string;
@@ -22,6 +23,7 @@ interface Props {
  * Для не-бинарных типов (numeric) ничего не рендерит.
  */
 export function SensorIconBadge({ entityId, size = 18 }: Props) {
+  const t = useT();
   const e = useEntity(entityId);
   const detected = detectSensorType(e);
   const preset = getSensorPreset(detected);
@@ -33,8 +35,8 @@ export function SensorIconBadge({ entityId, size = 18 }: Props) {
   const iconValue = (e?.attributes.icon as string | undefined)
     ?? (on ? preset.binary.onIcon : preset.icon);
   const colorClass = on ? preset.binary.onAccent : 'text-text-tertiary';
-  const label = on ? preset.binary.onLabel : preset.binary.offLabel;
-  const fullLabel = `${e?.attributes.friendly_name || entityId}: ${isBad ? 'нет связи' : label}`;
+  const label = on ? t(preset.binary.onLabel) : t(preset.binary.offLabel);
+  const fullLabel = `${e?.attributes.friendly_name || entityId}: ${isBad ? t('w.sensor.noSignal') : label}`;
 
   return (
     <span

@@ -5,6 +5,7 @@ import { useEntity } from '@/lib/ha/ConnectionProvider';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { SensorHistoryButton } from '@/components/charts/SensorHistoryButton';
 import { detectSensorType, getSensorPreset } from '@/lib/sensor/presets';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Props {
   entityId: string;
@@ -24,6 +25,7 @@ interface Props {
  * Пример: 🌡 22°  | 💧 45% | 🚪 Открыта
  */
 export function SensorChip({ entityId, height = 36, decimals }: Props) {
+  const t = useT();
   const dec = decimals ?? undefined;
   const e = useEntity(entityId);
 
@@ -39,7 +41,7 @@ export function SensorChip({ entityId, height = 36, decimals }: Props) {
     val = '—';
     unit = '';
   } else if (isBinary) {
-    val = on ? preset.binary!.onLabel : preset.binary!.offLabel;
+    val = on ? t(preset.binary!.onLabel) : t(preset.binary!.offLabel);
     unit = '';
   } else {
     const n = Number(e!.state);
@@ -70,7 +72,7 @@ export function SensorChip({ entityId, height = 36, decimals }: Props) {
         paddingLeft: 10,
         paddingRight: 10,
       }}
-      title={`${e?.attributes.friendly_name || entityId}: ${val}${unit}${isBinary || isBad ? '' : ' · нажмите для графика'}`}
+      title={`${e?.attributes.friendly_name || entityId}: ${val}${unit}${isBinary || isBad ? '' : ` · ${t('w.sensor.chartHint')}`}`}
     >
       <GlanceIcon
         value={iconValue}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, X } from 'lucide-react';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   label?: string;
@@ -27,11 +28,12 @@ interface HaNotification {
  * Тап на крестик → `persistent_notification.dismiss` (через REST/WS service).
  */
 export function NotificationFeedWidget({ params }: { params: Params }) {
+  const { t, locale } = useI18n();
   const { client, isReady } = useConnection();
   const [items, setItems] = useState<HaNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const max = Math.max(1, params.max ?? 10);
-  const label = params.label || 'Уведомления';
+  const label = params.label || t('w.notifications.label');
 
   useEffect(() => {
     if (!isReady) return;
@@ -89,11 +91,11 @@ export function NotificationFeedWidget({ params }: { params: Params }) {
 
       {loading ? (
         <div className="flex-1 flex items-center justify-center text-[11px] text-text-tertiary">
-          Загрузка…
+          {t('w.notifications.loading')}
         </div>
       ) : visible.length === 0 ? (
         <div className="flex-1 flex items-center justify-center text-[11px] text-text-tertiary text-center px-2">
-          Нет активных уведомлений
+          {t('w.notifications.empty')}
         </div>
       ) : (
         <ul className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pr-1">
@@ -116,7 +118,7 @@ export function NotificationFeedWidget({ params }: { params: Params }) {
                 </div>
                 {n.created_at && (
                   <div className="text-[9px] text-text-tertiary mt-0.5">
-                    {new Date(n.created_at).toLocaleString('ru-RU', {
+                    {new Date(n.created_at).toLocaleString(locale, {
                       hour: '2-digit',
                       minute: '2-digit',
                       day: 'numeric',
@@ -128,7 +130,7 @@ export function NotificationFeedWidget({ params }: { params: Params }) {
               <button
                 type="button"
                 onClick={() => dismiss(n.notification_id)}
-                aria-label="Закрыть уведомление"
+                aria-label={t('w.notifications.dismiss')}
                 className="no-drag shrink-0 w-5 h-5 rounded-full bg-black/10 dark:bg-white/10 text-text-tertiary hover:text-text-primary flex items-center justify-center"
               >
                 <X size={10} aria-hidden="true" />

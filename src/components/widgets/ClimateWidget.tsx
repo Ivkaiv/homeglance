@@ -8,6 +8,7 @@ import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { PressButton } from '@/components/ui/PressButton';
 import { ClimateSheet } from './ClimateSheet';
 import { Plus, Minus } from 'lucide-react';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -17,6 +18,7 @@ interface Params {
 }
 
 export function ClimateWidget({ params }: { params: Params }) {
+  const t = useT();
   const e = useEntity(params.entity);
   const callService = useCallService();
   const [ref, size] = useWidgetSize();
@@ -24,7 +26,7 @@ export function ClimateWidget({ params }: { params: Params }) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const isBad = !e || e.state === 'unavailable';
-  const label = params.label ?? e?.attributes.friendly_name ?? 'Климат';
+  const label = params.label ?? e?.attributes.friendly_name ?? t('w.climate.label');
   const current = e?.attributes.current_temperature;
   const target = e?.attributes.temperature;
   const mode = e?.state ?? 'unknown';
@@ -59,7 +61,7 @@ export function ClimateWidget({ params }: { params: Params }) {
           className="glass h-full w-full flex items-center justify-center disabled:opacity-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
           style={glow}
           title={label}
-          aria-label={`Открыть настройки ${label}`}
+          aria-label={t('w.climate.openSettings', { label })}
         >
           <div className="text-base font-medium tabular-nums">{tempCurrent}</div>
         </button>
@@ -89,7 +91,7 @@ export function ClimateWidget({ params }: { params: Params }) {
           }}
           className="glass h-full w-full p-2 flex items-center gap-2 overflow-hidden cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
           style={glow}
-          aria-label={`Открыть настройки ${label}`}
+          aria-label={t('w.climate.openSettings', { label })}
         >
           <GlanceIcon
             value={iconValue}
@@ -116,7 +118,7 @@ export function ClimateWidget({ params }: { params: Params }) {
               <PressButton
                 onClick={() => setTemp(-step)}
                 size={26}
-                ariaLabel={`Уменьшить (текущая ${formatTemp(target!, step)}°)`}
+                ariaLabel={t('w.climate.decrease', { temp: formatTemp(target!, step) })}
               >
                 <Minus size={12} aria-hidden="true" />
               </PressButton>
@@ -128,7 +130,7 @@ export function ClimateWidget({ params }: { params: Params }) {
               <PressButton
                 onClick={() => setTemp(+step)}
                 size={26}
-                ariaLabel={`Увеличить (текущая ${formatTemp(target!, step)}°)`}
+                ariaLabel={t('w.climate.increase', { temp: formatTemp(target!, step) })}
               >
                 <Plus size={12} aria-hidden="true" />
               </PressButton>

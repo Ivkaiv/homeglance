@@ -4,6 +4,7 @@ import { useEntity } from '@/lib/ha/ConnectionProvider';
 import { Zap } from 'lucide-react';
 import { SensorHistoryButton } from '@/components/charts/SensorHistoryButton';
 import { useWidgetSize, sizeTier } from '@/lib/widgets/useWidgetSize';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   /** Текущая мощность (W) — sensor.* с device_class=power. */
@@ -34,6 +35,7 @@ function fmt(s?: string, decimals = 0): { value: string; unit: string } {
  * `SensorHistoryButton` — стандартный паттерн в Glance.
  */
 export function EnergyWidget({ params }: { params: Params }) {
+  const t = useT();
   const [ref, size] = useWidgetSize();
   const tier = sizeTier(size);
   const power = useEntity(params.power);
@@ -43,20 +45,20 @@ export function EnergyWidget({ params }: { params: Params }) {
   if (!params.power) {
     return (
       <div className="glass h-full w-full p-3 flex items-center justify-center text-text-tertiary text-xs text-center">
-        ⚙️ Укажи sensor мощности
+        {t('w.energy.configure')}
       </div>
     );
   }
 
   const isBad = !power || power.state === 'unavailable' || power.state === 'unknown';
   const powerVal = isBad ? '—' : fmt(power.state, 0).value;
-  const powerUnit = power?.attributes.unit_of_measurement ?? 'Вт';
-  const label = params.label ?? power?.attributes.friendly_name ?? 'Потребление';
+  const powerUnit = power?.attributes.unit_of_measurement ?? t('w.energy.unitW');
+  const label = params.label ?? power?.attributes.friendly_name ?? t('w.energy.label');
 
   const todayVal = params.todayEnergy ? fmt(today?.state, 1).value : null;
-  const todayUnit = today?.attributes.unit_of_measurement ?? 'кВт·ч';
+  const todayUnit = today?.attributes.unit_of_measurement ?? t('w.energy.unitKWh');
   const monthVal = params.monthEnergy ? fmt(month?.state, 1).value : null;
-  const monthUnit = month?.attributes.unit_of_measurement ?? 'кВт·ч';
+  const monthUnit = month?.attributes.unit_of_measurement ?? t('w.energy.unitKWh');
 
   // Стоимость рассчитываем от текущего значения сегодняшней энергии
   const todayCost =
@@ -115,7 +117,7 @@ export function EnergyWidget({ params }: { params: Params }) {
         <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-text-tertiary mt-auto shrink-0">
           {todayVal && (
             <span className="tabular-nums">
-              Сегодня <span className="text-text-secondary">{todayVal}</span> {todayUnit}
+              {t('w.energy.today')} <span className="text-text-secondary">{todayVal}</span> {todayUnit}
               {todayCost && (
                 <span className="text-text-tertiary"> · ≈{todayCost}{currency}</span>
               )}
@@ -123,7 +125,7 @@ export function EnergyWidget({ params }: { params: Params }) {
           )}
           {monthVal && (
             <span className="tabular-nums">
-              Месяц <span className="text-text-secondary">{monthVal}</span> {monthUnit}
+              {t('w.energy.month')} <span className="text-text-secondary">{monthVal}</span> {monthUnit}
             </span>
           )}
         </div>

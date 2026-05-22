@@ -15,6 +15,7 @@ import {
   DEFAULT_THRESHOLDS,
   RANGE_OPTIONS,
 } from '@/lib/glucose';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -46,6 +47,7 @@ function parseRangeLabel(label: string | undefined): number | null {
 }
 
 export function GlucoseChartWidget({ params }: { params: Params }) {
+  const t = useT();
   const entityId = params.entity || DEFAULT_ENTITY;
   const rangeEntityId = params.rangeEntity || DEFAULT_RANGE_ENTITY;
 
@@ -88,7 +90,7 @@ export function GlucoseChartWidget({ params }: { params: Params }) {
           этом не наезжает на соседние виджеты, потому что overflow-hidden. */}
       <div className="flex items-center justify-between gap-2 flex-wrap shrink-0">
         <div className="text-sm @[300px]:text-base font-medium leading-tight truncate min-w-0">
-          {params.label || 'Глюкоза'}
+          {params.label || t('w.glucoseChart.label')}
         </div>
         <div className="flex items-center gap-0.5 rounded-lg bg-black/15 dark:bg-white/5 border border-black/10 dark:border-white/10 p-0.5">
           {RANGE_OPTIONS.map((opt) => {
@@ -110,7 +112,7 @@ export function GlucoseChartWidget({ params }: { params: Params }) {
                     : 'text-text-tertiary hover:text-text-secondary hover:bg-black/5 dark:hover:bg-white/5'}
                 `}
               >
-                {opt.label}
+                {t(opt.labelKey)}
               </button>
             );
           })}
@@ -121,11 +123,11 @@ export function GlucoseChartWidget({ params }: { params: Params }) {
       <div className="flex-1 min-h-0">
         {loading && points.length === 0 ? (
           <div className="h-full flex items-center justify-center text-xs text-text-tertiary">
-            График загружается…
+            {t('w.glucoseChart.loading')}
           </div>
         ) : points.length < 2 ? (
           <div className="h-full flex items-center justify-center text-xs text-text-tertiary text-center px-4">
-            За последние {hoursBack} ч в HA нет накопленной истории глюкозы
+            {t('w.glucoseChart.noHistory', { hours: hoursBack })}
           </div>
         ) : (
           <GlucoseChart points={points} thresholds={thresholds} hoursBack={hoursBack} />

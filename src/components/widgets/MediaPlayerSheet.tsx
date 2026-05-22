@@ -20,6 +20,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { ZAYCEV_CHANNELS, zaycevStreamUrl, type ZaycevBitrate } from '@/lib/zaycev';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 // Битмаска SUPPORT_* из media_player в Home Assistant
 const SUPPORT_PAUSE = 1;
@@ -55,6 +56,7 @@ interface Props {
  * в RoomHubWidget. Использует общую ModalSheet (нижняя шторка с focus-trap).
  */
 export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate }: Props) {
+  const t = useT();
   const e = useEntity(entityId);
   const callService = useCallService();
   // now нужен только чтобы пересчитывать прогресс «живым» при playing —
@@ -113,8 +115,8 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
 
   if (!e) {
     return (
-      <ModalSheet open={open} onClose={onClose} title="Плеер недоступен" position="center">
-        <div className="text-sm text-text-secondary">Плеер сейчас offline или не отдаёт состояние.</div>
+      <ModalSheet open={open} onClose={onClose} title={t('w.mediaSheet.unavailable')} position="center">
+        <div className="text-sm text-text-secondary">{t('w.mediaSheet.offlineBody')}</div>
       </ModalSheet>
     );
   }
@@ -192,7 +194,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
       onClose={onClose}
       title={friendly}
       subtitle={appName || undefined}
-      ariaLabel="Управление плеером"
+      ariaLabel={t('w.mediaSheet.ariaLabel')}
       innerStyle={
         accent
           ? {
@@ -262,7 +264,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
             <div
               className={`relative h-7 -my-2 flex items-center ${canSeek ? 'cursor-pointer' : ''}`}
               role={canSeek ? 'slider' : undefined}
-              aria-label={canSeek ? 'Перемотка' : undefined}
+              aria-label={canSeek ? t('w.mediaSheet.seekAriaLabel') : undefined}
               aria-valuemin={canSeek ? 0 : undefined}
               aria-valuemax={canSeek ? Math.round(duration) : undefined}
               aria-valuenow={canSeek ? Math.round(position) : undefined}
@@ -300,7 +302,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
         {has(SUPPORT_SHUFFLE_SET) && (
           <PressButton
             size={40}
-            ariaLabel={shuffle ? 'Выключить shuffle' : 'Включить shuffle'}
+            ariaLabel={shuffle ? t('w.mediaSheet.shuffleOff') : t('w.mediaSheet.shuffleOn')}
             onClick={() => cmd('shuffle_set', { shuffle: !shuffle })}
           >
             <Shuffle
@@ -313,7 +315,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
         {has(SUPPORT_PREVIOUS_TRACK) && (
           <PressButton
             size={48}
-            ariaLabel="Предыдущий"
+            ariaLabel={t('w.player.previous')}
             onClick={() => cmd('media_previous_track')}
           >
             <SkipBack size={20} aria-hidden="true" />
@@ -322,7 +324,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
         {canPlayPause && (
           <PressButton
             size={64}
-            ariaLabel={playing ? 'Пауза' : 'Воспроизвести'}
+            ariaLabel={playing ? t('w.player.pause') : t('w.player.play')}
             bg={accentSoft(0.25)}
             bgPressed={accentSoft(0.45)}
             onClick={() => cmd(playing ? 'media_pause' : 'media_play')}
@@ -337,7 +339,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
         {has(SUPPORT_NEXT_TRACK) && (
           <PressButton
             size={48}
-            ariaLabel="Следующий"
+            ariaLabel={t('w.player.next')}
             onClick={() => cmd('media_next_track')}
           >
             <SkipForward size={20} aria-hidden="true" />
@@ -346,7 +348,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
         {has(SUPPORT_REPEAT_SET) && (
           <PressButton
             size={40}
-            ariaLabel="Режим повтора"
+            ariaLabel={t('w.mediaSheet.repeatAriaLabel')}
             onClick={() => {
               const next = repeat === 'off' ? 'all' : repeat === 'all' ? 'one' : 'off';
               cmd('repeat_set', { repeat: next });
@@ -371,7 +373,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
           {has(SUPPORT_VOLUME_MUTE) && (
             <PressButton
               size={36}
-              ariaLabel={muted ? 'Включить звук' : 'Отключить звук'}
+              ariaLabel={muted ? t('w.player.unmute') : t('w.player.mute')}
               onClick={() => cmd('volume_mute', { is_volume_muted: !muted })}
             >
               {muted ? (
@@ -393,7 +395,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
               onChange={(ev) =>
                 cmd('volume_set', { volume_level: parseFloat(ev.target.value) })
               }
-              aria-label="Громкость"
+              aria-label={t('w.player.volume')}
               className="flex-1"
               style={{ accentColor: accentColor }}
             />
@@ -415,7 +417,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
             className="w-full flex items-center gap-2 py-2 px-1 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-black/5 dark:hover:bg-white/5 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
           >
             <Radio size={16} aria-hidden="true" />
-            <span className="flex-1 text-left">Радио · Zaycev FM</span>
+            <span className="flex-1 text-left">{t('w.mediaSheet.radioSection')}</span>
             {activeRadioChannel && !radioOpen && (
               <span className="text-xs text-text-tertiary truncate max-w-[40%]">
                 {ZAYCEV_CHANNELS.find((c) => c.id === activeRadioChannel)?.name}
@@ -437,7 +439,7 @@ export function MediaPlayerSheet({ entityId, open, onClose, radio, radioBitrate 
                     key={ch.id}
                     type="button"
                     onClick={() => playRadio(ch.id)}
-                    aria-label={`Включить ${ch.name}`}
+                    aria-label={t('w.mediaSheet.playChannel', { name: ch.name })}
                     className={`flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-lg border transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 ${
                       active
                         ? ''

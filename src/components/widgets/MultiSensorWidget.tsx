@@ -2,6 +2,7 @@
 
 import { SensorChip } from './SensorChip';
 import { useWidgetSize } from '@/lib/widgets/useWidgetSize';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   /** Список entity_id сенсоров (sensor.* / binary_sensor.*) — через ConfigSheet, multi-entity. */
@@ -24,13 +25,14 @@ interface Params {
  * чип кликабелен и открывает график истории (через `SensorHistoryButton`).
  */
 export function MultiSensorWidget({ params }: { params: Params }) {
+  const t = useT();
   const [ref, size] = useWidgetSize();
   const list = Array.isArray(params.entities) ? params.entities.filter(Boolean) : [];
 
   if (list.length === 0) {
     return (
       <div className="glass h-full w-full p-3 flex items-center justify-center text-text-tertiary text-xs text-center">
-        ⚙️ Добавь сенсоры в настройках
+        {t('w.multiSensor.configure')}
       </div>
     );
   }

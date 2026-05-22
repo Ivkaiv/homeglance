@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHAHistory, HistoryPoint } from '@/lib/ha/ConnectionProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -20,18 +21,20 @@ export function TempChart({
   entityId,
   hoursBack = 24,
   color = '#fbbf24',
-  modalLabel = 'Температура',
+  modalLabel,
 }: Props) {
+  const t = useT();
   const { points, loading } = useHAHistory(entityId, hoursBack);
   const [open, setOpen] = useState(false);
+  const label = modalLabel ?? t('chart.tempLabel');
 
   if (loading) {
     return (
-      <div className="h-14 flex items-center text-xs text-text-tertiary">График загружается…</div>
+      <div className="h-14 flex items-center text-xs text-text-tertiary">{t('chart.loading')}</div>
     );
   }
   if (points.length < 2) {
-    return <div className="h-14 flex items-center text-xs text-text-tertiary">Нет истории</div>;
+    return <div className="h-14 flex items-center text-xs text-text-tertiary">{t('chart.noHistoryTemp')}</div>;
   }
 
   const vs = points.map((p) => p.v);
@@ -64,7 +67,7 @@ export function TempChart({
           <TempChartModal
             points={points}
             color={color}
-            label={modalLabel}
+            label={label}
             onClose={() => setOpen(false)}
           />
         )}
@@ -184,6 +187,7 @@ function TempChartModal({
   label: string;
   onClose: () => void;
 }) {
+  const t = useT();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState<{ w: number; h: number }>(() => {
     if (typeof window === 'undefined') return { w: 600, h: 280 };
@@ -344,6 +348,7 @@ function TempChartModal({
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.close')}
             className="w-9 h-9 rounded-full bg-black/20 dark:bg-black/40 border border-black/15 dark:border-white/15 text-text-primary text-lg flex items-center justify-center"
           >
             ×
@@ -433,12 +438,12 @@ function TempChartModal({
         </div>
 
         <div className="grid grid-cols-3 gap-2 mt-3">
-          <Stat label="минимум" value={`${vMin.toFixed(1)}°`} color="text-sky-600 dark:text-sky-300" />
-          <Stat label="средняя" value={`${vAvg.toFixed(1)}°`} color="text-text-primary" />
-          <Stat label="максимум" value={`${vMax.toFixed(1)}°`} color="text-amber-600 dark:text-amber-300" />
+          <Stat label={t('chart.min')} value={`${vMin.toFixed(1)}°`} color="text-sky-600 dark:text-sky-300" />
+          <Stat label={t('chart.avg')} value={`${vAvg.toFixed(1)}°`} color="text-text-primary" />
+          <Stat label={t('chart.max')} value={`${vMax.toFixed(1)}°`} color="text-amber-600 dark:text-amber-300" />
         </div>
         <div className="mt-2 text-[11px] text-text-tertiary text-center">
-          Поведи пальцем по графику — увидишь температуру в нужный момент
+          {t('chart.swipeHintTemp')}
         </div>
       </motion.div>
     </motion.div>,

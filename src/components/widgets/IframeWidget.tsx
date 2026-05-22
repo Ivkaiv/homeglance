@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ExternalLink, Globe } from 'lucide-react';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   /** Полный URL — может быть http(s) или относительный (для same-origin). */
@@ -24,13 +25,14 @@ interface Params {
  * с прямой ссылкой «Открыть в новой вкладке».
  */
 export function IframeWidget({ params }: { params: Params }) {
+  const t = useT();
   const [failed, setFailed] = useState(false);
   const url = params.url?.trim();
 
   if (!url) {
     return (
       <div className="glass h-full w-full p-3 flex items-center justify-center text-text-tertiary text-xs text-center">
-        ⚙️ Укажите URL в настройках
+        {t('w.iframe.configure')}
       </div>
     );
   }
@@ -39,14 +41,14 @@ export function IframeWidget({ params }: { params: Params }) {
     return (
       <div className="glass h-full w-full p-3 flex flex-col items-center justify-center gap-2 text-text-tertiary">
         <Globe size={18} aria-hidden="true" />
-        <div className="text-[11px] text-center">Сайт запретил встраивание</div>
+        <div className="text-[11px] text-center">{t('w.iframe.blocked')}</div>
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
           className="text-[10px] inline-flex items-center gap-1 text-accent hover:underline"
         >
-          Открыть в новой вкладке <ExternalLink size={10} aria-hidden="true" />
+          {t('w.iframe.openNewTab')} <ExternalLink size={10} aria-hidden="true" />
         </a>
       </div>
     );
@@ -65,7 +67,7 @@ export function IframeWidget({ params }: { params: Params }) {
       )}
       <iframe
         src={url}
-        title={params.label || 'Встроенный сайт'}
+        title={params.label || t('w.iframe.ariaLabel')}
         sandbox={sandbox}
         loading="lazy"
         referrerPolicy="no-referrer"

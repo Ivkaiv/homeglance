@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode }
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHAHistory, useEntity, type HistoryPoint } from '@/lib/ha/ConnectionProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -135,6 +136,7 @@ function SensorHistoryModal({
   hoursBack: number;
   onClose: () => void;
 }) {
+  const t = useT();
   const { points, loading } = useHAHistory(entityId, hoursBack);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState<{ w: number; h: number }>(() => {
@@ -302,7 +304,7 @@ function SensorHistoryModal({
                     {points[points.length - 1].v.toFixed(decimals)}
                   </div>
                   {unit && <div className="text-base text-text-secondary">{unit}</div>}
-                  <div className="text-sm text-text-tertiary tabular-nums ml-2">сейчас</div>
+                  <div className="text-sm text-text-tertiary tabular-nums ml-2">{t('chart.now')}</div>
                 </>
               ) : null}
             </div>
@@ -310,7 +312,7 @@ function SensorHistoryModal({
           <button
             onClick={onClose}
             className="w-9 h-9 rounded-full bg-black/20 dark:bg-black/40 border border-black/15 dark:border-white/15 text-text-primary text-lg flex items-center justify-center shrink-0"
-            aria-label="Закрыть"
+            aria-label={t('common.close')}
           >
             ×
           </button>
@@ -319,11 +321,11 @@ function SensorHistoryModal({
         <div ref={containerRef} className="w-full" style={{ height: h }}>
           {loading ? (
             <div className="h-full flex items-center justify-center text-text-tertiary text-sm">
-              График загружается…
+              {t('chart.loading')}
             </div>
           ) : !data ? (
             <div className="h-full flex items-center justify-center text-text-tertiary text-sm">
-              За последние {hoursBack} ч нет накопленной истории
+              {t('chart.noHistory', { hours: hoursBack })}
             </div>
           ) : (
             <svg
@@ -427,12 +429,12 @@ function SensorHistoryModal({
         {data && (
           <>
             <div className="grid grid-cols-3 gap-2 mt-3">
-              <Stat label="минимум" value={fmt(data.vMin)} colorClass="text-sky-600 dark:text-sky-300" />
-              <Stat label="средняя" value={fmt(data.vAvg)} colorClass="text-text-primary" />
-              <Stat label="максимум" value={fmt(data.vMax)} colorClass="text-amber-600 dark:text-amber-300" />
+              <Stat label={t('chart.min')} value={fmt(data.vMin)} colorClass="text-sky-600 dark:text-sky-300" />
+              <Stat label={t('chart.avg')} value={fmt(data.vAvg)} colorClass="text-text-primary" />
+              <Stat label={t('chart.max')} value={fmt(data.vMax)} colorClass="text-amber-600 dark:text-amber-300" />
             </div>
             <div className="mt-2 text-[11px] text-text-tertiary text-center">
-              Поведи пальцем по графику — увидишь значение в нужный момент
+              {t('chart.swipeHint')}
             </div>
           </>
         )}

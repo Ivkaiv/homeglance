@@ -7,6 +7,17 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.84] — 2026-05-22
+
+### Changed
+- **Localization, part 3.** All remaining widget runtime strings now follow the
+  selected interface language. Localized: Glucose, Glucose chart and Glucose
+  stats, sensor chips and badges, MultiSensor, Note, QuickAction, Iframe,
+  Webhook, ControlPanel, NotificationFeed, RoomHub, MediaPlayer and its sheet,
+  MusicAssistant and its sheet, plus the sensor-history and temperature charts.
+  Sensor presets and glucose helpers now return i18n keys instead of hardcoded
+  Russian strings.
+
 ## [0.1.0-alpha.83] — 2026-05-22
 
 ### Changed

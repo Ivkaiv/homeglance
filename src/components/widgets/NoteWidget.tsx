@@ -1,6 +1,7 @@
 'use client';
 
 import { GlanceIcon } from '@/components/icons/MdiIcon';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   text?: string;
@@ -9,7 +10,8 @@ interface Params {
 }
 
 export function NoteWidget({ params }: { params: Params }) {
-  const text = params.text || 'Заметка';
+  const t = useT();
+  const text = params.text || t('w.note.defaultText');
   const iconValue = params.icon;
   const color = params.color;
 

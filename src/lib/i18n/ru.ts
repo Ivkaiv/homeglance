@@ -740,4 +740,291 @@ export const ru: Dictionary = {
   'wm.glucose_stats.fld.gmiEntity': 'GMI / HbA1c',
   'wm.glucose_stats.fld.highEntity': '% времени выше нормы',
   'wm.glucose_stats.fld.lowEntity': '% времени ниже нормы',
+
+  // ── Shared transport / player strings ────────────────────────────────────
+  'w.player.previous': 'Предыдущий',
+  'w.player.next': 'Следующий',
+  'w.player.play': 'Воспроизвести',
+  'w.player.pause': 'Пауза',
+  'w.player.open': 'Открыть плеер',
+  'w.player.mute': 'Отключить звук',
+  'w.player.unmute': 'Включить звук',
+  'w.player.volume': 'Громкость',
+  'w.player.seekHint': 'Поведи пальцем по графику — увидишь значение в нужный момент',
+
+  // ── climate widget runtime ────────────────────────────────────────────────
+  'w.climate.label': 'Климат',
+  'w.climate.openSettings': 'Открыть настройки {label}',
+  'w.climate.decrease': 'Уменьшить (текущая {temp}°)',
+  'w.climate.increase': 'Увеличить (текущая {temp}°)',
+
+  // ── climate sheet runtime ─────────────────────────────────────────────────
+  'w.climateSheet.unavailable': 'Климат недоступен',
+  'w.climateSheet.offlineBody': 'Сущность сейчас offline или не отдаёт состояние.',
+  'w.climateSheet.off': 'Выключено',
+  'w.climateSheet.currentTemp': 'сейчас {temp}°',
+  'w.climateSheet.decrease': 'Уменьшить целевую температуру',
+  'w.climateSheet.increase': 'Увеличить целевую температуру',
+  'w.climateSheet.ariaLabel': 'Управление {name}',
+  'w.climateSheet.modeLabel': 'Режим',
+  'w.climateSheet.fanLabel': 'Вентилятор',
+  'w.climateSheet.presetLabel': 'Пресет',
+  'w.climateSheet.swingLabel': 'Жалюзи',
+  'w.climateSheet.mode.off': 'Выключено',
+  'w.climateSheet.mode.heat': 'Обогрев',
+  'w.climateSheet.mode.cool': 'Охлаждение',
+  'w.climateSheet.mode.auto': 'Авто',
+  'w.climateSheet.mode.heat_cool': 'Тепло/Холод',
+  'w.climateSheet.mode.dry': 'Осушение',
+  'w.climateSheet.mode.fan_only': 'Вентилятор',
+  'w.climateSheet.action.heating': 'греет',
+  'w.climateSheet.action.cooling': 'охлаждает',
+  'w.climateSheet.action.drying': 'сушит',
+  'w.climateSheet.action.fan': 'вентилятор',
+  'w.climateSheet.action.idle': 'ожидание',
+  'w.climateSheet.action.off': 'выкл.',
+
+  // ── weather widget runtime ────────────────────────────────────────────────
+  'w.weather.label': 'Погода',
+  'w.weather.today': 'Сегодня',
+  'w.weather.feelsLike': 'Ощущается как',
+  'w.weather.mmPerH': 'мм',
+  'w.weather.uv': 'УФ',
+  'w.weather.gusts': 'Порывы',
+  'w.weather.km': 'км',
+  'w.weather.dewPoint': 'точка росы',
+  'w.weather.state.sunny': 'Солнечно',
+  'w.weather.state.clear-night': 'Ясная ночь',
+  'w.weather.state.partlycloudy': 'Переменная облачность',
+  'w.weather.state.cloudy': 'Облачно',
+  'w.weather.state.fog': 'Туман',
+  'w.weather.state.hail': 'Град',
+  'w.weather.state.lightning': 'Гроза',
+  'w.weather.state.lightning-rainy': 'Гроза с дождём',
+  'w.weather.state.pouring': 'Ливень',
+  'w.weather.state.rainy': 'Дождь',
+  'w.weather.state.snowy': 'Снег',
+  'w.weather.state.snowy-rainy': 'Мокрый снег',
+  'w.weather.state.windy': 'Ветрено',
+  'w.weather.state.windy-variant': 'Ветрено с облаками',
+  'w.weather.state.exceptional': 'Экстремально',
+  'w.weather.wind.N': 'С',
+  'w.weather.wind.NE': 'СВ',
+  'w.weather.wind.E': 'В',
+  'w.weather.wind.SE': 'ЮВ',
+  'w.weather.wind.S': 'Ю',
+  'w.weather.wind.SW': 'ЮЗ',
+  'w.weather.wind.W': 'З',
+  'w.weather.wind.NW': 'СЗ',
+  'w.weather.weekday.0': 'Вс',
+  'w.weather.weekday.1': 'Пн',
+  'w.weather.weekday.2': 'Вт',
+  'w.weather.weekday.3': 'Ср',
+  'w.weather.weekday.4': 'Чт',
+  'w.weather.weekday.5': 'Пт',
+  'w.weather.weekday.6': 'Сб',
+
+  // ── weather_room widget runtime ───────────────────────────────────────────
+  'w.weatherRoom.feelsLike': 'Ощущается',
+  'w.weatherRoom.humidity': 'Влажность',
+  'w.weatherRoom.wind': 'Ветер',
+  'w.weatherRoom.gusts': 'Порывы',
+  'w.weatherRoom.pressure': 'Давление',
+  'w.weatherRoom.uv': 'УФ',
+  'w.weatherRoom.uv.extreme': '(экстрим)',
+  'w.weatherRoom.uv.veryHigh': '(очень высокий)',
+  'w.weatherRoom.uv.high': '(высокий)',
+  'w.weatherRoom.uv.moderate': '(умеренный)',
+  'w.weatherRoom.uv.low': '(низкий)',
+  'w.weatherRoom.visibility': 'Видимость',
+  'w.weatherRoom.cloud': 'Облачность',
+  'w.weatherRoom.dewPoint': 'Точка росы',
+  'w.weatherRoom.windUnit.ms': 'м/с',
+  'w.weatherRoom.windUnit.kmh': 'км/ч',
+  'w.weatherRoom.windUnit.mph': 'миль/ч',
+  'w.weatherRoom.pressureUnit.mmHg': 'мм рт. ст.',
+  'w.weatherRoom.pressureUnit.hPa': 'гПа',
+  'w.weatherRoom.pressureUnit.inHg': 'inHg',
+  'w.weatherRoom.visibilityUnit.km': 'км',
+  'w.weatherRoom.visibilityUnit.mi': 'миль',
+
+  // ── energy widget runtime ─────────────────────────────────────────────────
+  'w.energy.label': 'Потребление',
+  'w.energy.configure': '⚙️ Укажи sensor мощности',
+  'w.energy.unitW': 'Вт',
+  'w.energy.unitKWh': 'кВт·ч',
+  'w.energy.today': 'Сегодня',
+  'w.energy.month': 'Месяц',
+
+  // ── calendar widget runtime ───────────────────────────────────────────────
+  'w.calendar.label': 'Календарь',
+  'w.calendar.loadError': 'Не удалось загрузить события',
+  'w.calendar.emptyDays': 'Ближайшие {days} дн.: событий нет',
+  'w.calendar.emptyDay': 'Ближайший день: событий нет',
+  'w.calendar.today': 'Сегодня',
+  'w.calendar.tomorrow': 'Завтра',
+  'w.calendar.yesterday': 'Вчера',
+  'w.calendar.todayCount': '{count} сегодня',
+  'w.calendar.ongoing': 'идёт',
+  'w.calendar.noTitle': '(без названия)',
+
+  // ── camera widget runtime ─────────────────────────────────────────────────
+  'w.camera.label': 'Камера',
+  'w.camera.connecting': 'подключаюсь…',
+  'w.camera.openAriaLabel': 'Открыть камеру {label}',
+  'w.camera.snapshotAlt': 'Снимок: {label}',
+  'w.camera.videoUnavailable': 'видео недоступно',
+  'w.camera.snapshotUnavailable': 'снимок недоступен',
+  'w.camera.videoAriaLabel': 'Видео с камеры {label}',
+
+  // ── map widget runtime ────────────────────────────────────────────────────
+  'w.map.configure': '⚙️ Выбери person или device_tracker',
+  'w.map.label': 'Местоположение',
+  'w.map.unknown': 'неизвестно',
+  'w.map.currentState': 'Сейчас: {state}',
+  'w.map.coordsUnavailable': 'Координаты недоступны',
+  'w.map.iframeTitle': 'Карта: {label}',
+
+  // ── notification feed widget runtime ─────────────────────────────────────
+  'w.notifications.label': 'Уведомления',
+  'w.notifications.loading': 'Загрузка…',
+  'w.notifications.empty': 'Нет активных уведомлений',
+  'w.notifications.dismiss': 'Закрыть уведомление',
+
+  // ── multi_sensor widget runtime ───────────────────────────────────────────
+  'w.multiSensor.configure': '⚙️ Добавь сенсоры в настройках',
+
+  // ── quick_action widget runtime ───────────────────────────────────────────
+  'w.quickAction.configure': '⚙️ Настрой действие',
+
+  // ── note widget runtime ───────────────────────────────────────────────────
+  'w.note.defaultText': 'Заметка',
+
+  // ── iframe widget runtime ─────────────────────────────────────────────────
+  'w.iframe.configure': '⚙️ Укажите URL в настройках',
+  'w.iframe.blocked': 'Сайт запретил встраивание',
+  'w.iframe.openNewTab': 'Открыть в новой вкладке',
+  'w.iframe.ariaLabel': 'Встроенный сайт',
+
+  // ── webhook widget runtime ────────────────────────────────────────────────
+  'w.webhook.configure': '⚙️ Укажи Webhook ID',
+  'w.webhook.label': 'Webhook',
+  'w.webhook.sending': 'отправка…',
+
+  // ── control_panel widget runtime ──────────────────────────────────────────
+  'w.controlPanel.configure': '⚙️ Добавь сущности в настройках',
+  'w.controlPanel.overflow': 'Ещё {count} устройств',
+
+  // ── room_hub widget runtime ───────────────────────────────────────────────
+  'w.roomHub.active': 'активна',
+  'w.roomHub.overflow': 'Ещё {count} устройств',
+  'w.roomHub.tempTitle': 'Температура: {value}',
+  'w.roomHub.humidTitle': 'Влажность: {value}',
+  'w.roomHub.decrease': 'Уменьшить {label}',
+  'w.roomHub.increase': 'Увеличить {label}',
+  'w.roomHub.openSettings': 'Открыть настройки {label}{active}',
+  'w.roomHub.isActive': ' (работает)',
+
+  // ── media_player widget runtime ───────────────────────────────────────────
+  'w.mediaPlayer.label': 'Плеер',
+  'w.mediaPlayer.coverAlt': 'Обложка: {title}',
+
+  // ── media_player sheet runtime ────────────────────────────────────────────
+  'w.mediaSheet.unavailable': 'Плеер недоступен',
+  'w.mediaSheet.offlineBody': 'Плеер сейчас offline или не отдаёт состояние.',
+  'w.mediaSheet.seekAriaLabel': 'Перемотка',
+  'w.mediaSheet.shuffleOff': 'Выключить shuffle',
+  'w.mediaSheet.shuffleOn': 'Включить shuffle',
+  'w.mediaSheet.repeatAriaLabel': 'Режим повтора',
+  'w.mediaSheet.radioSection': 'Радио · Zaycev FM',
+  'w.mediaSheet.playChannel': 'Включить {name}',
+  'w.mediaSheet.ariaLabel': 'Управление плеером',
+
+  // ── music_assistant widget runtime ────────────────────────────────────────
+  'w.ma.label': 'Музыка',
+  'w.ma.connecting': 'Подключение к Music Assistant…',
+  'w.ma.unavailable': 'Music Assistant недоступен',
+  'w.ma.nothingPlaying': 'Ничего не играет',
+
+  // ── music_assistant sheet runtime ─────────────────────────────────────────
+  'w.maSheet.outputSection': 'Где играть',
+  'w.maSheet.outputAriaLabel': 'Выход: {name}',
+  'w.maSheet.playing': 'играет',
+  'w.maSheet.ariaLabel': 'Музыкальный плеер',
+
+  // ── sensor_value / sensor chips runtime ───────────────────────────────────
+  'w.sensor.chartHint': 'нажмите для графика',
+  'w.sensor.noSignal': 'нет связи',
+
+  // ── sensor presets binary labels ──────────────────────────────────────────
+  'sensor.door.open': 'Открыта',
+  'sensor.door.closed': 'Закрыта',
+  'sensor.window.open': 'Открыто',
+  'sensor.window.closed': 'Закрыто',
+  'sensor.motion.on': 'Движение',
+  'sensor.motion.off': 'Тихо',
+  'sensor.occupancy.on': 'Есть',
+  'sensor.occupancy.off': 'Нет',
+  'sensor.plug.on': 'Включено',
+  'sensor.plug.off': 'Выключено',
+
+  // ── glucose widget runtime ────────────────────────────────────────────────
+  'w.glucose.label': 'Глюкоза',
+  'w.glucose.noData': 'нет данных',
+  'w.glucose.unit': 'ммоль/л',
+  'w.glucose.silent': 'сенсор молчит',
+  'w.glucose.target': 'цель {low}–{high}',
+  'w.glucose.zone.urgentLow': 'опасно низко',
+  'w.glucose.zone.low': 'низко',
+  'w.glucose.zone.normal': 'норма',
+  'w.glucose.zone.high': 'высоко',
+  'w.glucose.zone.urgentHigh': 'опасно высоко',
+  'w.glucose.trend.risingQuick': '↑↑ быстро растёт',
+  'w.glucose.trend.rising': '↑ растёт',
+  'w.glucose.trend.risingSlowly': '↗ медленно растёт',
+  'w.glucose.trend.steady': '→ стабильно',
+  'w.glucose.trend.fallingSlowly': '↘ медленно падает',
+  'w.glucose.trend.falling': '↓ падает',
+  'w.glucose.trend.fallingQuick': '↓↓ быстро падает',
+  'w.glucose.trend.unknown': '— неизвестно',
+
+  // ── glucose timeAgo runtime ───────────────────────────────────────────────
+  'w.glucose.ago.justNow': 'только что',
+  'w.glucose.ago.minAgo': '{n} мин назад',
+  'w.glucose.ago.hAgo': '{n} ч назад',
+
+  // ── glucose chart widget runtime ──────────────────────────────────────────
+  'w.glucoseChart.label': 'Глюкоза',
+  'w.glucoseChart.loading': 'График загружается…',
+  'w.glucoseChart.noHistory': 'За последние {hours} ч в HA нет накопленной истории глюкозы',
+  'w.glucoseChart.range.3h': '3 ч',
+  'w.glucoseChart.range.6h': '6 ч',
+  'w.glucoseChart.range.12h': '12 ч',
+  'w.glucoseChart.range.24h': '24 ч',
+
+  // ── glucose stats widget runtime ──────────────────────────────────────────
+  'w.glucoseStats.label7d': 'За 7 дней',
+  'w.glucoseStats.label24h': 'За 24 часа',
+  'w.glucoseStats.tirTitle': 'Время в норме · цель ≥70%',
+  'w.glucoseStats.tirLabel': 'Время в норме (TIR)',
+  'w.glucoseStats.statAvg': 'Сред.',
+  'w.glucoseStats.statGmi': 'GMI',
+  'w.glucoseStats.statBelow': 'Ниже',
+  'w.glucoseStats.statAbove': 'Выше',
+  'w.glucoseStats.statAvgFull': 'Среднее',
+  'w.glucoseStats.statGmiFull': 'GMI (HbA1c)',
+  'w.glucoseStats.statBelowFull': 'Ниже нормы',
+  'w.glucoseStats.statAboveFull': 'Выше нормы',
+
+  // ── chart (SensorHistoryButton / TempChart) runtime ───────────────────────
+  'chart.loading': 'График загружается…',
+  'chart.noHistory': 'За последние {hours} ч нет накопленной истории',
+  'chart.noHistoryTemp': 'Нет истории',
+  'chart.now': 'сейчас',
+  'chart.min': 'минимум',
+  'chart.avg': 'средняя',
+  'chart.max': 'максимум',
+  'chart.swipeHint': 'Поведи пальцем по графику — увидишь значение в нужный момент',
+  'chart.swipeHintTemp': 'Поведи пальцем по графику — увидишь температуру в нужный момент',
+  'chart.tempLabel': 'Температура',
 };

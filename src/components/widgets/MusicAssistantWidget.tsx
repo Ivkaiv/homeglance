@@ -15,6 +15,7 @@ import {
 import { maImageProxy } from '@/lib/music/config';
 import type { MAPlayer } from '@/lib/music/types';
 import { MusicAssistantSheet } from './MusicAssistantSheet';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   label?: string;
@@ -37,6 +38,7 @@ function pickActive(players: MAPlayer[], savedId: string | null): MAPlayer | und
  * полным управлением и выбором выхода.
  */
 export function MusicAssistantWidget({ params }: { params: Params }) {
+  const t = useT();
   useMAConnection();
   const { status } = useMusic();
   const players = useMAPlayers();
@@ -58,11 +60,11 @@ export function MusicAssistantWidget({ params }: { params: Params }) {
   };
 
   const active = pickActive(players, savedId);
-  const label = params.label ?? 'Музыка';
+  const label = params.label ?? t('w.ma.label');
 
   const media = active?.current_media ?? null;
   const playing = active?.playback_state === 'playing';
-  const title = media?.title || (active ? 'Ничего не играет' : '—');
+  const title = media?.title || (active ? t('w.ma.nothingPlaying') : '—');
   const artist = media?.artist || '';
   const cover = maImageProxy(media?.image_url);
   const accent = useImageAccent(cover);
@@ -101,8 +103,8 @@ export function MusicAssistantWidget({ params }: { params: Params }) {
           <Music size={22} aria-hidden="true" />
           <span>
             {status === 'connecting' || status === 'disconnected'
-              ? 'Подключение к Music Assistant…'
-              : 'Music Assistant недоступен'}
+              ? t('w.ma.connecting')
+              : t('w.ma.unavailable')}
           </span>
         </button>
         {sheet}
@@ -118,7 +120,7 @@ export function MusicAssistantWidget({ params }: { params: Params }) {
           type="button"
           onClick={togglePlay}
           title={label}
-          aria-label={playing ? 'Пауза' : 'Воспроизвести'}
+          aria-label={playing ? t('w.player.pause') : t('w.player.play')}
           className="glass h-full w-full flex items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
         >
           {playing ? <Pause size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
@@ -151,7 +153,7 @@ export function MusicAssistantWidget({ params }: { params: Params }) {
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          aria-label="Открыть плеер"
+          aria-label={t('w.player.open')}
           className="relative flex items-center gap-2.5 min-w-0 flex-1 text-left rounded-md overflow-hidden focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
         >
           {cover ? (
@@ -184,7 +186,7 @@ export function MusicAssistantWidget({ params }: { params: Params }) {
           onClick={togglePlay}
           disabled={!active}
           size={40}
-          ariaLabel={playing ? 'Пауза' : 'Воспроизвести'}
+          ariaLabel={playing ? t('w.player.pause') : t('w.player.play')}
           bg={playBg}
           bgPressed={playBgPressed}
         >

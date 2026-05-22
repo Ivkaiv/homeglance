@@ -3,6 +3,7 @@
 import { useEntity } from '@/lib/ha/ConnectionProvider';
 import { MapPin } from 'lucide-react';
 import { useWidgetSize } from '@/lib/widgets/useWidgetSize';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   /** Entity с координатами — person.* или device_tracker.*. */
@@ -24,30 +25,31 @@ interface Params {
  * (например «дом», «работа»).
  */
 export function MapWidget({ params }: { params: Params }) {
+  const t = useT();
   const [ref] = useWidgetSize();
   const e = useEntity(params.entity);
 
   if (!params.entity) {
     return (
       <div className="glass h-full w-full p-3 flex items-center justify-center text-text-tertiary text-xs text-center">
-        ⚙️ Выбери person или device_tracker
+        {t('w.map.configure')}
       </div>
     );
   }
 
   const lat = e?.attributes.latitude as number | undefined;
   const lng = e?.attributes.longitude as number | undefined;
-  const label = params.label ?? e?.attributes.friendly_name ?? 'Местоположение';
+  const label = params.label ?? e?.attributes.friendly_name ?? t('w.map.label');
   const zoom = Math.max(1, Math.min(18, params.zoom ?? 14));
-  const stateLabel = e?.state || 'неизвестно';
+  const stateLabel = e?.state || t('w.map.unknown');
 
   if (typeof lat !== 'number' || typeof lng !== 'number') {
     return (
       <div ref={ref} className="glass h-full w-full p-3 flex flex-col items-center justify-center gap-1 text-text-tertiary">
         <MapPin size={18} aria-hidden="true" />
         <div className="text-xs font-medium text-text-primary">{label}</div>
-        <div className="text-[11px]">Сейчас: {stateLabel}</div>
-        <div className="text-[10px] opacity-70 text-center">Координаты недоступны</div>
+        <div className="text-[11px]">{t('w.map.currentState', { state: stateLabel })}</div>
+        <div className="text-[10px] opacity-70 text-center">{t('w.map.coordsUnavailable')}</div>
       </div>
     );
   }
@@ -71,7 +73,7 @@ export function MapWidget({ params }: { params: Params }) {
         <span className="shrink-0 text-text-secondary">{stateLabel}</span>
       </div>
       <iframe
-        title={`Карта: ${label}`}
+        title={t('w.map.iframeTitle', { label })}
         src={src}
         loading="lazy"
         referrerPolicy="no-referrer"

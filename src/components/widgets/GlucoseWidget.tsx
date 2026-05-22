@@ -7,13 +7,14 @@ import {
   zoneFor,
   ZONE_PALETTE,
   trendArrow,
-  trendLabel,
-  timeAgo,
+  trendLabelKey,
+  timeAgoKey,
   lastReadingAt,
   formatDelta,
   DEFAULT_THRESHOLDS,
   type TrendDirection,
 } from '@/lib/glucose';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   /** sensor.* с текущим значением глюкозы.
@@ -32,9 +33,10 @@ interface Params {
 const DEFAULT_ENTITY = 'sensor.blood_sugar';
 
 export function GlucoseWidget({ params }: { params: Params }) {
+  const t = useT();
   const entityId = params.entity || DEFAULT_ENTITY;
   const e = useEntity(entityId);
-  const label = params.label || 'Глюкоза';
+  const label = params.label || t('w.glucose.label');
 
   // Тикаем раз в 30 сек чтобы «N мин назад» оставалось свежим.
   const [now, setNow] = useState(() => Date.now());
@@ -55,7 +57,7 @@ export function GlucoseWidget({ params }: { params: Params }) {
   const zone = zoneFor(numeric, thresholds);
   const palette = ZONE_PALETTE[zone];
 
-  const unit = (e?.attributes.unit_of_measurement as string) || 'ммоль/л';
+  const unit = (e?.attributes.unit_of_measurement as string) || t('w.glucose.unit');
   const direction = (e?.attributes.direction as TrendDirection) ?? null;
   const delta = e?.attributes.delta as number | undefined;
   const readingTs = lastReadingAt(e?.attributes, e?.last_updated);
@@ -72,7 +74,7 @@ export function GlucoseWidget({ params }: { params: Params }) {
         p-2 @[120px]:p-3 @[180px]:p-4
         ${stale ? 'opacity-70' : ''}
       `}
-      title={`${label}: ${isBad ? 'нет данных' : `${numeric.toFixed(1)} ${unit}`}${direction ? ` (${trendLabel(direction)})` : ''}`}
+      title={`${label}: ${isBad ? t('w.glucose.noData') : `${numeric.toFixed(1)} ${unit}`}${direction ? ` (${t(trendLabelKey(direction))})` : ''}`}
     >
       {/* Заголовок (видим со среднего tier'а) */}
       <div className="hidden @[120px]:flex items-center justify-between gap-2 mb-1 min-w-0">
@@ -84,7 +86,7 @@ export function GlucoseWidget({ params }: { params: Params }) {
         </div>
         {!isBad && (
           <div className={`text-[10px] uppercase tracking-wider font-semibold ${palette.text} shrink-0 whitespace-nowrap`}>
-            {palette.label}
+            {t(palette.labelKey)}
           </div>
         )}
       </div>
@@ -95,7 +97,7 @@ export function GlucoseWidget({ params }: { params: Params }) {
           {isBad ? '—' : numeric.toFixed(1)}
         </div>
         {!isBad && direction && (
-          <div className={`text-base leading-none ${palette.text}`} aria-label={trendLabel(direction)}>
+          <div className={`text-base leading-none ${palette.text}`} aria-label={t(trendLabelKey(direction))}>
             {trendArrow(direction)}
           </div>
         )}
@@ -124,8 +126,8 @@ export function GlucoseWidget({ params }: { params: Params }) {
             {direction && (
               <div
                 className={`text-3xl @[180px]:text-4xl leading-none ${palette.text}`}
-                aria-label={trendLabel(direction)}
-                title={trendLabel(direction)}
+                aria-label={t(trendLabelKey(direction))}
+                title={t(trendLabelKey(direction))}
               >
                 {trendArrow(direction)}
               </div>
@@ -142,12 +144,12 @@ export function GlucoseWidget({ params }: { params: Params }) {
       {/* Подвал — время с замера + целевой диапазон. Виден только на средних/больших. */}
       <div className="hidden @[120px]:flex items-center justify-between gap-2 mt-1 @[180px]:mt-2 min-w-0">
         <div className={`text-[10px] @[180px]:text-xs ${palette.textMuted} truncate`}>
-          {agoMs === null ? '' : timeAgo(agoMs)}
-          {stale && agoMs !== null && <span className="ml-1">· сенсор молчит</span>}
+          {agoMs === null ? '' : (() => { const a = timeAgoKey(agoMs); return t(a.key, a.params as Record<string, string | number> | undefined); })()}
+          {stale && agoMs !== null && <span className="ml-1">· {t('w.glucose.silent')}</span>}
         </div>
         {!isBad && (
           <div className={`text-[10px] @[180px]:text-xs ${palette.textMuted} shrink-0 tabular-nums`}>
-            цель {thresholds.low}–{thresholds.high}
+            {t('w.glucose.target', { low: thresholds.low, high: thresholds.high })}
           </div>
         )}
       </div>

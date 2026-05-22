@@ -15,6 +15,7 @@ import { MediaPlayerSheet } from './MediaPlayerSheet';
 import { ClimateSheet } from './ClimateSheet';
 import { useImageAccent } from '@/lib/useImageAccent';
 import { detectSensorType, getSensorPreset } from '@/lib/sensor/presets';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   name: string;
@@ -62,6 +63,7 @@ function fmt(n: any, unit = '', decimals = 0): string {
 }
 
 export function RoomHubWidget({ params }: { params: Params }) {
+  const tr = useT();
   const states = useStates();
   const callService = useCallService();
   const [ref, size] = useWidgetSize();
@@ -159,7 +161,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
           <span
             className="w-2 h-2 rounded-full shrink-0"
             style={{ background: 'rgb(var(--accent))', boxShadow: '0 0 8px rgb(var(--accent) / 0.7)' }}
-            aria-label="активна"
+            aria-label={tr('w.roomHub.active')}
           />
         )}
       </div>
@@ -283,7 +285,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
                   'flex items-center gap-1 font-semibold tabular-nums leading-none',
                   'text-sm'
                 )}
-                title={`Температура: ${fmt(t, '°', params.tempDecimals ?? 0)} · нажмите для графика`}
+                title={`${tr('w.roomHub.tempTitle', { value: fmt(t, '°', params.tempDecimals ?? 0) })} · ${tr('w.sensor.chartHint')}`}
               >
                 <GlanceIcon
                   value="thermometer"
@@ -301,7 +303,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
                   'flex items-center gap-1 font-semibold tabular-nums leading-none',
                   'text-sm'
                 )}
-                title={`Влажность: ${fmt(h, '%', params.humidityDecimals ?? 0)} · нажмите для графика`}
+                title={`${tr('w.roomHub.humidTitle', { value: fmt(h, '%', params.humidityDecimals ?? 0) })} · ${tr('w.sensor.chartHint')}`}
               >
                 <GlanceIcon
                   value="water-percent"
@@ -381,7 +383,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
                 setMediaSheetOpen(true);
               }}
               className="relative flex items-center gap-3 min-w-0 flex-1 text-left rounded-xl focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-              aria-label="Открыть плеер"
+              aria-label={tr('w.player.open')}
             >
               {coverSrc ? (
                 <img
@@ -408,7 +410,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
               <PressButton
                 onClick={() => cmd('media_previous_track')}
                 size={36}
-                ariaLabel="Предыдущий"
+                ariaLabel={tr('w.player.previous')}
                 className="hidden @[260px]:flex"
               >
                 <SkipBack size={14} aria-hidden="true" />
@@ -416,7 +418,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
               <PressButton
                 onClick={() => cmd(playing ? 'media_pause' : 'media_play')}
                 size={40}
-                ariaLabel={playing ? 'Пауза' : 'Воспроизвести'}
+                ariaLabel={playing ? tr('w.player.pause') : tr('w.player.play')}
                 bg={mediaAccentRgb ? `rgb(${mediaAccentRgb} / 0.25)` : 'rgb(var(--accent) / 0.25)'}
                 bgPressed={mediaAccentRgb ? `rgb(${mediaAccentRgb} / 0.45)` : 'rgb(var(--accent) / 0.45)'}
               >
@@ -429,7 +431,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
               <PressButton
                 onClick={() => cmd('media_next_track')}
                 size={36}
-                ariaLabel="Следующий"
+                ariaLabel={tr('w.player.next')}
                 className="hidden @[260px]:flex"
               >
                 <SkipForward size={14} aria-hidden="true" />
@@ -517,7 +519,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
           <div
             className="rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-xs text-text-secondary tabular-nums"
             style={{ width: btnSize, height: btnSize }}
-            title={`Ещё ${overflow + 1} устройств`}
+            title={tr('w.roomHub.overflow', { count: overflow + 1 })}
           >
             +{overflow + 1}
           </div>
@@ -628,15 +630,15 @@ export function RoomHubWidget({ params }: { params: Params }) {
                   onClick={() => setTemp(-step)}
                   disabled={isUnavail || target === undefined}
                   size={innerBtn}
-                  ariaLabel={`Уменьшить ${label}`}
+                  ariaLabel={tr('w.roomHub.decrease', { label })}
                 >
                   <Minus size={Math.round(innerBtn * 0.45)} aria-hidden="true" />
                 </PressButton>
                 <button
                   type="button"
                   onClick={() => setClimateSheetEntity(cid)}
-                  aria-label={`Открыть настройки ${label}${isActive ? ' (работает)' : ''}`}
-                  title={`Открыть настройки ${label}`}
+                  aria-label={tr('w.roomHub.openSettings', { label, active: isActive ? tr('w.roomHub.isActive') : '' })}
+                  title={tr('w.roomHub.openSettings', { label, active: '' })}
                   className={clsx(
                     'tabular-nums text-center flex items-center justify-center gap-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70',
                     compactClimate
@@ -667,7 +669,7 @@ export function RoomHubWidget({ params }: { params: Params }) {
                   onClick={() => setTemp(+step)}
                   disabled={isUnavail || target === undefined}
                   size={innerBtn}
-                  ariaLabel={`Увеличить ${label}`}
+                  ariaLabel={tr('w.roomHub.increase', { label })}
                 >
                   <Plus size={Math.round(innerBtn * 0.45)} aria-hidden="true" />
                 </PressButton>
