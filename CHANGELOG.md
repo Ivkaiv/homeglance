@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.85] — 2026-05-22
+
+### Changed
+- **Localization, part 4.** The blinds control sheet (CoverSheet) and the
+  light color sheet (LightColorSheet) are now localized: open/stop/close
+  buttons, position and slat-angle sliders, brightness, color palette,
+  color temperature and effects all follow the selected interface language.
+
 ## [0.1.0-alpha.84] — 2026-05-22
 
 ### Changed

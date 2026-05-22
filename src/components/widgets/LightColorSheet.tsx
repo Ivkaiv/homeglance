@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Lightbulb, Power, Sun, Snowflake, Sparkles } from 'lucide-react';
 import { ModalSheet } from '@/components/ui/ModalSheet';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Props {
   entityId: string;
@@ -68,6 +69,7 @@ const PRESETS = [
  * ~70 строк, выглядит в стиле панели (фон, тон, скругление).
  */
 export function LightColorSheet({ entityId, open, onClose }: Props) {
+  const t = useT();
   const e = useEntity(entityId);
   const callService = useCallService();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -80,7 +82,7 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
 
   const on = e?.state === 'on';
   const isBad = !e || e.state === 'unavailable';
-  const friendly = e?.attributes.friendly_name ?? 'Свет';
+  const friendly = e?.attributes.friendly_name ?? t('w.lightSheet.label');
   const supported: string[] = e?.attributes.supported_color_modes ?? [];
   const hasColor = supported.some((m) => ['rgb', 'rgbw', 'rgbww', 'hs', 'xy'].includes(m));
   const hasCT = supported.includes('color_temp');
@@ -200,8 +202,8 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
       open={open}
       onClose={onClose}
       title={friendly}
-      subtitle={on ? `${brightnessPct}%` : 'выключена'}
-      ariaLabel="Управление лампой"
+      subtitle={on ? `${brightnessPct}%` : t('w.lightSheet.off')}
+      ariaLabel={t('w.lightSheet.ariaLabel')}
       innerStyle={
         on
           ? {
@@ -222,7 +224,7 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
             on ? 'shadow-[0_0_36px_currentColor]' : 'bg-black/10 dark:bg-white/10 text-text-tertiary'
           }`}
           style={on ? { color: colorHex, backgroundColor: `${colorHex}44` } : undefined}
-          aria-label={on ? 'Выключить' : 'Включить'}
+          aria-label={on ? t('w.lightSheet.turnOff') : t('w.lightSheet.turnOn')}
         >
           {on ? <Lightbulb size={34} /> : <Power size={30} />}
         </button>
@@ -238,7 +240,7 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
               value={brightnessPct}
               onChange={(ev) => sendBrightness(Number(ev.target.value))}
               disabled={isBad || !on}
-              aria-label="Яркость"
+              aria-label={t('w.lightSheet.brightness')}
               className="no-drag flex-1 min-w-0 h-2 cursor-pointer"
               style={{ accentColor: colorHex }}
             />
@@ -270,7 +272,7 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
                 height: 240,
                 boxShadow: `0 8px 24px ${accentSoft(0.35)}`,
               }}
-              aria-label="Палитра цветов"
+              aria-label={t('w.lightSheet.colorWheel')}
             />
           </div>
           <div className="grid grid-cols-10 gap-1.5">
@@ -286,7 +288,7 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
                     active ? 'ring-2 ring-white/80 ring-offset-2 ring-offset-bg-secondary' : ''
                   }`}
                   style={{ backgroundColor: p.hex }}
-                  aria-label={`Цвет ${p.hex}`}
+                  aria-label={t('w.lightSheet.colorSwatch', { hex: p.hex })}
                 />
               );
             })}
@@ -307,7 +309,7 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
               value={ctValue}
               onChange={(ev) => sendCT(Number(ev.target.value))}
               disabled={isBad || !on}
-              aria-label="Цветовая температура"
+              aria-label={t('w.lightSheet.colorTemp')}
               className="no-drag flex-1 min-w-0 h-2 cursor-pointer"
               style={{
                 background: 'linear-gradient(to right, #ffd9a8, #ffffff, #b9d2ff)',
@@ -317,7 +319,7 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
             <Snowflake size={14} className="shrink-0 text-blue-300" aria-hidden="true" />
           </div>
           <div className="text-[10px] text-text-tertiary text-center mt-1">
-            Цветовая температура: {ctValue} mired
+            {t('w.lightSheet.colorTempValue', { value: ctValue })}
           </div>
         </section>
       )}
@@ -327,7 +329,7 @@ export function LightColorSheet({ entityId, open, onClose }: Props) {
         <section>
           <div className="flex items-center gap-1.5 mb-2 text-xs text-text-tertiary">
             <Sparkles size={12} aria-hidden="true" />
-            Эффекты
+            {t('w.lightSheet.effects')}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {effects.map((eff) => {

@@ -1027,4 +1027,31 @@ export const en: Dictionary = {
   'chart.swipeHint': 'Swipe along the chart to see the value at a point in time',
   'chart.swipeHintTemp': 'Swipe along the chart to see the temperature at a point in time',
   'chart.tempLabel': 'Temperature',
+
+  // ── cover sheet runtime ───────────────────────────────────────────────────
+  'w.coverSheet.label': 'Blinds',
+  'w.coverSheet.ariaLabel': 'Blinds control',
+  'w.coverSheet.state.unavailable': 'no connection',
+  'w.coverSheet.state.open': 'open',
+  'w.coverSheet.state.closed': 'closed',
+  'w.coverSheet.state.opening': 'opening…',
+  'w.coverSheet.state.closing': 'closing…',
+  'w.coverSheet.open': 'Open',
+  'w.coverSheet.stop': 'Stop',
+  'w.coverSheet.close': 'Close',
+  'w.coverSheet.position': 'Position',
+  'w.coverSheet.tilt': 'Slat angle',
+
+  // ── light color sheet runtime ─────────────────────────────────────────────
+  'w.lightSheet.label': 'Light',
+  'w.lightSheet.ariaLabel': 'Light control',
+  'w.lightSheet.off': 'off',
+  'w.lightSheet.turnOn': 'Turn on',
+  'w.lightSheet.turnOff': 'Turn off',
+  'w.lightSheet.brightness': 'Brightness',
+  'w.lightSheet.colorWheel': 'Color palette',
+  'w.lightSheet.colorSwatch': 'Color {hex}',
+  'w.lightSheet.colorTemp': 'Color temperature',
+  'w.lightSheet.colorTempValue': 'Color temperature: {value} mired',
+  'w.lightSheet.effects': 'Effects',
 };

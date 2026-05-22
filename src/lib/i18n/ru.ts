@@ -1027,4 +1027,31 @@ export const ru: Dictionary = {
   'chart.swipeHint': 'Поведи пальцем по графику — увидишь значение в нужный момент',
   'chart.swipeHintTemp': 'Поведи пальцем по графику — увидишь температуру в нужный момент',
   'chart.tempLabel': 'Температура',
+
+  // ── cover sheet runtime ───────────────────────────────────────────────────
+  'w.coverSheet.label': 'Шторы',
+  'w.coverSheet.ariaLabel': 'Управление шторами',
+  'w.coverSheet.state.unavailable': 'нет связи',
+  'w.coverSheet.state.open': 'открыто',
+  'w.coverSheet.state.closed': 'закрыто',
+  'w.coverSheet.state.opening': 'открывается…',
+  'w.coverSheet.state.closing': 'закрывается…',
+  'w.coverSheet.open': 'Открыть',
+  'w.coverSheet.stop': 'Стоп',
+  'w.coverSheet.close': 'Закрыть',
+  'w.coverSheet.position': 'Позиция',
+  'w.coverSheet.tilt': 'Угол ламелей',
+
+  // ── light color sheet runtime ─────────────────────────────────────────────
+  'w.lightSheet.label': 'Свет',
+  'w.lightSheet.ariaLabel': 'Управление лампой',
+  'w.lightSheet.off': 'выключена',
+  'w.lightSheet.turnOn': 'Включить',
+  'w.lightSheet.turnOff': 'Выключить',
+  'w.lightSheet.brightness': 'Яркость',
+  'w.lightSheet.colorWheel': 'Палитра цветов',
+  'w.lightSheet.colorSwatch': 'Цвет {hex}',
+  'w.lightSheet.colorTemp': 'Цветовая температура',
+  'w.lightSheet.colorTempValue': 'Цветовая температура: {value} mired',
+  'w.lightSheet.effects': 'Эффекты',
 };

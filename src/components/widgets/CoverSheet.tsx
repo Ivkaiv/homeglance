@@ -5,6 +5,7 @@ import { ChevronUp, ChevronDown, Square } from 'lucide-react';
 import { ModalSheet } from '@/components/ui/ModalSheet';
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Props {
   entityId: string;
@@ -43,27 +44,28 @@ const SUPPORT_STOP_TILT = 64;
 const SUPPORT_SET_TILT_POSITION = 128;
 
 export function CoverSheet({ entityId, open, onClose }: Props) {
+  const t = useT();
   const e = useEntity(entityId);
   const callService = useCallService();
   const [localPos, setLocalPos] = useState<number | null>(null);
   const [localTilt, setLocalTilt] = useState<number | null>(null);
 
   const isBad = !e || e.state === 'unavailable';
-  const friendly = e?.attributes.friendly_name ?? 'Шторы';
+  const friendly = e?.attributes.friendly_name ?? t('w.coverSheet.label');
   const features = (e?.attributes.supported_features as number | undefined) ?? 0;
   const has = (flag: number) => (features & flag) !== 0;
 
   const state = e?.state;
   const stateText = isBad
-    ? 'нет связи'
+    ? t('w.coverSheet.state.unavailable')
     : state === 'open'
-      ? 'открыто'
+      ? t('w.coverSheet.state.open')
       : state === 'closed'
-        ? 'закрыто'
+        ? t('w.coverSheet.state.closed')
         : state === 'opening'
-          ? 'открывается…'
+          ? t('w.coverSheet.state.opening')
           : state === 'closing'
-            ? 'закрывается…'
+            ? t('w.coverSheet.state.closing')
             : state ?? '—';
 
   const positionHa = e?.attributes.current_position as number | undefined;
@@ -96,7 +98,7 @@ export function CoverSheet({ entityId, open, onClose }: Props) {
       onClose={onClose}
       title={friendly}
       subtitle={stateText}
-      ariaLabel="Управление шторами"
+      ariaLabel={t('w.coverSheet.ariaLabel')}
     >
       <div className="flex flex-col items-center gap-5 mb-5">
         <div className="w-20 h-20 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center">
@@ -111,7 +113,7 @@ export function CoverSheet({ entityId, open, onClose }: Props) {
               onClick={() => cmd('open_cover')}
               disabled={isBad}
               className="rounded-2xl bg-emerald-500/15 border border-emerald-300/30 text-emerald-700 dark:text-emerald-200 py-3 flex items-center justify-center disabled:opacity-40"
-              aria-label="Открыть"
+              aria-label={t('w.coverSheet.open')}
             >
               <ChevronUp size={22} />
             </button>
@@ -122,7 +124,7 @@ export function CoverSheet({ entityId, open, onClose }: Props) {
               onClick={() => cmd('stop_cover')}
               disabled={isBad}
               className="rounded-2xl bg-black/10 dark:bg-white/10 text-text-secondary py-3 flex items-center justify-center disabled:opacity-40"
-              aria-label="Стоп"
+              aria-label={t('w.coverSheet.stop')}
             >
               <Square size={14} />
             </button>
@@ -133,7 +135,7 @@ export function CoverSheet({ entityId, open, onClose }: Props) {
               onClick={() => cmd('close_cover')}
               disabled={isBad}
               className="rounded-2xl bg-sky-500/15 border border-sky-300/30 text-sky-700 dark:text-sky-200 py-3 flex items-center justify-center disabled:opacity-40"
-              aria-label="Закрыть"
+              aria-label={t('w.coverSheet.close')}
             >
               <ChevronDown size={22} />
             </button>
@@ -144,7 +146,7 @@ export function CoverSheet({ entityId, open, onClose }: Props) {
       {has(SUPPORT_SET_POSITION) && (
         <section className="mb-5">
           <div className="flex items-baseline justify-between text-xs text-text-tertiary mb-1.5 px-1">
-            <span>Позиция</span>
+            <span>{t('w.coverSheet.position')}</span>
             <span className="tabular-nums">{position}%</span>
           </div>
           <input
@@ -155,7 +157,7 @@ export function CoverSheet({ entityId, open, onClose }: Props) {
             value={position}
             onChange={(ev) => sendPosition(Number(ev.target.value))}
             disabled={isBad}
-            aria-label="Позиция"
+            aria-label={t('w.coverSheet.position')}
             className="no-drag w-full h-2 cursor-pointer accent-accent"
           />
           <div className="grid grid-cols-5 gap-1.5 mt-2">
@@ -184,7 +186,7 @@ export function CoverSheet({ entityId, open, onClose }: Props) {
       {has(SUPPORT_SET_TILT_POSITION) && (
         <section>
           <div className="flex items-baseline justify-between text-xs text-text-tertiary mb-1.5 px-1">
-            <span>Угол ламелей</span>
+            <span>{t('w.coverSheet.tilt')}</span>
             <span className="tabular-nums">{tilt}%</span>
           </div>
           <input
@@ -195,7 +197,7 @@ export function CoverSheet({ entityId, open, onClose }: Props) {
             value={tilt}
             onChange={(ev) => sendTilt(Number(ev.target.value))}
             disabled={isBad}
-            aria-label="Угол ламелей"
+            aria-label={t('w.coverSheet.tilt')}
             className="no-drag w-full h-2 cursor-pointer accent-accent"
           />
         </section>
