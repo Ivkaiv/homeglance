@@ -5,29 +5,37 @@ import { useEntity, useStates, useWeatherForecast } from '@/lib/ha/ConnectionPro
 import { TempChart } from '@/components/charts/TempChart';
 import { WeatherIcon } from '@/components/icons/WeatherIcon';
 import { StormSection } from './StormSection';
+import { useT, useI18n, type TFunction } from '@/lib/i18n/I18nProvider';
 import type { WeatherPageConfig } from '@/lib/pages/types';
 
-const STATE_RU: Record<string, string> = {
-  sunny: 'Солнечно',
-  clear: 'Ясно',
-  'clear-night': 'Ясная ночь',
-  cloudy: 'Облачно',
-  partlycloudy: 'Переменно',
-  rainy: 'Дождь',
-  pouring: 'Ливень',
-  snowy: 'Снег',
-  'snowy-rainy': 'Снег с дождём',
-  fog: 'Туман',
-  mist: 'Дымка',
-  windy: 'Ветрено',
-  'windy-variant': 'Ветрено',
-  hail: 'Град',
-  lightning: 'Гроза',
-  'lightning-rainy': 'Гроза с дождём',
-  exceptional: 'Опасная погода',
-  unknown: '—',
-  unavailable: 'Нет данных',
+// Сопоставление состояния погоды HA с i18n-ключом. windy-variant использует
+// тот же ключ, что и windy.
+const STATE_KEY: Record<string, string> = {
+  sunny: 'page.weather.state.sunny',
+  clear: 'page.weather.state.clear',
+  'clear-night': 'page.weather.state.clear-night',
+  cloudy: 'page.weather.state.cloudy',
+  partlycloudy: 'page.weather.state.partlycloudy',
+  rainy: 'page.weather.state.rainy',
+  pouring: 'page.weather.state.pouring',
+  snowy: 'page.weather.state.snowy',
+  'snowy-rainy': 'page.weather.state.snowy-rainy',
+  fog: 'page.weather.state.fog',
+  mist: 'page.weather.state.mist',
+  windy: 'page.weather.state.windy',
+  'windy-variant': 'page.weather.state.windy',
+  hail: 'page.weather.state.hail',
+  lightning: 'page.weather.state.lightning',
+  'lightning-rainy': 'page.weather.state.lightning-rainy',
+  exceptional: 'page.weather.state.exceptional',
+  unknown: 'page.weather.state.unknown',
+  unavailable: 'page.weather.state.unavailable',
 };
+
+// Переводит код состояния погоды; если кода нет в карте — возвращает сам код.
+function stateLabel(cond: string, t: TFunction): string {
+  return STATE_KEY[cond] ? t(STATE_KEY[cond]) : cond;
+}
 
 function convertTemp(c: number | undefined, unit: 'C' | 'F'): string {
   if (c === undefined || c === null) return '—';
@@ -35,25 +43,36 @@ function convertTemp(c: number | undefined, unit: 'C' | 'F'): string {
   return Math.round(v) + '°';
 }
 
-function convertWind(ms: number | undefined, unit: 'm/s' | 'km/h' | 'mph'): string {
+function convertWind(
+  ms: number | undefined,
+  unit: 'm/s' | 'km/h' | 'mph',
+  t: TFunction
+): string {
   if (ms === undefined || ms === null) return '—';
   const v = unit === 'km/h' ? ms * 3.6 : unit === 'mph' ? ms * 2.237 : ms;
-  return `${Math.round(v)} ${unit === 'm/s' ? 'м/с' : unit === 'km/h' ? 'км/ч' : 'миль/ч'}`;
+  const unitLabel =
+    unit === 'm/s'
+      ? t('page.weather.windUnit.ms')
+      : unit === 'km/h'
+        ? t('page.weather.windUnit.kmh')
+        : t('page.weather.windUnit.mph');
+  return `${Math.round(v)} ${unitLabel}`;
 }
 
 function convertPressure(
   v: number | undefined,
   fromUnit: string,
-  toUnit: 'mmHg' | 'hPa' | 'inHg'
+  toUnit: 'mmHg' | 'hPa' | 'inHg',
+  t: TFunction
 ): string {
   if (v === undefined || v === null) return '—';
   let hpa: number;
   if (fromUnit === 'mmHg') hpa = v * 1.33322;
   else if (fromUnit === 'inHg') hpa = v * 33.8639;
   else hpa = v;
-  if (toUnit === 'mmHg') return `${Math.round(hpa / 1.33322)} мм`;
+  if (toUnit === 'mmHg') return `${Math.round(hpa / 1.33322)} ${t('page.weather.pressureUnit.mmHg')}`;
   if (toUnit === 'inHg') return `${(hpa / 33.8639).toFixed(2)} inHg`;
-  return `${Math.round(hpa)} гПа`;
+  return `${Math.round(hpa)} ${t('page.weather.pressureUnit.hPa')}`;
 }
 
 interface ForecastPoint {
@@ -72,6 +91,7 @@ function HourlyStrip({
   points: ForecastPoint[];
   tempUnit: 'C' | 'F';
 }) {
+  const tr = useT();
   const next24 = points.slice(0, 24);
   if (next24.length === 0) return null;
   const temps = next24.map((p) => p.temperature ?? 0);
@@ -95,7 +115,7 @@ function HourlyStrip({
                 isNow ? 'opacity-100' : 'opacity-90'
               }`}
             >
-              <div className="text-[10px] text-text-secondary">{isNow ? 'сейчас' : `${hour}:00`}</div>
+              <div className="text-[10px] text-text-secondary">{isNow ? tr('page.weather.now') : `${hour}:00`}</div>
               <WeatherIcon condition={p.condition || ''} size={28} />
               <div className="h-12 w-3 bg-black/8 dark:bg-white/8 rounded-full relative overflow-hidden">
                 <div
@@ -116,13 +136,14 @@ function HourlyStrip({
 }
 
 function DailyList({ points, tempUnit }: { points: ForecastPoint[]; tempUnit: 'C' | 'F' }) {
+  const { t, locale } = useI18n();
   if (points.length === 0) return null;
   return (
     <div className="glass p-2">
       {points.map((p) => {
         const dt = new Date(p.datetime);
-        const weekday = dt.toLocaleDateString('ru-RU', { weekday: 'long' });
-        const dateStr = dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        const weekday = dt.toLocaleDateString(locale, { weekday: 'long' });
+        const dateStr = dt.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
         return (
           <div
             key={p.datetime}
@@ -136,7 +157,7 @@ function DailyList({ points, tempUnit }: { points: ForecastPoint[]; tempUnit: 'C
               <WeatherIcon condition={p.condition || ''} size={32} />
             </div>
             <div className="flex-1 min-w-0 text-sm text-text-secondary truncate">
-              {STATE_RU[p.condition || ''] || ''}
+              {STATE_KEY[p.condition || ''] ? t(STATE_KEY[p.condition || '']) : ''}
             </div>
             <div className="text-sm tabular-nums text-right shrink-0 flex flex-col items-end leading-tight">
               <div>
@@ -150,7 +171,7 @@ function DailyList({ points, tempUnit }: { points: ForecastPoint[]; tempUnit: 'C
               </div>
               {p.precipitation !== undefined && p.precipitation > 0.1 && (
                 <div className="text-[10px] text-cyan-300/80 tabular-nums mt-0.5">
-                  💧 {p.precipitation.toFixed(1)} мм
+                  💧 {p.precipitation.toFixed(1)} {t('w.weather.mmPerH')}
                 </div>
               )}
             </div>
@@ -194,6 +215,7 @@ interface Props {
 }
 
 export function WeatherPageView({ config, pageTitle }: Props) {
+  const t = useT();
   const w = useEntity(config.weatherEntity);
   const outdoorTempEntity = useEntity(config.outdoorTempEntity);
   const apparentEntity = useEntity(config.apparentTempEntity);
@@ -217,13 +239,13 @@ export function WeatherPageView({ config, pageTitle }: Props) {
   if (!w) {
     return (
       <div className="p-6 text-center text-text-tertiary">
-        Поставщик погоды не настроен. Открой настройки страницы и выбери `weather.*` сущность.
+        {t('page.weather.noProvider')}
       </div>
     );
   }
 
   const cond = w.state ?? 'unknown';
-  const stateRu = STATE_RU[cond] || cond;
+  const stateRu = stateLabel(cond, t);
 
   // Температура: предпочесть уличный датчик, если он есть и валидный
   let temp: number | undefined;
@@ -269,14 +291,14 @@ export function WeatherPageView({ config, pageTitle }: Props) {
         className="text-2xl sm:text-3xl font-semibold mb-5 flex items-center gap-3"
       >
         <span>🌤</span>
-        <span>{pageTitle || 'Погода'}</span>
+        <span>{pageTitle || t('page.weather.title')}</span>
       </motion.h1>
 
       {sections.header && (
         <div className="glass p-5 mb-6">
           <div className="flex items-center gap-3 sm:gap-5 flex-nowrap">
             <div className="shrink-0">
-              <div className="text-xs text-text-secondary uppercase tracking-wider">Сейчас</div>
+              <div className="text-xs text-text-secondary uppercase tracking-wider">{t('page.weather.nowLabel')}</div>
               <div className="flex items-center gap-2 sm:gap-4 mt-1">
                 <div className="flex items-baseline gap-2">
                   <div className="text-6xl sm:text-7xl font-light tabular-nums leading-none">
@@ -297,7 +319,7 @@ export function WeatherPageView({ config, pageTitle }: Props) {
                 <TempChart
                   entityId={config.outdoorTempEntity}
                   hoursBack={24}
-                  modalLabel="Температура на улице"
+                  modalLabel={t('page.weather.outdoorChartLabel')}
                 />
               </div>
             )}
@@ -307,14 +329,14 @@ export function WeatherPageView({ config, pageTitle }: Props) {
               <div>💧 {Math.round(w.attributes.humidity)}%</div>
             )}
             {w.attributes.wind_speed !== undefined && (
-              <div>💨 {convertWind(w.attributes.wind_speed, windUnit)}</div>
+              <div>💨 {convertWind(w.attributes.wind_speed, windUnit, t)}</div>
             )}
             {w.attributes.cloud_coverage !== undefined && (
               <div>☁️ {Math.round(w.attributes.cloud_coverage)}%</div>
             )}
             {w.attributes.pressure !== undefined && (
               <div>
-                📊 {convertPressure(w.attributes.pressure, w.attributes.pressure_unit || 'hPa', pressureUnit)}
+                📊 {convertPressure(w.attributes.pressure, w.attributes.pressure_unit || 'hPa', pressureUnit, t)}
               </div>
             )}
           </div>
@@ -324,7 +346,7 @@ export function WeatherPageView({ config, pageTitle }: Props) {
       {sections.alerts && activeAlerts.length > 0 && (
         <section className="mb-6">
           <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">
-            Метеопредупреждения
+            {t('page.weather.alerts.title')}
           </h2>
           <div className="flex flex-col gap-2">
             {activeAlerts.map((a) => {
@@ -345,7 +367,7 @@ export function WeatherPageView({ config, pageTitle }: Props) {
                         : 'text-yellow-700 dark:text-yellow-200'
                     }`}
                   >
-                    {isOrange ? '🟠 Оранжевый уровень' : '🟡 Жёлтый уровень'}
+                    {isOrange ? t('page.weather.alerts.orange') : t('page.weather.alerts.yellow')}
                   </div>
                   <div className="text-text-primary font-medium">
                     {a.attributes.friendly_name || a.state}
@@ -359,21 +381,21 @@ export function WeatherPageView({ config, pageTitle }: Props) {
 
       {sections.hourly && hourly.length > 0 && (
         <section className="mb-6">
-          <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">На 24 часа</h2>
+          <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">{t('page.weather.hourly.title')}</h2>
           <HourlyStrip points={hourly} tempUnit={tempUnit} />
         </section>
       )}
 
       {sections.daily && daily.length > 0 && (
         <section className="mb-6">
-          <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">На неделю</h2>
+          <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">{t('page.weather.daily.title')}</h2>
           <DailyList points={daily} tempUnit={tempUnit} />
         </section>
       )}
 
       {sections.extras && (config.extraSensors?.length ?? 0) > 0 && (
         <section className="mb-6">
-          <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">Прочее</h2>
+          <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">{t('page.weather.extras.title')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {config.extraSensors!.map((id) => (
               <SensorTile key={id} entityId={id} />
@@ -384,7 +406,7 @@ export function WeatherPageView({ config, pageTitle }: Props) {
 
       {sections.lightning && (config.lightningSensors?.length ?? 0) > 0 && (
         <section className="mb-6">
-          <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">⚡ Грозы</h2>
+          <h2 className="text-xs uppercase tracking-wider text-text-tertiary mb-3 px-1">{t('page.weather.lightning.title')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {config.lightningSensors!.map((id) => (
               <SensorTile key={id} entityId={id} />

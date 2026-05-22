@@ -44,7 +44,10 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
     const created = addPage(preset);
     setImportMessage({
       kind: 'success',
-      text: `Готовая страница «${created.title}» добавлена — ${preset.widgets.length} виджетов`,
+      text: t('page.manager.glucosePresetAdded', {
+        title: created.title,
+        n: preset.widgets.length,
+      }),
     });
   }
 
@@ -110,7 +113,7 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
         return;
       }
       const created = addPage({
-        title: 'Из HA',
+        title: t('page.manager.importedPageTitle'),
         icon: '🏠',
         kind: 'grid',
         widgets: plan.widgets,
@@ -172,9 +175,15 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
       <ModalSheet
         open
         onClose={onClose}
-        title={editing ? undefined : 'Страницы'}
-        subtitle={editing ? undefined : 'Управляй страницами и порядком в dock-баре'}
-        ariaLabel={editing ? (editing.id ? 'Редактирование страницы' : 'Новая страница') : 'Управление страницами'}
+        title={editing ? undefined : t('page.manager.sheetTitle')}
+        subtitle={editing ? undefined : t('page.manager.sheetSubtitle')}
+        ariaLabel={
+          editing
+            ? editing.id
+              ? t('page.manager.ariaEditPage')
+              : t('page.manager.ariaNewPage')
+            : t('page.manager.ariaManage')
+        }
       >
         {!editing ? (
           <>
@@ -193,16 +202,16 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
                     <span className="flex-1 truncate">
                       {p.title}
                       {p.kind === 'weather' && (
-                        <span className="text-[10px] text-amber-300/80 ml-2">погода</span>
+                        <span className="text-[10px] text-amber-300/80 ml-2">{t('page.manager.badge.weather')}</span>
                       )}
                       {p.kind === 'music' && (
-                        <span className="text-[10px] text-fuchsia-300/80 ml-2">музыка</span>
+                        <span className="text-[10px] text-fuchsia-300/80 ml-2">{t('page.manager.badge.music')}</span>
                       )}
                       {p.hidden && (
-                        <span className="text-[10px] text-text-tertiary ml-2">скрыта</span>
+                        <span className="text-[10px] text-text-tertiary ml-2">{t('page.manager.badge.hidden')}</span>
                       )}
                       {p.protected && (
-                        <span className="text-[10px] text-text-tertiary ml-2">базовая</span>
+                        <span className="text-[10px] text-text-tertiary ml-2">{t('page.manager.badge.protected')}</span>
                       )}
                     </span>
                   </div>
@@ -210,22 +219,26 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
                   <div className="flex items-center gap-0.5 ml-auto">
                     <ActionIcon
                       onClick={() => updatePage(p.id, { hidden: !p.hidden })}
-                      title={p.hidden ? 'Показать в dock-баре' : 'Скрыть из dock-бара'}
-                      aria-label={p.hidden ? `Показать «${p.title}» в dock-баре` : `Скрыть «${p.title}» из dock-бара`}
+                      title={p.hidden ? t('page.manager.show') : t('page.manager.hide')}
+                      aria-label={
+                        p.hidden
+                          ? t('page.manager.showAria', { title: p.title })
+                          : t('page.manager.hideAria', { title: p.title })
+                      }
                     >
                       {p.hidden ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
                     </ActionIcon>
                     <ActionIcon
                       onClick={() => moveUp(idx)}
                       disabled={idx === 0}
-                      aria-label="Переместить вверх"
+                      aria-label={t('page.manager.moveUp')}
                     >
                       <ChevronUp size={14} aria-hidden="true" />
                     </ActionIcon>
                     <ActionIcon
                       onClick={() => moveDown(idx)}
                       disabled={idx >= pages.length - 1}
-                      aria-label="Переместить вниз"
+                      aria-label={t('page.manager.moveDown')}
                     >
                       <ChevronDown size={14} aria-hidden="true" />
                     </ActionIcon>
@@ -238,7 +251,7 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
                     </ActionIcon>
                     <ActionIcon
                       onClick={() => setEditing(p)}
-                      aria-label={`Редактировать страницу «${p.title}»`}
+                      aria-label={t('page.manager.editAria', { title: p.title })}
                     >
                       <Pencil size={14} aria-hidden="true" />
                     </ActionIcon>
@@ -251,7 +264,7 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
                         protected-страницу удалить было нельзя. */}
                     <ActionIcon
                       onClick={() => setConfirmDelete(p)}
-                      aria-label={`Удалить страницу «${p.title}»`}
+                      aria-label={t('page.manager.deleteAria', { title: p.title })}
                       variant="danger"
                     >
                       <Trash2 size={14} aria-hidden="true" />
@@ -295,17 +308,17 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
 
             <div className="mt-3 pt-3 border-t border-black/10 dark:border-white/10">
               <div className="text-[10px] uppercase tracking-wider text-text-tertiary mb-1.5">
-                Готовые страницы
+                {t('page.manager.readyPages')}
               </div>
               <button
                 onClick={addGlucosePreset}
                 className="w-full px-3 py-2.5 rounded-xl bg-rose-500/15 border border-rose-400/30 text-rose-300 text-xs flex items-center justify-center gap-1.5 hover:bg-rose-500/25 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-400/70"
               >
                 <Activity size={14} aria-hidden="true" />
-                🩸 Сахар — мониторинг CGM
+                {t('page.manager.glucosePreset')}
               </button>
               <div className="text-[10px] text-text-tertiary mt-1.5 leading-snug">
-                Текущая глюкоза, тренд, TIR за 24 ч и за неделю, график динамики
+                {t('page.manager.glucosePresetHint')}
               </div>
             </div>
 
@@ -332,9 +345,9 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
       </ModalSheet>
       <ConfirmDialog
         open={!!confirmDelete}
-        title={confirmDelete ? `Удалить страницу «${confirmDelete.title}»?` : ''}
-        message="Действие необратимо."
-        confirmLabel="Удалить"
+        title={confirmDelete ? t('page.manager.deleteTitle', { title: confirmDelete.title }) : ''}
+        message={t('page.manager.deleteMessage')}
+        confirmLabel={t('common.delete')}
         variant="danger"
         onConfirm={() => {
           if (confirmDelete) deletePage(confirmDelete.id);
@@ -355,6 +368,7 @@ function PageEditor({
   onCancel: () => void;
   onSave: (p: Page) => void;
 }) {
+  const t = useT();
   const [page, setPage] = useState<Page>({
     ...initial,
     kind: initial.kind ?? 'grid',
@@ -365,15 +379,15 @@ function PageEditor({
     <>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <div className="text-xs text-text-tertiary uppercase tracking-wider">Страница</div>
+          <div className="text-xs text-text-tertiary uppercase tracking-wider">{t('page.manager.editor.section')}</div>
           <div className="text-lg font-medium">
-            {page.id ? 'Редактирование' : 'Новая страница'}
+            {page.id ? t('page.manager.editor.editing') : t('page.manager.editor.newPage')}
           </div>
         </div>
         <button
           onClick={onCancel}
-          aria-label="Назад к списку страниц"
-          title="Назад"
+          aria-label={t('page.manager.editor.backToList')}
+          title={t('common.back')}
           className="w-9 h-9 rounded-full bg-black/40 border border-black/15 dark:border-white/15 text-text-primary flex items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
         >
           <X size={16} aria-hidden="true" />
@@ -382,17 +396,17 @@ function PageEditor({
 
       <div className="flex flex-col gap-3">
         <div>
-          <div className="text-xs text-text-secondary mb-1">Название</div>
+          <div className="text-xs text-text-secondary mb-1">{t('page.manager.editor.nameLabel')}</div>
           <input
             type="text"
             value={page.title}
             onChange={(e) => setPage({ ...page, title: e.target.value })}
-            placeholder="Кухня, Гостиная, Гараж..."
+            placeholder={t('page.manager.editor.namePlaceholder')}
             className="w-full px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary"
           />
         </div>
         <div>
-          <div className="text-xs text-text-secondary mb-1">Иконка (эмодзи)</div>
+          <div className="text-xs text-text-secondary mb-1">{t('page.manager.editor.iconLabel')}</div>
           <input
             type="text"
             value={page.icon}
@@ -406,7 +420,7 @@ function PageEditor({
         {/* Тип страницы — только при создании, переключение после создания может потерять виджеты */}
         {isNew && (
           <div>
-            <div className="text-xs text-text-secondary mb-1">Тип страницы</div>
+            <div className="text-xs text-text-secondary mb-1">{t('page.manager.editor.kindLabel')}</div>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
@@ -417,7 +431,7 @@ function PageEditor({
                     : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-text-secondary'
                 }`}
               >
-                🧩 Сетка виджетов
+                {t('page.manager.editor.kind.grid')}
               </button>
               <button
                 type="button"
@@ -438,7 +452,7 @@ function PageEditor({
                     : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-text-secondary'
                 }`}
               >
-                🌤 Погода
+                {t('page.manager.editor.kind.weather')}
               </button>
               <button
                 type="button"
@@ -456,7 +470,7 @@ function PageEditor({
                     : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-text-secondary'
                 }`}
               >
-                🎵 Музыка
+                {t('page.manager.editor.kind.music')}
               </button>
             </div>
           </div>
@@ -475,7 +489,7 @@ function PageEditor({
           onClick={onCancel}
           className="flex-1 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary"
         >
-          Отмена
+          {t('common.cancel')}
         </button>
         <button
           disabled={
@@ -485,21 +499,22 @@ function PageEditor({
           onClick={() => onSave(page)}
           className="flex-1 px-4 py-2.5 rounded-xl bg-accent/20 border border-accent/40 text-accent disabled:opacity-40 flex items-center justify-center gap-2"
         >
-          <Check size={16} /> Сохранить
+          <Check size={16} /> {t('common.save')}
         </button>
       </div>
     </>
   );
 }
 
-const SECTION_LABELS: Record<keyof WeatherPageSections, string> = {
-  header: 'Шапка с большой температурой и графиком',
-  alerts: 'Метеопредупреждения',
-  hourly: 'Прогноз на 24 часа',
-  daily: 'Прогноз на неделю',
-  extras: 'Прочие датчики (УФ, порывы, …)',
-  lightning: 'Грозы (счётчик, дистанция, азимут)',
-  storm: 'Шторм-радар (расстояние, направление, геомагнитка)',
+// i18n-ключи подписей секций; перевод делается в компоненте.
+const SECTION_LABEL_KEYS: Record<keyof WeatherPageSections, string> = {
+  header: 'page.manager.section.header',
+  alerts: 'page.manager.section.alerts',
+  hourly: 'page.manager.section.hourly',
+  daily: 'page.manager.section.daily',
+  extras: 'page.manager.section.extras',
+  lightning: 'page.manager.section.lightning',
+  storm: 'page.manager.section.storm',
 };
 
 function WeatherPageConfigEditor({
@@ -509,6 +524,7 @@ function WeatherPageConfigEditor({
   config?: WeatherPageConfig;
   onChange: (c: WeatherPageConfig) => void;
 }) {
+  const t = useT();
   const c: WeatherPageConfig = config ?? {
     weatherEntity: '',
     sections: { ...DEFAULT_WEATHER_SECTIONS },
@@ -556,49 +572,49 @@ function WeatherPageConfigEditor({
   return (
     <div className="flex flex-col gap-3 mt-1 pt-3 border-t border-black/10 dark:border-white/10">
       <div className="text-xs text-text-tertiary uppercase tracking-wider">
-        Настройки погоды
+        {t('page.manager.weatherSettings')}
       </div>
 
       <div>
-        <div className="text-xs text-text-secondary mb-1">Поставщик погоды *</div>
+        <div className="text-xs text-text-secondary mb-1">{t('page.manager.weatherProvider')}</div>
         <SearchableEntitySelect
           value={c.weatherEntity || undefined}
           onChange={(v) => update({ weatherEntity: v ?? '' })}
           options={weatherOptions}
-          placeholder="— выбери —"
+          placeholder={t('page.manager.pickPlaceholder')}
         />
       </div>
 
       <div>
         <div className="text-xs text-text-secondary mb-1">
-          Уличный датчик температуры (для шапки и графика)
+          {t('page.manager.outdoorTemp')}
         </div>
         <SearchableEntitySelect
           value={c.outdoorTempEntity}
           onChange={(v) => update({ outdoorTempEntity: v })}
           options={tempSensorOptions}
-          placeholder="Использовать данные провайдера"
-          emptyOptionLabel="— Использовать данные провайдера —"
+          placeholder={t('page.manager.useProvider')}
+          emptyOptionLabel={t('page.manager.useProviderOption')}
         />
       </div>
 
       <div>
         <div className="text-xs text-text-secondary mb-1">
-          Сенсор «Ощущается как» (свой, по своим данным)
+          {t('page.manager.apparentSensor')}
         </div>
         <SearchableEntitySelect
           value={c.apparentTempEntity}
           onChange={(v) => update({ apparentTempEntity: v })}
           options={tempSensorOptions}
-          placeholder="Брать из провайдера"
-          emptyOptionLabel="— Брать из провайдера —"
+          placeholder={t('page.manager.takeFromProvider')}
+          emptyOptionLabel={t('page.manager.takeFromProviderOption')}
         />
       </div>
 
       <div>
-        <div className="text-xs text-text-secondary mb-1.5">Какие секции показывать</div>
+        <div className="text-xs text-text-secondary mb-1.5">{t('page.manager.whichSections')}</div>
         <div className="flex flex-col gap-1 p-2 rounded-md bg-black/3 dark:bg-white/3 border border-black/10 dark:border-white/10">
-          {(Object.keys(SECTION_LABELS) as Array<keyof WeatherPageSections>).map((k) => (
+          {(Object.keys(SECTION_LABEL_KEYS) as Array<keyof WeatherPageSections>).map((k) => (
             <label
               key={k}
               className="flex items-center gap-2 text-sm cursor-pointer hover:bg-black/4 dark:hover:bg-white/4 rounded-sm px-2 py-1"
@@ -609,7 +625,7 @@ function WeatherPageConfigEditor({
                 onChange={(e) => updateSection(k, e.target.checked)}
                 className="w-4 h-4 accent-emerald-500"
               />
-              <span>{SECTION_LABELS[k]}</span>
+              <span>{t(SECTION_LABEL_KEYS[k])}</span>
             </label>
           ))}
         </div>
@@ -617,8 +633,8 @@ function WeatherPageConfigEditor({
 
       {c.sections.alerts && (
         <MultiEntitySelect
-          label="Сущности метеопредупреждений"
-          hint="Например, sensor.weather_alerts_o_any (оранжевые), …_w_any (жёлтые)"
+          label={t('page.manager.alertEntities')}
+          hint={t('page.manager.alertEntitiesHint')}
           domain="sensor."
           value={c.alertEntities ?? []}
           onChange={(v) => update({ alertEntities: v })}
@@ -627,8 +643,8 @@ function WeatherPageConfigEditor({
 
       {c.sections.extras && (
         <MultiEntitySelect
-          label="Доп. датчики для секции «Прочее»"
-          hint="УФ-индекс, порывы, озон, любые другие sensor.*"
+          label={t('page.manager.extraSensors')}
+          hint={t('page.manager.extraSensorsHint')}
           domain="sensor."
           value={c.extraSensors ?? []}
           onChange={(v) => update({ extraSensors: v })}
@@ -637,8 +653,8 @@ function WeatherPageConfigEditor({
 
       {c.sections.lightning && (
         <MultiEntitySelect
-          label="Датчики гроз"
-          hint="Например: счётчик молний, дистанция, азимут"
+          label={t('page.manager.lightningSensors')}
+          hint={t('page.manager.lightningSensorsHint')}
           domain="sensor."
           value={c.lightningSensors ?? []}
           onChange={(v) => update({ lightningSensors: v })}
@@ -648,75 +664,75 @@ function WeatherPageConfigEditor({
       {c.sections.storm && (
         <div className="flex flex-col gap-2 p-3 rounded-md bg-black/3 dark:bg-white/3 border border-black/10 dark:border-white/10">
           <div className="text-[11px] uppercase tracking-wider text-text-tertiary">
-            Шторм-радар (любое поле опционально)
+            {t('page.manager.stormRadarTitle')}
           </div>
           <div>
             <div className="text-xs text-text-secondary mb-1">
-              Расстояние до ближайшей грозы (км)
+              {t('page.manager.stormDistance')}
             </div>
             <SearchableEntitySelect
               value={c.stormDistanceEntity}
               onChange={(v) => update({ stormDistanceEntity: v })}
               options={allSensorOptions}
-              placeholder="— нет —"
-              emptyOptionLabel="— нет —"
+              placeholder={t('page.manager.none')}
+              emptyOptionLabel={t('page.manager.none')}
             />
           </div>
           <div>
             <div className="text-xs text-text-secondary mb-1">
-              Направление до ближайшей грозы (азимут °)
+              {t('page.manager.stormBearing')}
             </div>
             <SearchableEntitySelect
               value={c.stormBearingEntity}
               onChange={(v) => update({ stormBearingEntity: v })}
               options={allSensorOptions}
-              placeholder="— нет —"
-              emptyOptionLabel="— нет —"
+              placeholder={t('page.manager.none')}
+              emptyOptionLabel={t('page.manager.none')}
             />
           </div>
           <div>
             <div className="text-xs text-text-secondary mb-1">
-              Движение шторма (азимут °)
+              {t('page.manager.stormMovement')}
             </div>
             <SearchableEntitySelect
               value={c.stormEntity}
               onChange={(v) => update({ stormEntity: v })}
               options={allSensorOptions}
-              placeholder="— нет —"
-              emptyOptionLabel="— нет —"
+              placeholder={t('page.manager.none')}
+              emptyOptionLabel={t('page.manager.none')}
             />
           </div>
           <div className="text-[11px] uppercase tracking-wider text-text-tertiary mt-2">
-            Геомагнитная активность (Kp)
+            {t('page.manager.geomagneticTitle')}
           </div>
           <div>
-            <div className="text-xs text-text-secondary mb-1">Сегодня</div>
+            <div className="text-xs text-text-secondary mb-1">{t('page.manager.today')}</div>
             <SearchableEntitySelect
               value={c.magneticStormEntity}
               onChange={(v) => update({ magneticStormEntity: v })}
               options={allSensorOptions}
-              placeholder="— нет —"
-              emptyOptionLabel="— нет —"
+              placeholder={t('page.manager.none')}
+              emptyOptionLabel={t('page.manager.none')}
             />
           </div>
           <div>
-            <div className="text-xs text-text-secondary mb-1">Завтра</div>
+            <div className="text-xs text-text-secondary mb-1">{t('page.manager.tomorrow')}</div>
             <SearchableEntitySelect
               value={c.magneticStormTomorrowEntity}
               onChange={(v) => update({ magneticStormTomorrowEntity: v })}
               options={allSensorOptions}
-              placeholder="— нет —"
-              emptyOptionLabel="— нет —"
+              placeholder={t('page.manager.none')}
+              emptyOptionLabel={t('page.manager.none')}
             />
           </div>
           <div>
-            <div className="text-xs text-text-secondary mb-1">Послезавтра</div>
+            <div className="text-xs text-text-secondary mb-1">{t('page.manager.afterTomorrow')}</div>
             <SearchableEntitySelect
               value={c.magneticStormAfterTomorrowEntity}
               onChange={(v) => update({ magneticStormAfterTomorrowEntity: v })}
               options={allSensorOptions}
-              placeholder="— нет —"
-              emptyOptionLabel="— нет —"
+              placeholder={t('page.manager.none')}
+              emptyOptionLabel={t('page.manager.none')}
             />
           </div>
         </div>
@@ -724,7 +740,7 @@ function WeatherPageConfigEditor({
 
       <div className="grid grid-cols-3 gap-2 pt-2 border-t border-black/10 dark:border-white/10">
         <div>
-          <div className="text-xs text-text-secondary mb-1">Темп</div>
+          <div className="text-xs text-text-secondary mb-1">{t('page.manager.unit.temp')}</div>
           <select
             value={c.tempUnit ?? 'C'}
             onChange={(e) => update({ tempUnit: e.target.value as any })}
@@ -735,26 +751,26 @@ function WeatherPageConfigEditor({
           </select>
         </div>
         <div>
-          <div className="text-xs text-text-secondary mb-1">Ветер</div>
+          <div className="text-xs text-text-secondary mb-1">{t('page.manager.unit.wind')}</div>
           <select
             value={c.windUnit ?? 'm/s'}
             onChange={(e) => update({ windUnit: e.target.value as any })}
             className="w-full px-2 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm"
           >
-            <option value="m/s">м/с</option>
-            <option value="km/h">км/ч</option>
-            <option value="mph">миль/ч</option>
+            <option value="m/s">{t('page.manager.unit.windMs')}</option>
+            <option value="km/h">{t('page.manager.unit.windKmh')}</option>
+            <option value="mph">{t('page.manager.unit.windMph')}</option>
           </select>
         </div>
         <div>
-          <div className="text-xs text-text-secondary mb-1">Давление</div>
+          <div className="text-xs text-text-secondary mb-1">{t('page.manager.unit.pressure')}</div>
           <select
             value={c.pressureUnit ?? 'mmHg'}
             onChange={(e) => update({ pressureUnit: e.target.value as any })}
             className="w-full px-2 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm"
           >
-            <option value="mmHg">мм</option>
-            <option value="hPa">гПа</option>
+            <option value="mmHg">{t('page.manager.unit.pressureMm')}</option>
+            <option value="hPa">{t('page.manager.unit.pressureHpa')}</option>
             <option value="inHg">inHg</option>
           </select>
         </div>
@@ -776,6 +792,7 @@ function MultiEntitySelect({
   value: string[];
   onChange: (v: string[]) => void;
 }) {
+  const t = useT();
   const states = useStates();
   const { registries } = useConnection();
   const [filter, setFilter] = useState('');
@@ -804,7 +821,7 @@ function MultiEntitySelect({
       {hint && <div className="text-[10px] text-text-tertiary mb-1.5">{hint}</div>}
       <input
         type="text"
-        placeholder="🔍 поиск…"
+        placeholder={t('page.manager.multiSelect.searchPlaceholder')}
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         className="w-full px-3 py-1.5 mb-1 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm"
@@ -812,7 +829,7 @@ function MultiEntitySelect({
       <div className="max-h-44 overflow-y-auto p-2 rounded-md bg-black/3 dark:bg-white/3 border border-black/10 dark:border-white/10">
         {value.length > 0 && (
           <div className="text-[10px] text-text-tertiary mb-1.5">
-            Выбрано: {value.length}
+            {t('page.manager.multiSelect.selected', { n: value.length })}
           </div>
         )}
         {list.slice(0, 80).map((id) => {
@@ -835,7 +852,7 @@ function MultiEntitySelect({
           );
         })}
         {list.length === 0 && (
-          <div className="text-xs text-text-tertiary text-center py-2">Ничего не найдено</div>
+          <div className="text-xs text-text-tertiary text-center py-2">{t('page.manager.multiSelect.notFound')}</div>
         )}
       </div>
     </div>

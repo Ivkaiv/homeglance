@@ -7,6 +7,15 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.87] — 2026-05-22
+
+### Changed
+- **Localization, part 6 (final).** The full-screen pages and page manager
+  are now localized: the Weather page (including the storm radar and
+  geomagnetic activity), the Music page, the page manager sheet and the
+  Dashboard all follow the selected interface language. This completes the
+  homeglance interface localization.
+
 ## [0.1.0-alpha.86] — 2026-05-22
 
 ### Changed

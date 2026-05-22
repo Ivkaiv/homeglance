@@ -190,7 +190,7 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
   }, [needsSeed, current?.id, cols]);
 
   if (!current) {
-    return <div className="p-8 text-text-tertiary">Нет страниц.</div>;
+    return <div className="p-8 text-text-tertiary">{t('page.dashboard.noPages')}</div>;
   }
 
   const rglItems: RGLItem[] = widgets.map((w) => {
@@ -233,7 +233,7 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
           <span className="text-2xl sm:text-3xl shrink-0 leading-none">{current.icon}</span>
           <div className={`min-w-0 ${editing ? 'hidden sm:block' : ''}`}>
             <div className="text-base sm:text-lg font-medium truncate leading-tight">{current.title}</div>
-            <div className="text-[10px] text-text-tertiary hidden sm:block">Glance</div>
+            <div className="text-[10px] text-text-tertiary hidden sm:block">{t('page.dashboard.brand')}</div>
           </div>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">

@@ -38,6 +38,7 @@ import {
   useMAQueue,
 } from '@/lib/music/MusicProvider';
 import { maImageProxy } from '@/lib/music/config';
+import { useT } from '@/lib/i18n/I18nProvider';
 import type { MusicPageConfig } from '@/lib/pages/types';
 import type { MAMediaItem } from '@/lib/music/types';
 
@@ -60,17 +61,17 @@ function isYandexStation(playerId?: string): boolean {
   return !!playerId && playerId.includes('yandex_station');
 }
 
-/** Иконка и подпись по типу медиа-элемента. */
-function kindInfo(item: MAMediaItem): { Icon: typeof Music; label: string } {
+/** Иконка и i18n-ключ подписи по типу медиа-элемента. */
+function kindInfo(item: MAMediaItem): { Icon: typeof Music; labelKey: string } {
   switch (item.media_type) {
     case 'album':
-      return { Icon: Disc3, label: 'Альбом' };
+      return { Icon: Disc3, labelKey: 'page.music.kind.album' };
     case 'artist':
-      return { Icon: Mic2, label: 'Артист' };
+      return { Icon: Mic2, labelKey: 'page.music.kind.artist' };
     case 'playlist':
-      return { Icon: ListMusic, label: 'Плейлист' };
+      return { Icon: ListMusic, labelKey: 'page.music.kind.playlist' };
     default:
-      return { Icon: Music, label: 'Трек' };
+      return { Icon: Music, labelKey: 'page.music.kind.track' };
   }
 }
 
@@ -95,9 +96,10 @@ function MediaRow({
   playingUri?: string | null;
   accentColor: string;
 }) {
-  const { Icon, label } = kindInfo(item);
+  const t = useT();
+  const { Icon, labelKey } = kindInfo(item);
   const thumb = maImageProxy(item.metadata?.images?.[0]?.path ?? item.image?.path);
-  const sub = item.artists?.[0]?.name || label;
+  const sub = item.artists?.[0]?.name || t(labelKey);
   const isTrack = item.media_type === 'track' || !item.media_type;
   const isPending = !!item.uri && item.uri === pendingUri;
   const isPlaying = !!item.uri && item.uri === playingUri;
@@ -105,7 +107,11 @@ function MediaRow({
     <button
       type="button"
       onClick={() => onActivate(item)}
-      aria-label={`${isTrack ? 'Включить' : 'Открыть'} ${item.name ?? ''}`}
+      aria-label={
+        isTrack
+          ? t('page.music.row.play', { name: item.name ?? '' })
+          : t('page.music.row.open', { name: item.name ?? '' })
+      }
       className={`flex items-center gap-2.5 py-2 px-2 rounded-lg text-left transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 active:scale-[0.98] ${
         isPlaying
           ? 'bg-accent/10'
@@ -164,6 +170,7 @@ function MediaRow({
  * вывода, поиск с открытием альбомов/артистов, недавно прослушанное.
  */
 export function MusicPageView({ config, pageTitle }: Props) {
+  const t = useT();
   useMAConnection();
   const { client, status } = useMusic();
   const players = useMAPlayers();
@@ -221,7 +228,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
   const accentSoft = (op: number) =>
     accentRgb ? `rgb(${accentRgb} / ${op})` : `rgb(var(--accent) / ${op})`;
 
-  const title = media?.title || 'Ничего не играет';
+  const title = media?.title || t('page.music.nothingPlaying');
   const artist = media?.artist || '';
   const duration = media?.duration ?? 0;
   let position = active?.elapsed_time ?? 0;
@@ -310,8 +317,13 @@ export function MusicPageView({ config, pageTitle }: Props) {
   const playItem = (item: MAMediaItem) => {
     if (!playerId || !item.uri) return;
     setPendingUri(item.uri);
-    const what = item.name ? `«${item.name}»` : 'трек';
-    showToast(`Запускаю ${what} на «${active?.name ?? 'плеере'}»`);
+    const what = item.name ? `«${item.name}»` : t('page.music.toast.somethingTrack');
+    showToast(
+      t('page.music.toast.starting', {
+        what,
+        player: active?.name ?? t('page.music.toast.defaultPlayer'),
+      })
+    );
     run(() => client.playMedia(playerId, item.uri as string));
   };
 
@@ -335,20 +347,20 @@ export function MusicPageView({ config, pageTitle }: Props) {
   const startWave = () => {
     if (!playerId || !media || waveBusy) return;
     if (!actionUri) {
-      showToast('Этот трек запущен не через Glance — волну не построить');
+      showToast(t('page.music.toast.waveNotGlance'));
       return;
     }
     setWaveBusy(true);
     client
       .playRadio(playerId, actionUri)
-      .then(() => showToast('Волна запущена — играем похожее'))
-      .catch(() => showToast('Не удалось запустить волну'))
+      .then(() => showToast(t('page.music.toast.waveStarted')))
+      .catch(() => showToast(t('page.music.toast.waveFailed')))
       .finally(() => setWaveBusy(false));
   };
   const favoriteCurrent = () => {
     if (!media || favBusy) return;
     if (!actionUri) {
-      showToast('Этот трек запущен не через Glance — избранное недоступно');
+      showToast(t('page.music.toast.favNotGlance'));
       return;
     }
     setFavBusy(true);
@@ -357,9 +369,9 @@ export function MusicPageView({ config, pageTitle }: Props) {
       .addFavorite(uri)
       .then(() => {
         setFavUri(uri);
-        showToast('Добавлено в избранное');
+        showToast(t('page.music.toast.favAdded'));
       })
-      .catch(() => showToast('Не удалось добавить в избранное'))
+      .catch(() => showToast(t('page.music.toast.favFailed')))
       .finally(() => setFavBusy(false));
   };
   const isFav = !!actionUri && favUri === actionUri;
@@ -377,8 +389,8 @@ export function MusicPageView({ config, pageTitle }: Props) {
         {players.length === 0 ? (
           <div className="glass p-6 text-center text-text-tertiary text-sm">
             {status === 'connected'
-              ? 'Music Assistant не отдаёт устройства.'
-              : 'Подключение к Music Assistant…'}
+              ? t('page.music.noDevices')
+              : t('page.music.connecting')}
           </div>
         ) : (
           <>
@@ -434,7 +446,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
               <div className="flex items-center justify-center gap-2">
                 <PressButton
                   size={40}
-                  ariaLabel={shuffle ? 'Выключить перемешивание' : 'Перемешать'}
+                  ariaLabel={shuffle ? t('page.music.shuffle.off') : t('page.music.shuffle.on')}
                   onClick={() => playerId && run(() => client.setShuffle(playerId, !shuffle))}
                 >
                   <Shuffle
@@ -445,14 +457,14 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 </PressButton>
                 <PressButton
                   size={48}
-                  ariaLabel="Предыдущий"
+                  ariaLabel={t('page.music.previous')}
                   onClick={() => playerId && run(() => client.previous(playerId))}
                 >
                   <SkipBack size={20} aria-hidden="true" />
                 </PressButton>
                 <PressButton
                   size={64}
-                  ariaLabel={playing ? 'Пауза' : 'Воспроизвести'}
+                  ariaLabel={playing ? t('page.music.pause') : t('page.music.play')}
                   bg={accentSoft(0.25)}
                   bgPressed={accentSoft(0.45)}
                   onClick={() => playerId && run(() => client.playPause(playerId))}
@@ -465,12 +477,12 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 </PressButton>
                 <PressButton
                   size={48}
-                  ariaLabel="Следующий"
+                  ariaLabel={t('page.music.next')}
                   onClick={() => playerId && run(() => client.next(playerId))}
                 >
                   <SkipForward size={20} aria-hidden="true" />
                 </PressButton>
-                <PressButton size={40} ariaLabel="Режим повтора" onClick={cycleRepeat}>
+                <PressButton size={40} ariaLabel={t('page.music.repeatMode')} onClick={cycleRepeat}>
                   {repeatMode === 'one' ? (
                     <Repeat1 size={16} aria-hidden="true" style={{ color: accentColor }} />
                   ) : (
@@ -487,7 +499,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
               <div className="flex items-center gap-3 w-full">
                 <PressButton
                   size={36}
-                  ariaLabel={muted ? 'Включить звук' : 'Отключить звук'}
+                  ariaLabel={muted ? t('page.music.unmute') : t('page.music.mute')}
                   onClick={() => playerId && run(() => client.setMute(playerId, !muted))}
                 >
                   {muted ? (
@@ -507,7 +519,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
                   onChange={(ev) =>
                     playerId && run(() => client.setVolume(playerId, Number(ev.target.value)))
                   }
-                  aria-label="Громкость"
+                  aria-label={t('page.music.volume')}
                   className="no-drag flex-1 min-w-0"
                   style={{ accentColor }}
                 />
@@ -529,7 +541,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
                   ) : (
                     <Waves size={15} aria-hidden="true" />
                   )}
-                  {waveBusy ? 'Запускаю…' : 'Волна'}
+                  {waveBusy ? t('page.music.wave.busy') : t('page.music.wave')}
                 </button>
                 <button
                   type="button"
@@ -547,13 +559,17 @@ export function MusicPageView({ config, pageTitle }: Props) {
                       style={isFav ? { color: accentColor } : undefined}
                     />
                   )}
-                  {favBusy ? 'Добавляю…' : isFav ? 'В избранном' : 'В избранное'}
+                  {favBusy
+                    ? t('page.music.fav.busy')
+                    : isFav
+                      ? t('page.music.fav.added')
+                      : t('page.music.fav.add')}
                 </button>
               </div>
 
               {nextName && (
                 <div className="text-xs text-text-tertiary w-full truncate text-center">
-                  Далее: {nextName}
+                  {t('page.music.upNext', { name: nextName })}
                 </div>
               )}
             </div>
@@ -562,7 +578,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
             <div className="glass p-4">
               <div className="flex items-center gap-2 text-xs font-medium text-text-secondary mb-2">
                 <Speaker size={14} aria-hidden="true" />
-                <span>Где играть</span>
+                <span>{t('page.music.outputLabel')}</span>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {players.map((p) => {
@@ -573,9 +589,9 @@ export function MusicPageView({ config, pageTitle }: Props) {
                       type="button"
                       onClick={() => {
                         selectPlayer(p.player_id);
-                        showToast(`Выход: ${p.name}`);
+                        showToast(t('page.music.outputSelect', { name: p.name }));
                       }}
-                      aria-label={`Выход: ${p.name}`}
+                      aria-label={t('page.music.outputSelect', { name: p.name })}
                       className={`flex items-center gap-2 py-2 px-2.5 rounded-lg text-left transition active:scale-[0.98] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 ${
                         selected
                           ? 'bg-black/8 dark:bg-white/10'
@@ -590,7 +606,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
                       />
                       <span className="flex-1 min-w-0 truncate text-sm">{p.name}</span>
                       {p.playback_state === 'playing' && !selected && (
-                        <span className="text-[10px] text-text-tertiary shrink-0">играет</span>
+                        <span className="text-[10px] text-text-tertiary shrink-0">{t('page.music.outputPlaying')}</span>
                       )}
                       {selected && (
                         <Check
@@ -607,11 +623,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
               {stationWarning && (
                 <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-[12px] leading-snug text-amber-700 dark:text-amber-300">
                   <AlertTriangle size={15} className="shrink-0 mt-0.5" aria-hidden="true" />
-                  <span>
-                    Яндекс.Станция через Music Assistant проигрывает один трек и
-                    обрывает очередь. Для альбомов и плейлистов выберите ТВ-приставку
-                    или другой плеер.
-                  </span>
+                  <span>{t('page.music.stationWarning')}</span>
                 </div>
               )}
             </div>
@@ -626,7 +638,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && doSearch()}
-                    placeholder="Найти артиста, альбом, трек…"
+                    placeholder={t('page.music.searchPlaceholder')}
                     className="flex-1 min-w-0 bg-transparent text-sm text-text-primary outline-hidden"
                   />
                 </div>
@@ -635,19 +647,19 @@ export function MusicPageView({ config, pageTitle }: Props) {
                   onClick={doSearch}
                   className="px-4 py-2 rounded-lg bg-accent/20 border border-accent/40 text-accent text-sm shrink-0 active:scale-[0.97] transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
                 >
-                  Поиск
+                  {t('page.music.searchButton')}
                 </button>
               </div>
 
               {searching && (
                 <div className="flex items-center justify-center gap-2 text-sm text-text-tertiary py-4">
                   <Loader2 size={15} className="animate-spin" aria-hidden="true" />
-                  Ищу…
+                  {t('page.music.searching')}
                 </div>
               )}
               {!searching && results && results.length === 0 && (
                 <div className="text-sm text-text-tertiary text-center py-4">
-                  Ничего не нашлось.
+                  {t('page.music.searchEmpty')}
                 </div>
               )}
               {!searching && results && results.length > 0 && (
@@ -666,7 +678,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
               )}
               {!results && !searching && (
                 <div className="text-sm text-text-tertiary text-center py-4">
-                  Введи название — найдём в подключённых источниках.
+                  {t('page.music.searchHint')}
                 </div>
               )}
             </div>
@@ -676,7 +688,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
               <div className="glass p-4">
                 <div className="flex items-center gap-2 text-xs font-medium text-text-secondary mb-2">
                   <History size={14} aria-hidden="true" />
-                  <span>Недавнее</span>
+                  <span>{t('page.music.recent')}</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   {recent.map((item, i) => (
@@ -709,12 +721,12 @@ export function MusicPageView({ config, pageTitle }: Props) {
               <button
                 type="button"
                 onClick={() => setDetail(null)}
-                aria-label="Назад"
+                aria-label={t('page.music.back')}
                 className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-center shrink-0 active:scale-95 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
               >
                 <ArrowLeft size={18} aria-hidden="true" />
               </button>
-              <span className="text-sm text-text-secondary">Назад к поиску</span>
+              <span className="text-sm text-text-secondary">{t('page.music.backToSearch')}</span>
             </div>
 
             <div className="glass p-5 flex flex-col items-center gap-3 text-center">
@@ -740,7 +752,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
               <div className="min-w-0 w-full">
                 <div className="text-lg font-semibold truncate">{detail.name}</div>
                 <div className="text-xs text-text-tertiary mt-0.5">
-                  {kindInfo(detail).label}
+                  {t(kindInfo(detail).labelKey)}
                   {detail.artists?.[0]?.name ? ` · ${detail.artists[0].name}` : ''}
                 </div>
               </div>
@@ -750,7 +762,7 @@ export function MusicPageView({ config, pageTitle }: Props) {
                 className="mt-1 px-5 py-2 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm flex items-center gap-1.5 active:scale-95 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
               >
                 <Play size={15} aria-hidden="true" />
-                Играть всё
+                {t('page.music.playAll')}
               </button>
             </div>
 
@@ -758,11 +770,11 @@ export function MusicPageView({ config, pageTitle }: Props) {
               {detailLoading ? (
                 <div className="flex items-center justify-center gap-2 text-sm text-text-tertiary py-6">
                   <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-                  Загрузка…
+                  {t('page.music.detailLoading')}
                 </div>
               ) : detailTracks.length === 0 ? (
                 <div className="text-sm text-text-tertiary text-center py-6">
-                  Треки не загрузились.
+                  {t('page.music.detailEmpty')}
                 </div>
               ) : (
                 <div className="flex flex-col gap-1">

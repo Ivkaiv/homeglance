@@ -17,11 +17,14 @@ const DICTIONARIES: Record<Locale, Dictionary> = { ru, en };
 const STORAGE_KEY = 'glance:locale';
 const FALLBACK: Locale = 'en';
 
+/** Тип функции перевода — для передачи `t` в module-level хелперы. */
+export type TFunction = (key: string, params?: Record<string, string | number>) => string;
+
 interface I18nContextValue {
   locale: Locale;
   setLocale: (next: Locale) => void;
   /** Перевод с подстановкой переменных {name} → params.name. */
-  t: (key: string, params?: Record<string, string | number>) => string;
+  t: TFunction;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
