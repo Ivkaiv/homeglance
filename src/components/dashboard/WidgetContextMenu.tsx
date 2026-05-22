@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Settings, Trash2, Copy } from 'lucide-react';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface MenuItem {
   id: string;
@@ -31,6 +32,7 @@ export function WidgetContextMenu({
   onDuplicate?: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const t = useT();
 
   useEffect(() => {
     function onDoc(e: MouseEvent | TouchEvent) {
@@ -53,21 +55,21 @@ export function WidgetContextMenu({
   const items: MenuItem[] = [
     {
       id: 'configure',
-      label: 'Настроить',
+      label: t('dlg.menu.configure'),
       icon: <Settings size={14} aria-hidden="true" />,
       onClick: onConfigure,
     },
     ...(onDuplicate
       ? [{
           id: 'duplicate',
-          label: 'Дублировать',
+          label: t('dlg.menu.duplicate'),
           icon: <Copy size={14} aria-hidden="true" />,
           onClick: onDuplicate,
         }]
       : []),
     {
       id: 'delete',
-      label: 'Удалить',
+      label: t('common.delete'),
       icon: <Trash2 size={14} aria-hidden="true" />,
       variant: 'danger',
       onClick: onDelete,

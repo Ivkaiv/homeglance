@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock } from 'lucide-react';
 import { verifyPin } from '@/lib/profiles/storage';
 import type { Profile } from '@/lib/profiles/types';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 /**
  * Модалка ввода PIN конкретного **профиля** (не путать с security/PinPrompt —
@@ -27,6 +28,7 @@ export function ProfilePinPrompt({
   onCancel: () => void;
   onSuccess: () => void;
 }) {
+  const t = useT();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -49,7 +51,7 @@ export function ProfilePinPrompt({
       if (ok) {
         onSuccess();
       } else {
-        setError('Неверный PIN');
+        setError(t('dlg.pin.wrong'));
         setPin('');
       }
     } finally {
@@ -87,12 +89,12 @@ export function ProfilePinPrompt({
             <div className="flex items-center gap-2 min-w-0">
               <Lock size={16} className="text-amber-400 shrink-0" />
               <div className="text-sm font-medium truncate">
-                {title || `Вход в профиль «${profile.name}»`}
+                {title || t('dlg.profilePin.title', { name: profile.name })}
               </div>
             </div>
             <button
               onClick={onCancel}
-              aria-label="Закрыть"
+              aria-label={t('common.close')}
               className="w-8 h-8 rounded-full bg-black/20 dark:bg-black/40 border border-black/15 dark:border-white/15 text-text-primary flex items-center justify-center shrink-0"
             >
               <X size={14} />
@@ -102,7 +104,7 @@ export function ProfilePinPrompt({
           <div className="flex items-center gap-3 mb-4">
             <div className="text-4xl shrink-0">{profile.avatar}</div>
             <div className="text-xs text-text-secondary">
-              Этот профиль защищён PIN-кодом. Введи его, чтобы войти.
+              {t('dlg.profilePin.body')}
             </div>
           </div>
 
@@ -130,14 +132,14 @@ export function ProfilePinPrompt({
               onClick={onCancel}
               className="flex-1 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-sm"
             >
-              Отмена
+              {t('common.cancel')}
             </button>
             <button
               onClick={submit}
               disabled={pin.length < 4 || busy}
               className="flex-1 px-4 py-2.5 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm disabled:opacity-40"
             >
-              Войти
+              {t('common.signIn')}
             </button>
           </div>
         </motion.div>

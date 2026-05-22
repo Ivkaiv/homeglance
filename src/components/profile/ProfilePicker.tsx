@@ -7,12 +7,14 @@ import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import type { Profile } from '@/lib/profiles/types';
 import { verifyPin } from '@/lib/profiles/storage';
 import { ProfileEditor } from './ProfileEditor';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 /**
  * Полноэкранный picker профилей. Показывается когда нет активного.
  * Если профилей нет вообще — открывает онбординг (форма создания первого).
  */
 export function ProfilePicker() {
+  const t = useT();
   const { profiles, setActiveId } = useProfiles();
   const [creating, setCreating] = useState(profiles.length === 0);
   const [pinFor, setPinFor] = useState<Profile | null>(null);
@@ -28,8 +30,8 @@ export function ProfilePicker() {
   if (creating) {
     return (
       <ProfileEditor
-        title={profiles.length === 0 ? 'Добро пожаловать в Glance ✨' : 'Новый профиль'}
-        subtitle={profiles.length === 0 ? 'Создай свой профиль за 10 секунд' : ''}
+        title={profiles.length === 0 ? t('dlg.profilePicker.welcome') : t('dlg.profilePicker.newProfile')}
+        subtitle={profiles.length === 0 ? t('dlg.profilePicker.welcomeSub') : ''}
         onCancel={profiles.length === 0 ? undefined : () => setCreating(false)}
       />
     );
@@ -55,7 +57,7 @@ export function ProfilePicker() {
       >
         <div className="text-6xl mb-3">✨</div>
         <h1 className="text-3xl font-light mb-2">Glance</h1>
-        <p className="text-text-secondary text-sm mb-8">Выбери профиль</p>
+        <p className="text-text-secondary text-sm mb-8">{t('dlg.profilePicker.choose')}</p>
 
         <div className="grid grid-cols-2 gap-3">
           {profiles.map((p) => (
@@ -81,7 +83,7 @@ export function ProfilePicker() {
             className="glass p-5 flex flex-col items-center justify-center gap-2 hover:bg-black/10 dark:hover:bg-white/10 transition border-dashed border-black/20 dark:border-white/20"
           >
             <Plus size={32} className="text-text-secondary" />
-            <div className="text-xs text-text-secondary">Новый</div>
+            <div className="text-xs text-text-secondary">{t('dlg.profilePicker.new')}</div>
           </motion.button>
         </div>
       </motion.div>
@@ -98,6 +100,7 @@ function PinPrompt({
   onCancel: () => void;
   onSuccess: () => void;
 }) {
+  const t = useT();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
 
@@ -109,7 +112,7 @@ function PinPrompt({
     const ok = await verifyPin(pin, profile.pinHash);
     if (ok) onSuccess();
     else {
-      setError('Неверный PIN');
+      setError(t('dlg.pin.wrong'));
       setPin('');
     }
   }
@@ -124,7 +127,7 @@ function PinPrompt({
       >
         <div className="text-6xl mb-3">{profile.avatar}</div>
         <div className="text-lg font-medium mb-1">{profile.name}</div>
-        <div className="text-xs text-text-secondary mb-5">Введи PIN</div>
+        <div className="text-xs text-text-secondary mb-5">{t('dlg.profilePicker.enterPin')}</div>
 
         <input
           autoFocus
@@ -148,14 +151,14 @@ function PinPrompt({
             onClick={onCancel}
             className="flex-1 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-sm"
           >
-            Назад
+            {t('common.back')}
           </button>
           <button
             onClick={check}
             disabled={pin.length < 4}
             className="flex-1 px-4 py-2.5 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm disabled:opacity-40"
           >
-            Войти
+            {t('common.signIn')}
           </button>
         </div>
       </motion.div>

@@ -1,6 +1,6 @@
 {
   "name": "homeglance",
-  "version": "0.1.0-alpha.85",
+  "version": "0.1.0-alpha.86",
   "description": "A modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.",
   "license": "MIT",
   "homepage": "https://github.com/Ivkaiv/homeglance",

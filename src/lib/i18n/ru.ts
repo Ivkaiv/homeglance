@@ -15,6 +15,10 @@ export const ru: Dictionary = {
   'common.retry': 'Попробовать снова',
   'common.loading': 'Загрузка',
   'common.signOut': 'Выйти',
+  'common.yes': 'Да',
+  'common.confirm': 'Подтвердить',
+  'common.create': 'Создать',
+  'common.signIn': 'Войти',
 
   // ── First-run wizard ──────────────────────────────────────────────────────
   'wizard.welcome.title': 'С чего начнём?',
@@ -1054,4 +1058,66 @@ export const ru: Dictionary = {
   'w.lightSheet.colorTemp': 'Цветовая температура',
   'w.lightSheet.colorTempValue': 'Цветовая температура: {value} mired',
   'w.lightSheet.effects': 'Эффекты',
+
+  // ── shared dialog strings ─────────────────────────────────────────────────
+  'dlg.pin.wrong': 'Неверный PIN',
+
+  // ── widget context menu ───────────────────────────────────────────────────
+  'dlg.menu.configure': 'Настроить',
+  'dlg.menu.duplicate': 'Дублировать',
+
+  // ── dock bar ──────────────────────────────────────────────────────────────
+  'dlg.dock.pages': 'Страницы',
+  'dlg.dock.manage': 'Управление',
+  'dlg.dock.hidden': '{label} (скрыта)',
+
+  // ── change PIN dialog ─────────────────────────────────────────────────────
+  'dlg.changePin.titleRemove': 'Снять PIN с «{name}»',
+  'dlg.changePin.titleChange': 'Сменить PIN для «{name}»',
+  'dlg.changePin.titleSet': 'Установить PIN для «{name}»',
+  'dlg.changePin.errCurrent': 'Текущий PIN неверный',
+  'dlg.changePin.errShort': 'Новый PIN должен быть не короче 4 цифр',
+  'dlg.changePin.errMismatch': 'PIN-коды не совпадают',
+  'dlg.changePin.bodyRemove': 'Профиль станет доступен без PIN — любой, кто откроет Glance, попадёт в него.',
+  'dlg.changePin.bodyChange': 'Введи текущий PIN, чтобы подтвердить владение, и придумай новый.',
+  'dlg.changePin.bodySet': 'Защити профиль PIN-кодом — без него никто не сможет в него зайти с других устройств.',
+  'dlg.changePin.currentLabel': 'Текущий PIN',
+  'dlg.changePin.newLabel': 'Новый PIN (4-6 цифр)',
+  'dlg.changePin.repeatLabel': 'Ещё раз',
+  'dlg.changePin.switchToChange': '← Я хочу сменить PIN, а не снять',
+  'dlg.changePin.switchToRemove': 'Снять PIN с профиля',
+  'dlg.changePin.btnRemove': 'Снять',
+  'dlg.changePin.btnChange': 'Сменить',
+  'dlg.changePin.btnSet': 'Установить',
+
+  // ── profile PIN prompt ────────────────────────────────────────────────────
+  'dlg.profilePin.title': 'Вход в профиль «{name}»',
+  'dlg.profilePin.body': 'Этот профиль защищён PIN-кодом. Введи его, чтобы войти.',
+
+  // ── profile editor ────────────────────────────────────────────────────────
+  'dlg.profileEditor.nameLabel': 'Имя',
+  'dlg.profileEditor.namePlaceholder': 'Юра, Аня, Гость…',
+  'dlg.profileEditor.avatarLabel': 'Аватар',
+  'dlg.profileEditor.usePin': 'Защитить PIN-кодом',
+  'dlg.profileEditor.pinPlaceholder': '4-6 цифр',
+
+  // ── profile picker ────────────────────────────────────────────────────────
+  'dlg.profilePicker.welcome': 'Добро пожаловать в Glance ✨',
+  'dlg.profilePicker.welcomeSub': 'Создай свой профиль за 10 секунд',
+  'dlg.profilePicker.newProfile': 'Новый профиль',
+  'dlg.profilePicker.choose': 'Выбери профиль',
+  'dlg.profilePicker.new': 'Новый',
+  'dlg.profilePicker.enterPin': 'Введи PIN',
+
+  // ── profile switcher ──────────────────────────────────────────────────────
+  'dlg.profileSwitcher.deleteConfirm': 'Удалить профиль «{name}»? Все его страницы и настройки будут потеряны.',
+  'dlg.profileSwitcher.heading': 'Профиль',
+  'dlg.profileSwitcher.switch': 'Переключить',
+  'dlg.profileSwitcher.changePin': 'Сменить PIN',
+  'dlg.profileSwitcher.setPin': 'Установить PIN',
+  'dlg.profileSwitcher.signOut': 'Выбрать другой профиль',
+  'dlg.profileSwitcher.delete': 'Удалить мой профиль',
+  'dlg.profileSwitcher.deleteTitle': 'Удаление профиля',
+  'dlg.profileSwitcher.deletePinDesc': 'Введи PIN администратора, чтобы удалить профиль «{name}»',
+  'dlg.profileSwitcher.switchTitle': 'Переключение на «{name}»',
 };

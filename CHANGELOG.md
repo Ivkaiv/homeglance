@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.86] — 2026-05-22
+
+### Changed
+- **Localization, part 5.** All dialogs are now localized: the confirm
+  dialog, admin PIN prompt, widget context menu, page dock bar, and every
+  profile dialog (profile creation, picker, switcher, PIN change and
+  profile PIN entry) follow the selected interface language.
+
 ## [0.1.0-alpha.85] — 2026-05-22
 
 ### Changed

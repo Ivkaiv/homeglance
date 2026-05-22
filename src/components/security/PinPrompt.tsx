@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock } from 'lucide-react';
 import { useSecurity } from '@/lib/security/SecurityProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 /**
  * Модалка ввода PIN перед опасным действием. Если защита выключена —
@@ -26,6 +27,7 @@ export function PinPrompt({
   onCancel: () => void;
 }) {
   const { verifyPin } = useSecurity();
+  const t = useT();
   const [pin, setPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -39,7 +41,7 @@ export function PinPrompt({
     try {
       const ok = await verifyPin(pin);
       if (!ok) {
-        setError('Неверный PIN');
+        setError(t('dlg.pin.wrong'));
         setPin('');
         setBusy(false);
         return;
@@ -120,14 +122,14 @@ export function PinPrompt({
               onClick={onCancel}
               className="flex-1 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-sm"
             >
-              Отмена
+              {t('common.cancel')}
             </button>
             <button
               disabled={pin.length < 4 || busy}
               onClick={submit}
               className="flex-1 px-4 py-2.5 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm disabled:opacity-40"
             >
-              Подтвердить
+              {t('common.confirm')}
             </button>
           </div>
         </motion.div>

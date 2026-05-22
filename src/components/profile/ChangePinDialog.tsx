@@ -7,6 +7,7 @@ import { X, Lock, Unlock } from 'lucide-react';
 import { verifyPin } from '@/lib/profiles/storage';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
 import type { Profile } from '@/lib/profiles/types';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 /**
  * Диалог установки / смены / снятия PIN профиля.
@@ -23,6 +24,7 @@ export function ChangePinDialog({
   onClose: () => void;
 }) {
   const { setProfilePin } = useProfiles();
+  const t = useT();
   const [currentPin, setCurrentPin] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
@@ -43,7 +45,7 @@ export function ChangePinDialog({
       if (hasPin) {
         const ok = await verifyPin(currentPin, profile.pinHash!);
         if (!ok) {
-          setError('Текущий PIN неверный');
+          setError(t('dlg.changePin.errCurrent'));
           setCurrentPin('');
           setBusy(false);
           return;
@@ -59,12 +61,12 @@ export function ChangePinDialog({
 
       // 3. Проверяем новый PIN: длина, совпадение.
       if (newPin.length < 4) {
-        setError('Новый PIN должен быть не короче 4 цифр');
+        setError(t('dlg.changePin.errShort'));
         setBusy(false);
         return;
       }
       if (newPin !== confirmPin) {
-        setError('PIN-коды не совпадают');
+        setError(t('dlg.changePin.errMismatch'));
         setConfirmPin('');
         setBusy(false);
         return;
@@ -79,9 +81,9 @@ export function ChangePinDialog({
 
   const title = hasPin
     ? removeMode
-      ? `Снять PIN с «${profile.name}»`
-      : `Сменить PIN для «${profile.name}»`
-    : `Установить PIN для «${profile.name}»`;
+      ? t('dlg.changePin.titleRemove', { name: profile.name })
+      : t('dlg.changePin.titleChange', { name: profile.name })
+    : t('dlg.changePin.titleSet', { name: profile.name });
 
   const saveDisabled = busy ||
     (hasPin && currentPin.length < 4) ||
@@ -124,7 +126,7 @@ export function ChangePinDialog({
             </div>
             <button
               onClick={onClose}
-              aria-label="Закрыть"
+              aria-label={t('common.close')}
               className="w-8 h-8 rounded-full bg-black/20 dark:bg-black/40 border border-black/15 dark:border-white/15 text-text-primary flex items-center justify-center shrink-0"
             >
               <X size={14} />
@@ -136,9 +138,9 @@ export function ChangePinDialog({
             <div className="text-xs text-text-secondary">
               {hasPin
                 ? removeMode
-                  ? 'Профиль станет доступен без PIN — любой, кто откроет Glance, попадёт в него.'
-                  : 'Введи текущий PIN, чтобы подтвердить владение, и придумай новый.'
-                : 'Защити профиль PIN-кодом — без него никто не сможет в него зайти с других устройств.'}
+                  ? t('dlg.changePin.bodyRemove')
+                  : t('dlg.changePin.bodyChange')
+                : t('dlg.changePin.bodySet')}
             </div>
           </div>
 
@@ -146,7 +148,7 @@ export function ChangePinDialog({
             {hasPin && (
               <div>
                 <div className="text-[11px] uppercase tracking-wider text-text-tertiary mb-1">
-                  Текущий PIN
+                  {t('dlg.changePin.currentLabel')}
                 </div>
                 <input
                   autoFocus
@@ -168,7 +170,7 @@ export function ChangePinDialog({
               <>
                 <div>
                   <div className="text-[11px] uppercase tracking-wider text-text-tertiary mb-1">
-                    Новый PIN (4-6 цифр)
+                    {t('dlg.changePin.newLabel')}
                   </div>
                   <input
                     autoFocus={!hasPin}
@@ -186,7 +188,7 @@ export function ChangePinDialog({
                 </div>
                 <div>
                   <div className="text-[11px] uppercase tracking-wider text-text-tertiary mb-1">
-                    Ещё раз
+                    {t('dlg.changePin.repeatLabel')}
                   </div>
                   <input
                     type="password"
@@ -218,7 +220,7 @@ export function ChangePinDialog({
               }}
               className="mt-4 text-[11px] text-text-tertiary hover:text-text-secondary underline underline-offset-2"
             >
-              {removeMode ? '← Я хочу сменить PIN, а не снять' : 'Снять PIN с профиля'}
+              {removeMode ? t('dlg.changePin.switchToChange') : t('dlg.changePin.switchToRemove')}
             </button>
           )}
 
@@ -227,7 +229,7 @@ export function ChangePinDialog({
               onClick={onClose}
               className="flex-1 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-sm"
             >
-              Отмена
+              {t('common.cancel')}
             </button>
             <button
               onClick={save}
@@ -238,7 +240,7 @@ export function ChangePinDialog({
                   : 'bg-accent/20 border-accent/40 text-accent'
               }`}
             >
-              {removeMode ? 'Снять' : hasPin ? 'Сменить' : 'Установить'}
+              {removeMode ? t('dlg.changePin.btnRemove') : hasPin ? t('dlg.changePin.btnChange') : t('dlg.changePin.btnSet')}
             </button>
           </div>
         </motion.div>

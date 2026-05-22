@@ -15,6 +15,10 @@ export const en: Dictionary = {
   'common.retry': 'Try again',
   'common.loading': 'Loading',
   'common.signOut': 'Sign out',
+  'common.yes': 'Yes',
+  'common.confirm': 'Confirm',
+  'common.create': 'Create',
+  'common.signIn': 'Sign in',
 
   // ── First-run wizard ──────────────────────────────────────────────────────
   'wizard.welcome.title': 'Where shall we start?',
@@ -1054,4 +1058,66 @@ export const en: Dictionary = {
   'w.lightSheet.colorTemp': 'Color temperature',
   'w.lightSheet.colorTempValue': 'Color temperature: {value} mired',
   'w.lightSheet.effects': 'Effects',
+
+  // ── shared dialog strings ─────────────────────────────────────────────────
+  'dlg.pin.wrong': 'Wrong PIN',
+
+  // ── widget context menu ───────────────────────────────────────────────────
+  'dlg.menu.configure': 'Configure',
+  'dlg.menu.duplicate': 'Duplicate',
+
+  // ── dock bar ──────────────────────────────────────────────────────────────
+  'dlg.dock.pages': 'Pages',
+  'dlg.dock.manage': 'Manage',
+  'dlg.dock.hidden': '{label} (hidden)',
+
+  // ── change PIN dialog ─────────────────────────────────────────────────────
+  'dlg.changePin.titleRemove': 'Remove PIN from "{name}"',
+  'dlg.changePin.titleChange': 'Change PIN for "{name}"',
+  'dlg.changePin.titleSet': 'Set PIN for "{name}"',
+  'dlg.changePin.errCurrent': 'Current PIN is incorrect',
+  'dlg.changePin.errShort': 'The new PIN must be at least 4 digits',
+  'dlg.changePin.errMismatch': 'PIN codes do not match',
+  'dlg.changePin.bodyRemove': 'The profile will become accessible without a PIN — anyone who opens Glance will land in it.',
+  'dlg.changePin.bodyChange': 'Enter the current PIN to confirm ownership, then choose a new one.',
+  'dlg.changePin.bodySet': 'Protect the profile with a PIN — without it nobody can enter it from other devices.',
+  'dlg.changePin.currentLabel': 'Current PIN',
+  'dlg.changePin.newLabel': 'New PIN (4-6 digits)',
+  'dlg.changePin.repeatLabel': 'Repeat',
+  'dlg.changePin.switchToChange': '← I want to change the PIN, not remove it',
+  'dlg.changePin.switchToRemove': 'Remove PIN from profile',
+  'dlg.changePin.btnRemove': 'Remove',
+  'dlg.changePin.btnChange': 'Change',
+  'dlg.changePin.btnSet': 'Set',
+
+  // ── profile PIN prompt ────────────────────────────────────────────────────
+  'dlg.profilePin.title': 'Sign in to "{name}"',
+  'dlg.profilePin.body': 'This profile is protected with a PIN. Enter it to sign in.',
+
+  // ── profile editor ────────────────────────────────────────────────────────
+  'dlg.profileEditor.nameLabel': 'Name',
+  'dlg.profileEditor.namePlaceholder': 'Alex, Sam, Guest…',
+  'dlg.profileEditor.avatarLabel': 'Avatar',
+  'dlg.profileEditor.usePin': 'Protect with a PIN',
+  'dlg.profileEditor.pinPlaceholder': '4-6 digits',
+
+  // ── profile picker ────────────────────────────────────────────────────────
+  'dlg.profilePicker.welcome': 'Welcome to Glance ✨',
+  'dlg.profilePicker.welcomeSub': 'Create your profile in 10 seconds',
+  'dlg.profilePicker.newProfile': 'New profile',
+  'dlg.profilePicker.choose': 'Choose a profile',
+  'dlg.profilePicker.new': 'New',
+  'dlg.profilePicker.enterPin': 'Enter PIN',
+
+  // ── profile switcher ──────────────────────────────────────────────────────
+  'dlg.profileSwitcher.deleteConfirm': 'Delete profile "{name}"? All its pages and settings will be lost.',
+  'dlg.profileSwitcher.heading': 'Profile',
+  'dlg.profileSwitcher.switch': 'Switch',
+  'dlg.profileSwitcher.changePin': 'Change PIN',
+  'dlg.profileSwitcher.setPin': 'Set PIN',
+  'dlg.profileSwitcher.signOut': 'Choose another profile',
+  'dlg.profileSwitcher.delete': 'Delete my profile',
+  'dlg.profileSwitcher.deleteTitle': 'Profile deletion',
+  'dlg.profileSwitcher.deletePinDesc': 'Enter the administrator PIN to delete profile "{name}"',
+  'dlg.profileSwitcher.switchTitle': 'Switch to "{name}"',
 };

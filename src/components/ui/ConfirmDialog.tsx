@@ -1,6 +1,7 @@
 'use client';
 
 import { ModalSheet } from './ModalSheet';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -23,12 +24,15 @@ export function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = 'Да',
-  cancelLabel = 'Отмена',
+  confirmLabel,
+  cancelLabel,
   variant = 'accent',
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const t = useT();
+  const confirmText = confirmLabel ?? t('common.yes');
+  const cancelText = cancelLabel ?? t('common.cancel');
   // Цвета подобраны контрастными для обеих тем: насыщенный красный текст
   // в светлой теме (был text-red-200 — невидим на белой модалке), приглушённый
   // в тёмной.
@@ -54,7 +58,7 @@ export function ConfirmDialog({
           onClick={onCancel}
           className="flex-1 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-sm hover:bg-black/10 dark:hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
         >
-          {cancelLabel}
+          {cancelText}
         </button>
         <button
           onClick={onConfirm}
@@ -64,7 +68,7 @@ export function ConfirmDialog({
               : 'focus-visible:ring-accent/70'
           }`}
         >
-          {confirmLabel}
+          {confirmText}
         </button>
       </div>
     </ModalSheet>

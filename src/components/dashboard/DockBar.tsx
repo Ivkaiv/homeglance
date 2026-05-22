@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { LayoutGrid } from 'lucide-react';
 import { usePages } from '@/lib/pages/PagesProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 export function DockBar({
   editing,
@@ -12,6 +13,7 @@ export function DockBar({
   editing: boolean;
   onManagePages: () => void;
 }) {
+  const t = useT();
   const { pages, current, setCurrentId } = usePages();
   // В dock-баре не показываем скрытые страницы — но в режиме редактирования
   // их видно, чтобы можно было быстро переключиться и снять флаг.
@@ -34,7 +36,7 @@ export function DockBar({
     >
       <motion.nav
         ref={navRef}
-        aria-label="Страницы"
+        aria-label={t('dlg.dock.pages')}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
@@ -50,6 +52,7 @@ export function DockBar({
             key={p.id}
             id={p.id}
             label={p.title}
+            hiddenLabel={t('dlg.dock.hidden', { label: p.title })}
             icon={p.icon}
             active={p.id === current?.id}
             hidden={p.hidden}
@@ -61,7 +64,7 @@ export function DockBar({
           <>
             <div className="w-px h-8 bg-black/10 dark:bg-white/10 mx-0.5 self-center shrink-0" />
             <DockButton
-              label="Управление"
+              label={t('dlg.dock.manage')}
               onClick={onManagePages}
               icon={<LayoutGrid size={20} />}
             />
@@ -75,6 +78,7 @@ export function DockBar({
 function DockItem({
   id,
   label,
+  hiddenLabel,
   icon,
   active,
   hidden,
@@ -82,6 +86,7 @@ function DockItem({
 }: {
   id: string;
   label: string;
+  hiddenLabel: string;
   icon: string;
   active: boolean;
   hidden?: boolean;
@@ -94,8 +99,8 @@ function DockItem({
       whileHover={{ scale: 1.1, y: -4 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       onClick={onClick}
-      title={hidden ? `${label} (скрыта)` : label}
-      aria-label={hidden ? `${label} (скрыта)` : label}
+      title={hidden ? hiddenLabel : label}
+      aria-label={hidden ? hiddenLabel : label}
       aria-current={active ? 'page' : undefined}
       className={`relative w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center text-2xl transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary ${
         active ? 'bg-accent/20 border border-accent/40' : 'hover:bg-black/5 dark:hover:bg-white/5'

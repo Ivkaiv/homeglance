@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProfiles } from '@/lib/profiles/ProfilesProvider';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 const DEFAULT_AVATARS = ['👤', '🧑', '👨', '👩', '🧒', '👶', '👴', '👵', '🐱', '🐶', '🦊', '🐼', '🤖', '👾', '🦄', '🌟'];
 
@@ -16,6 +17,7 @@ export function ProfileEditor({
   onCancel?: () => void;
 }) {
   const { addProfile } = useProfiles();
+  const t = useT();
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('👤');
   const [pin, setPin] = useState('');
@@ -53,19 +55,19 @@ export function ProfileEditor({
 
         <div className="space-y-4">
           <div>
-            <div className="text-xs text-text-secondary mb-1">Имя</div>
+            <div className="text-xs text-text-secondary mb-1">{t('dlg.profileEditor.nameLabel')}</div>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Юра, Аня, Гость..."
+              placeholder={t('dlg.profileEditor.namePlaceholder')}
               className="w-full px-3 py-2.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary"
               autoFocus
             />
           </div>
 
           <div>
-            <div className="text-xs text-text-secondary mb-2">Аватар</div>
+            <div className="text-xs text-text-secondary mb-2">{t('dlg.profileEditor.avatarLabel')}</div>
             <div className="flex flex-wrap gap-2">
               {DEFAULT_AVATARS.map((a) => (
                 <button
@@ -91,7 +93,7 @@ export function ProfileEditor({
                 onChange={(e) => setUsePin(e.target.checked)}
                 className="w-4 h-4 accent-emerald-500"
               />
-              <span>Защитить PIN-кодом</span>
+              <span>{t('dlg.profileEditor.usePin')}</span>
             </label>
             {usePin && (
               <input
@@ -100,7 +102,7 @@ export function ProfileEditor({
                 maxLength={6}
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                placeholder="4-6 цифр"
+                placeholder={t('dlg.profileEditor.pinPlaceholder')}
                 className="w-full mt-2 px-3 py-2.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-center text-lg tracking-widest font-mono"
               />
             )}
@@ -113,7 +115,7 @@ export function ProfileEditor({
               onClick={onCancel}
               className="flex-1 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-sm"
             >
-              Отмена
+              {t('common.cancel')}
             </button>
           )}
           <button
@@ -121,7 +123,7 @@ export function ProfileEditor({
             disabled={!name.trim() || busy || (usePin && pin.length < 4)}
             className="flex-1 px-4 py-2.5 rounded-xl bg-accent/20 border border-accent/40 text-accent text-sm disabled:opacity-40"
           >
-            {busy ? '⏳' : 'Создать'}
+            {busy ? '⏳' : t('common.create')}
           </button>
         </div>
       </motion.div>

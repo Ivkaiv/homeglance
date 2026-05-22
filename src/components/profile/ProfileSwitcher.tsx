@@ -10,8 +10,10 @@ import { PinPrompt } from '@/components/security/PinPrompt';
 import { ProfilePinPrompt } from './ProfilePinPrompt';
 import { ChangePinDialog } from './ChangePinDialog';
 import type { Profile } from '@/lib/profiles/types';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 export function ProfileSwitcher() {
+  const t = useT();
   const { active, profiles, signOut, deleteProfile, setActiveId } = useProfiles();
   const { enabled: securityEnabled } = useSecurity();
   const [open, setOpen] = useState(false);
@@ -26,9 +28,7 @@ export function ProfileSwitcher() {
 
   const handleDelete = () => {
     if (
-      !confirm(
-        `Удалить профиль «${active.name}»? Все его страницы и настройки будут потеряны.`
-      )
+      !confirm(t('dlg.profileSwitcher.deleteConfirm', { name: active.name }))
     ) {
       return;
     }
@@ -78,7 +78,7 @@ export function ProfileSwitcher() {
                 >
                   <div className="px-3 py-2 mb-1 border-b border-black/5 dark:border-white/5">
                     <div className="text-xs text-text-tertiary uppercase tracking-wider">
-                      Профиль
+                      {t('dlg.profileSwitcher.heading')}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-2xl">{active.avatar}</span>
@@ -89,7 +89,7 @@ export function ProfileSwitcher() {
                   {profiles.filter((p) => p.id !== active.id).length > 0 && (
                     <>
                       <div className="text-[10px] uppercase tracking-wider text-text-tertiary px-3 py-1.5">
-                        Переключить
+                        {t('dlg.profileSwitcher.switch')}
                       </div>
                       {profiles
                         .filter((p) => p.id !== active.id)
@@ -129,7 +129,7 @@ export function ProfileSwitcher() {
                       className="w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 text-sm text-text-secondary"
                     >
                       <KeyRound size={14} />
-                      {active.pinHash ? 'Сменить PIN' : 'Установить PIN'}
+                      {active.pinHash ? t('dlg.profileSwitcher.changePin') : t('dlg.profileSwitcher.setPin')}
                       {active.pinHash && (
                         <Lock size={11} className="ml-auto opacity-60" />
                       )}
@@ -141,13 +141,13 @@ export function ProfileSwitcher() {
                       }}
                       className="w-full px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 text-sm text-text-secondary"
                     >
-                      <LogOut size={14} /> Выбрать другой профиль
+                      <LogOut size={14} /> {t('dlg.profileSwitcher.signOut')}
                     </button>
                     <button
                       onClick={handleDelete}
                       className="w-full px-3 py-2 rounded-lg hover:bg-red-500/10 flex items-center gap-2 text-sm text-red-300/85"
                     >
-                      <Trash2 size={14} /> Удалить мой профиль
+                      <Trash2 size={14} /> {t('dlg.profileSwitcher.delete')}
                       {securityEnabled && (
                         <Lock size={11} className="ml-auto opacity-60" />
                       )}
@@ -162,8 +162,8 @@ export function ProfileSwitcher() {
 
       {pinPromptOpen && (
         <PinPrompt
-          title="Удаление профиля"
-          description={`Введи PIN администратора, чтобы удалить профиль «${active.name}»`}
+          title={t('dlg.profileSwitcher.deleteTitle')}
+          description={t('dlg.profileSwitcher.deletePinDesc', { name: active.name })}
           onConfirm={() => deleteProfile(active.id)}
           onCancel={() => setPinPromptOpen(false)}
         />
@@ -172,7 +172,7 @@ export function ProfileSwitcher() {
       {switchTarget && (
         <ProfilePinPrompt
           profile={switchTarget}
-          title={`Переключение на «${switchTarget.name}»`}
+          title={t('dlg.profileSwitcher.switchTitle', { name: switchTarget.name })}
           onCancel={() => setSwitchTarget(null)}
           onSuccess={() => {
             const targetId = switchTarget.id;
