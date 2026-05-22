@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.89] — 2026-05-22
+
+### Fixed
+- **Built-in page titles now follow the interface language.** The "Music"
+  and "Weather" pages used to show their stored Russian title ("Музыка",
+  "Погода") even in English mode. Standard titles are now translated
+  automatically; a custom title set by the user is left untouched.
+
 ## [0.1.0-alpha.88] — 2026-05-22
 
 ### Fixed

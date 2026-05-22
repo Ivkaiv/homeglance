@@ -1190,6 +1190,7 @@ export const en: Dictionary = {
   'page.weather.lightning.title': '⚡ Storms',
 
   // ── Music page (MusicPageView) ────────────────────────────────────────────
+  'page.music.title': 'Music',
   'page.music.kind.album': 'Album',
   'page.music.kind.artist': 'Artist',
   'page.music.kind.playlist': 'Playlist',

@@ -12,6 +12,7 @@ import { WidgetSkeleton } from '@/components/widgets/_states';
 import { WidgetErrorBoundary } from '@/components/ui/WidgetErrorBoundary';
 import { useT } from '@/lib/i18n/I18nProvider';
 import { usePages } from '@/lib/pages/PagesProvider';
+import { pageDisplayTitle } from '@/lib/pages/displayTitle';
 import { DockBar } from './DockBar';
 import { ProfileSwitcher } from '@/components/profile/ProfileSwitcher';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -232,7 +233,7 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
         <div className={`flex items-center gap-2.5 min-w-0 ${editing ? 'shrink' : ''}`}>
           <span className="text-2xl sm:text-3xl shrink-0 leading-none">{current.icon}</span>
           <div className={`min-w-0 ${editing ? 'hidden sm:block' : ''}`}>
-            <div className="text-base sm:text-lg font-medium truncate leading-tight">{current.title}</div>
+            <div className="text-base sm:text-lg font-medium truncate leading-tight">{pageDisplayTitle(current, t)}</div>
             <div className="text-[10px] text-text-tertiary hidden sm:block">{t('page.dashboard.brand')}</div>
           </div>
         </div>
@@ -309,11 +310,11 @@ export function Dashboard({ onOpenSettings }: DashboardProps = {}) {
 
       {current.kind === 'music' ? (
         <main key={current.id} className="page-fade-in">
-          <MusicPageView config={current.music ?? {}} pageTitle={current.title} />
+          <MusicPageView config={current.music ?? {}} pageTitle={pageDisplayTitle(current, t)} />
         </main>
       ) : current.kind === 'weather' && current.weather ? (
         <main key={current.id} className="page-fade-in">
-          <WeatherPageView config={current.weather} pageTitle={current.title} />
+          <WeatherPageView config={current.weather} pageTitle={pageDisplayTitle(current, t)} />
         </main>
       ) : widgets.length === 0 ? (
         <main
