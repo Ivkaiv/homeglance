@@ -11,7 +11,7 @@ The method depends on which kind of Home Assistant you run:
 
 | Your HA | Recommended method |
 |---|---|
-| Home Assistant OS / Supervised | **HA Add-on** — one-click install via the Add-on Store |
+| Home Assistant OS / Supervised | **HA App** (add-on) — one-click install via the App store |
 | HA Container / HA Core | **Docker Compose** — a separate container |
 | Any | **Docker** on a separate machine on the network |
 
@@ -22,10 +22,10 @@ Full step-by-step instructions for each option are in the
 
 The first time you open Glance, it offers to connect to your Home Assistant.
 
-### If Glance is installed as an HA Add-on
+### If Glance is installed as an HA App
 
 The connection happens **automatically** — there is nothing to enter. The
-add-on runs next to Home Assistant and authenticates through it on its own.
+app runs next to Home Assistant and authenticates through it on its own.
 The token never leaves the server.
 
 ### In all other cases
@@ -51,7 +51,7 @@ that anything is sent to.
 > this device and that the token was copied in full. If Glance is opened
 > over `https` while HA is only available over `http`, the browser may
 > block the connection; in that case it is easier to install Glance as an
-> Add-on or in Docker next to HA.
+> App or in Docker next to HA.
 
 ## The first-run setup wizard
 

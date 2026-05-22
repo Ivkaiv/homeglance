@@ -17,7 +17,7 @@ labels: bug
 
 ## Environment
 
-- **Install method:** HA Add-on / HACS plugin / Docker / standalone
+- **Install method:** HA App (add-on) / HACS plugin / Docker / standalone
 - **Homeglance version:** (shown in Settings)
 - **Home Assistant version:**
 - **Browser / device:** (Chrome 130 / iPhone 15 Safari / ...)

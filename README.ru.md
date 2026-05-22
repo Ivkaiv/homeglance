@@ -40,33 +40,36 @@ Glance в светлой и тёмной теме — она переключа�
 
 Четыре пути в зависимости от типа вашего HA.
 
-### 1. HA Add-on (для HA OS / Supervised — самый простой)
+### 1. HA App / Add-on (для HA OS / Supervised — самый простой)
 
 Если у вас Home Assistant OS или Home Assistant Supervised — это самый простой путь. HA сам поднимет Homeglance-сервер и будет им управлять.
 
-1. **Settings** → **Add-ons** → **Add-on Store** → ⋮ (три точки) → **Repositories**
+> В Home Assistant 2026.2 раздел **Add-ons** переименован в **Apps**. На
+> старых версиях HA меню по-прежнему называется **Settings → Add-ons → Add-on Store**.
+
+1. **Settings** → **Apps** → **App store** → ⋮ (три точки) → **Repositories**
 2. Добавить URL `https://github.com/Ivkaiv/homeglance` → **Add**
 3. Найти **Homeglance** → **Install** → **Start**
 4. В боковой панели HA появится **Homeglance** — открыть.
 
-**Zero-config авторизация.** Под HA Ingress add-on автоматически
+**Zero-config авторизация.** Под HA Ingress приложение автоматически
 подключается к HA через `SUPERVISOR_TOKEN` — никаких токенов вручную
 создавать не нужно. WS- и REST-запросы к HA проксируются server-side,
 токен не покидает контейнер.
 
 **Persistent storage.** Профили, виджеты, темы хранятся в `/data` mount,
 который Supervisor сохраняет между рестартами, обновлениями и
-переустановками add-on'а. На любой версии HA Supervisor.
+переустановками приложения. На любой версии HA Supervisor.
 
 Подробнее: [`homeglance-addon/README.md`](homeglance-addon/README.md).
 
 ### 2. HACS plugin (иконка в сайдбаре HA)
 
-> **Когда нужен.** HACS plugin **не нужен**, если вы используете HA Add-on
+> **Когда нужен.** HACS plugin **не нужен**, если вы используете HA App
 > (вариант 1) — он уже добавляет Homeglance в боковую панель HA через
 > Ingress автоматически. Plugin предназначен для случая, когда сервер
 > Homeglance запущен **снаружи** HA: на другом компьютере в сети, в
-> Docker (вариант 3) или в HA Core/Container, где Add-on'ы недоступны.
+> Docker (вариант 3) или в HA Core/Container, где приложения недоступны.
 
 Сам по себе plugin не запускает сервер — это iframe-обёртка для уже
 запущенного Homeglance. После установки Glance появляется в боковой

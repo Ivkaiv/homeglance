@@ -44,34 +44,37 @@ system.
 
 Four paths depending on your type of Home Assistant.
 
-### 1. HA Add-on (for HA OS / Supervised — the easiest)
+### 1. HA App / Add-on (for HA OS / Supervised — the easiest)
 
 If you run Home Assistant OS or Home Assistant Supervised, this is the
 simplest path. HA itself starts and manages the Homeglance server.
 
-1. **Settings** → **Add-ons** → **Add-on Store** → ⋮ (three dots) → **Repositories**
+> Home Assistant 2026.2 renamed **Add-ons** to **Apps**. On older HA
+> versions the menu is still called **Settings → Add-ons → Add-on Store**.
+
+1. **Settings** → **Apps** → **App store** → ⋮ (three dots) → **Repositories**
 2. Add the URL `https://github.com/Ivkaiv/homeglance` → **Add**
 3. Find **Homeglance** → **Install** → **Start**
 4. **Homeglance** appears in the HA sidebar — open it.
 
-**Zero-config authentication.** Under HA Ingress the add-on connects to HA
+**Zero-config authentication.** Under HA Ingress the app connects to HA
 automatically via `SUPERVISOR_TOKEN` — there are no tokens to create by
 hand. WS and REST requests to HA are proxied server-side, and the token
 never leaves the container.
 
 **Persistent storage.** Profiles, widgets and themes are kept in the
 `/data` mount, which the Supervisor preserves across restarts, updates and
-reinstalls of the add-on — on any HA Supervisor version.
+reinstalls of the app — on any HA Supervisor version.
 
 More details: [`homeglance-addon/README.md`](homeglance-addon/README.md).
 
 ### 2. HACS plugin (icon in the HA sidebar)
 
 > **When you need it.** The HACS plugin is **not needed** if you use the HA
-> Add-on (option 1) — it already adds Homeglance to the HA sidebar via
+> App (option 1) — it already adds Homeglance to the HA sidebar via
 > Ingress. The plugin is for the case when the Homeglance server runs
 > **outside** HA: on another machine on the network, in Docker (option 3),
-> or on HA Core/Container where add-ons are unavailable.
+> or on HA Core/Container where apps are unavailable.
 
 The plugin itself does not start a server — it is an iframe wrapper for an
 already-running Homeglance. After installation, Glance appears in the HA
