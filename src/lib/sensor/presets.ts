@@ -96,13 +96,13 @@ export const SENSOR_PRESETS: Record<Exclude<SensorType, 'auto' | 'numeric'>, Sen
   },
   gas: {
     icon: 'gas-cylinder',
-    unit: 'м³',
+    unit: 'm³',
     decimals: 2,
     accent: 'text-amber-700 dark:text-amber-300',
   },
   glucose: {
     icon: 'diabetes',
-    unit: 'ммоль/л',
+    unit: 'mmol/L',
     decimals: 1,
     accent: 'text-rose-700 dark:text-rose-300',
   },

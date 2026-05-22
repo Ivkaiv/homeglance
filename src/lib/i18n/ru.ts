@@ -1323,4 +1323,7 @@ export const ru: Dictionary = {
   // ── Dashboard ─────────────────────────────────────────────────────────────
   'page.dashboard.noPages': 'Нет страниц.',
   'page.dashboard.brand': 'Glance',
+
+  // ── page presets ──────────────────────────────────────────────────────────
+  'page.preset.glucose.title': 'Сахар',
 };

@@ -5,6 +5,7 @@
 
 import type { Page } from './types';
 import type { WidgetConfig } from '@/lib/widgets/types';
+import type { TFunction } from '@/lib/i18n/I18nProvider';
 
 function rnd(): string {
   // Достаточно случайный id для виджета — не пересечётся с другими.
@@ -16,8 +17,13 @@ function rnd(): string {
  * (9 колонок), один под другим. На мобиле всё читается, на десктопе при
  * желании пользователь сам перетащит. На узких экранах CGM-данные важнее
  * красивой сетки.
+ *
+ * Заголовки виджетов НЕ задаём (`label` не передаём) — каждый виджет сам
+ * подставит свой локализованный заголовок и будет следовать выбранному
+ * языку интерфейса. Заголовок страницы переводим один раз при создании
+ * (имя страницы — это пользовательские данные, оно «застывает»).
  */
-export function buildGlucosePage(): Omit<Page, 'id'> {
+export function buildGlucosePage(t: TFunction): Omit<Page, 'id'> {
   const widgets: WidgetConfig[] = [
     // Главная карточка глюкозы — 9×3, полная ширина, крупное значение со
     // стрелкой и цветом зоны. Высота 3 row достаточна для всего layout'а.
@@ -30,7 +36,6 @@ export function buildGlucosePage(): Omit<Page, 'id'> {
       h: 3,
       params: {
         entity: 'sensor.blood_sugar',
-        label: 'Глюкоза',
       },
     },
     // График динамики — широкий 9×5, чтобы линия и зоны хорошо читались
@@ -45,7 +50,6 @@ export function buildGlucosePage(): Omit<Page, 'id'> {
         entity: 'sensor.blood_sugar',
         rangeEntity: 'input_select.glucose_range',
         defaultHours: 6,
-        label: 'Динамика',
       },
     },
     // Статистика за 24 часа — 9×4, тайлы получают полную ширину
@@ -58,7 +62,6 @@ export function buildGlucosePage(): Omit<Page, 'id'> {
       h: 4,
       params: {
         period: '24h',
-        label: 'За 24 часа',
       },
     },
     // Статистика за 7 дней — 9×4, под 24h
@@ -71,13 +74,12 @@ export function buildGlucosePage(): Omit<Page, 'id'> {
       h: 4,
       params: {
         period: '7d',
-        label: 'За 7 дней',
       },
     },
   ];
 
   return {
-    title: 'Сахар',
+    title: t('page.preset.glucose.title'),
     icon: '🩸',
     kind: 'grid',
     widgets,

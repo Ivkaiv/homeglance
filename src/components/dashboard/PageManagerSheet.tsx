@@ -40,7 +40,7 @@ export function PageManagerSheet({ onClose }: { onClose: () => void }) {
   }
 
   function addGlucosePreset() {
-    const preset = buildGlucosePage();
+    const preset = buildGlucosePage(t);
     const created = addPage(preset);
     setImportMessage({
       kind: 'success',

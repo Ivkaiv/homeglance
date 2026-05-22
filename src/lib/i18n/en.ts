@@ -1323,4 +1323,7 @@ export const en: Dictionary = {
   // ── Dashboard ─────────────────────────────────────────────────────────────
   'page.dashboard.noPages': 'No pages.',
   'page.dashboard.brand': 'Glance',
+
+  // ── page presets ──────────────────────────────────────────────────────────
+  'page.preset.glucose.title': 'Sugar',
 };

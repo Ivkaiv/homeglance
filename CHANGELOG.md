@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.88] — 2026-05-22
+
+### Fixed
+- **Glucose preset page localization.** The "Sugar" preset page no longer
+  bakes Russian widget labels into the page config — its widgets now use
+  their own localized titles and follow the interface language. The page
+  title is translated when the preset is created.
+- Glucose and gas sensor presets fell back to Russian unit labels
+  (`ммоль/л`, `м³`); they now use the neutral `mmol/L` and `m³`.
+
 ## [0.1.0-alpha.87] — 2026-05-22
 
 ### Changed
