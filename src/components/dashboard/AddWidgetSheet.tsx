@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import { listWidgets, CATEGORY_LABELS } from '@/lib/widgets/registry';
 import type { WidgetCategory } from '@/lib/widgets/types';
 import { ModalSheet } from '@/components/ui/ModalSheet';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 export function AddWidgetSheet({
   onAdd,
@@ -13,6 +14,7 @@ export function AddWidgetSheet({
   onAdd: (type: string) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [filter, setFilter] = useState<WidgetCategory | 'all'>('all');
   const [search, setSearch] = useState('');
   const all = listWidgets();
@@ -29,13 +31,13 @@ export function AddWidgetSheet({
       if (filter !== 'all' && w.meta.category !== filter) return false;
       if (q) {
         return (
-          w.meta.name.toLowerCase().includes(q) ||
-          w.meta.description.toLowerCase().includes(q)
+          t(w.meta.name).toLowerCase().includes(q) ||
+          t(w.meta.description).toLowerCase().includes(q)
         );
       }
       return true;
     });
-  }, [all, filter, search]);
+  }, [all, filter, search, t]);
 
   // Группируем по категории если активен «Все» и нет поиска
   const grouped = useMemo(() => {
@@ -53,8 +55,8 @@ export function AddWidgetSheet({
     <ModalSheet
       open
       onClose={onClose}
-      title="Добавить виджет"
-      subtitle="Тапни на нужный"
+      title={t('addw.title')}
+      subtitle={t('addw.subtitle')}
     >
       {/* Поиск */}
       <div className="relative mb-3">
@@ -67,7 +69,7 @@ export function AddWidgetSheet({
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Поиск виджета (например, «лампа», «погода»)…"
+          placeholder={t('addw.searchPlaceholder')}
           className="w-full pl-8 pr-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
         />
       </div>
@@ -82,7 +84,7 @@ export function AddWidgetSheet({
               : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-text-secondary'
           }`}
         >
-          Все ({all.length})
+          {t('addw.filterAll', { count: String(all.length) })}
         </button>
         {categories.map((c) => {
           const cnt = all.filter((w) => w.meta.category === c).length;
@@ -97,7 +99,7 @@ export function AddWidgetSheet({
                   : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-text-secondary'
               }`}
             >
-              {meta.emoji} {meta.label} ({cnt})
+              {meta.emoji} {t(meta.label)} ({cnt})
             </button>
           );
         })}
@@ -106,7 +108,7 @@ export function AddWidgetSheet({
       {/* Список */}
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-text-tertiary text-sm">
-          Ничего не найдено
+          {t('addw.notFound')}
         </div>
       ) : grouped ? (
         // «Все» без поиска — группы с заголовками
@@ -117,7 +119,7 @@ export function AddWidgetSheet({
               <section key={cat}>
                 <div className="text-[11px] uppercase tracking-wider text-text-tertiary mb-2 flex items-center gap-1.5">
                   <span aria-hidden="true">{meta.emoji}</span>
-                  <span>{meta.label}</span>
+                  <span>{t(meta.label)}</span>
                   <span className="opacity-60">({widgets.length})</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -148,6 +150,7 @@ function WidgetCard({
   widget: ReturnType<typeof listWidgets>[number];
   onAdd: (type: string) => void;
 }) {
+  const t = useT();
   return (
     <button
       onClick={() => onAdd(widget.meta.type)}
@@ -155,10 +158,10 @@ function WidgetCard({
     >
       <div className="flex items-center gap-3 mb-1">
         <span className="text-2xl" aria-hidden="true">{widget.meta.emoji}</span>
-        <span className="font-medium">{widget.meta.name}</span>
+        <span className="font-medium">{t(widget.meta.name)}</span>
       </div>
       <div className="text-xs text-text-secondary leading-snug">
-        {widget.meta.description}
+        {t(widget.meta.description)}
       </div>
     </button>
   );

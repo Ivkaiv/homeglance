@@ -31,13 +31,13 @@ export function listByCategory(category: WidgetCategory): AnyEntry[] {
 }
 
 export const CATEGORY_LABELS: Record<WidgetCategory, { label: string; emoji: string }> = {
-  lights: { label: 'Свет', emoji: '💡' },
-  switches: { label: 'Переключатели', emoji: '🔌' },
-  sensors: { label: 'Сенсоры', emoji: '📊' },
-  climate: { label: 'Климат', emoji: '🌡' },
-  media: { label: 'Медиа', emoji: '🎵' },
-  cameras: { label: 'Камеры', emoji: '📷' },
-  rooms: { label: 'Комнаты', emoji: '🏠' },
-  health: { label: 'Здоровье', emoji: '🩸' },
-  misc: { label: 'Прочее', emoji: '✨' },
+  lights: { label: 'wcat.lights', emoji: '💡' },
+  switches: { label: 'wcat.switches', emoji: '🔌' },
+  sensors: { label: 'wcat.sensors', emoji: '📊' },
+  climate: { label: 'wcat.climate', emoji: '🌡' },
+  media: { label: 'wcat.media', emoji: '🎵' },
+  cameras: { label: 'wcat.cameras', emoji: '📷' },
+  rooms: { label: 'wcat.rooms', emoji: '🏠' },
+  health: { label: 'wcat.health', emoji: '🩸' },
+  misc: { label: 'wcat.misc', emoji: '✨' },
 };

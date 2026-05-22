@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.83] — 2026-05-22
+
+### Changed
+- **Localization, part 2.** The widget catalog ("+ Widget") and every widget
+  configuration form are now fully localized: widget names, descriptions,
+  field labels, hints, placeholders and select options follow the selected
+  interface language instead of always being Russian.
+
 ## [0.1.0-alpha.82] — 2026-05-22
 
 ### Changed

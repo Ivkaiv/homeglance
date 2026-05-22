@@ -9,6 +9,7 @@ import { MdiIcon, searchMdi, getMdiPath, GlanceIcon } from '@/components/icons/M
 import type { WidgetConfig, ParamField, ParamGroup } from '@/lib/widgets/types';
 import { ModalSheet } from '@/components/ui/ModalSheet';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 /**
  * Проверяет совпадение entity_id с заявленным доменом из paramSchema.
@@ -47,7 +48,7 @@ function groupSchema(
   }
   const groupMap = new Map((groups || []).map((g) => [g.id, g]));
   return order.map((id) => ({
-    group: groupMap.get(id) ?? { id, label: id === '_basic' ? 'Основное' : id },
+    group: groupMap.get(id) ?? { id, label: id === '_basic' ? 'wm.common.basic' : id },
     fields: buckets.get(id)!,
   }));
 }
@@ -61,6 +62,7 @@ export function ConfigSheet({
   onUpdate: (params: Record<string, any>) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const meta = getWidget(widget.type)?.meta;
   if (!meta) return null;
 
@@ -87,15 +89,15 @@ export function ConfigSheet({
   const header = (
     <div className="flex items-center justify-between p-5 border-b border-black/5 dark:border-white/5 shrink-0">
       <div>
-        <div className="text-xs text-text-tertiary uppercase tracking-wider">Настройка</div>
+        <div className="text-xs text-text-tertiary uppercase tracking-wider">{t('cfg.header.section')}</div>
         <div className="text-lg font-medium flex items-center gap-2">
-          <span aria-hidden="true">{meta.emoji}</span> {meta.name}
+          <span aria-hidden="true">{meta.emoji}</span> {t(meta.name)}
         </div>
       </div>
       <button
         onClick={tryCancel}
-        aria-label="Закрыть"
-        title="Закрыть"
+        aria-label={t('cfg.close.ariaLabel')}
+        title={t('cfg.close.ariaLabel')}
         className="w-9 h-9 rounded-full bg-black/40 border border-black/15 dark:border-white/15 text-text-primary flex items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
       >
         <X size={16} aria-hidden="true" />
@@ -109,14 +111,14 @@ export function ConfigSheet({
         onClick={tryCancel}
         className="flex-1 px-4 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-secondary text-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
       >
-        Отмена
+        {t('cfg.cancel')}
       </button>
       <button
         onClick={save}
         disabled={!dirty}
         className="flex-1 px-4 py-2.5 rounded-xl bg-accent/25 border border-accent/40 text-accent text-sm disabled:opacity-40 flex items-center justify-center gap-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
       >
-        <Save size={14} aria-hidden="true" /> {dirty ? 'Сохранить' : 'Без изменений'}
+        <Save size={14} aria-hidden="true" /> {dirty ? t('cfg.save') : t('cfg.noChanges')}
       </button>
     </div>
   );
@@ -126,7 +128,7 @@ export function ConfigSheet({
       <ModalSheet
         open
         onClose={tryCancel}
-        ariaLabel={`Настройка виджета: ${meta.name}`}
+        ariaLabel={t('cfg.ariaLabel', { name: t(meta.name) })}
         preventBackdropClose={dirty}
         className="w-full max-w-2xl rounded-t-3xl bg-bg-secondary border-t border-x border-black/10 dark:border-white/10 flex flex-col max-h-[88vh]"
         header={header}
@@ -146,10 +148,10 @@ export function ConfigSheet({
       </ModalSheet>
       <ConfirmDialog
         open={confirmCancel}
-        title="Отменить изменения?"
-        message="Несохранённые правки будут потеряны."
-        confirmLabel="Отменить"
-        cancelLabel="Продолжить"
+        title={t('cfg.confirmCancel.title')}
+        message={t('cfg.confirmCancel.message')}
+        confirmLabel={t('cfg.confirmCancel.confirm')}
+        cancelLabel={t('cfg.confirmCancel.cancel')}
         variant="danger"
         onConfirm={() => {
           setConfirmCancel(false);
@@ -177,6 +179,7 @@ function ParamGroupSection({
   draft: Record<string, any>;
   update: (k: string, v: any) => void;
 }) {
+  const t = useT();
   const isBasic = group.id === '_basic';
   const [open, setOpen] = useState(isBasic ? true : !group.collapsed);
 
@@ -206,17 +209,17 @@ function ParamGroupSection({
           {group.icon && <span className="shrink-0 mt-0.5" aria-hidden="true">{group.icon}</span>}
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium flex items-center gap-1.5 flex-wrap">
-              <span>{group.label}</span>
+              <span>{t(group.label)}</span>
               {hasValues && (
                 <span
                   className="w-1.5 h-1.5 rounded-full bg-accent shrink-0"
-                  aria-label="заполнено"
-                  title="В этой секции есть значения"
+                  aria-label={t('cfg.sectionFilled.ariaLabel')}
+                  title={t('cfg.sectionFilled.title')}
                 />
               )}
             </div>
             {group.hint && !open && (
-              <div className="text-[11px] text-text-tertiary mt-0.5">{group.hint}</div>
+              <div className="text-[11px] text-text-tertiary mt-0.5">{t(group.hint)}</div>
             )}
           </div>
         </div>
@@ -230,7 +233,7 @@ function ParamGroupSection({
         <div className="accordion-inner">
           <div className="p-4 flex flex-col gap-3 bg-black/2 dark:bg-white/2">
             {group.hint && (
-              <div className="text-xs text-text-tertiary -mt-1 mb-1">{group.hint}</div>
+              <div className="text-xs text-text-tertiary -mt-1 mb-1">{t(group.hint)}</div>
             )}
             {renderFields(fields, draft, update)}
           </div>
@@ -296,6 +299,8 @@ function ParamInput({
   onChange: (v: any) => void;
   draft: Record<string, any>;
 }) {
+  const t = useT();
+
   if (field.kind === 'entity') {
     return <EntityPicker field={field} value={value} onChange={onChange} />;
   }
@@ -347,7 +352,7 @@ function ParamInput({
       onChange(next);
     };
     return (
-      <Field label={field.label} hint={field.hint}>
+      <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
         <div className="flex flex-col gap-1.5 p-2 rounded-md bg-black/3 dark:bg-white/3 border border-black/10 dark:border-white/10">
           {(field.options ?? []).map((o) => (
             <label
@@ -360,7 +365,7 @@ function ParamInput({
                 onChange={() => toggle(o.value)}
                 className="w-4 h-4 accent-emerald-500"
               />
-              <span className="text-text-primary">{o.label}</span>
+              <span className="text-text-primary">{t(o.label)}</span>
             </label>
           ))}
         </div>
@@ -369,10 +374,10 @@ function ParamInput({
   }
   if (field.kind === 'select') {
     return (
-      <Field label={field.label + (field.required ? ' *' : '')} hint={field.hint}>
+      <Field label={t(field.label) + (field.required ? ' *' : '')} hint={field.hint ? t(field.hint) : undefined}>
         <SelectField
           value={value ?? field.default ?? ''}
-          options={field.options ?? []}
+          options={(field.options ?? []).map((o) => ({ value: o.value, label: t(o.label) }))}
           onChange={(v) => onChange(v)}
         />
       </Field>
@@ -380,7 +385,7 @@ function ParamInput({
   }
   if (field.kind === 'color') {
     return (
-      <Field label={field.label} hint={field.hint}>
+      <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
         <input
           type="color"
           value={value || field.default || '#34d399'}
@@ -395,7 +400,7 @@ function ParamInput({
     // блокирует ввод дробей (default step=1) — пользователь не мог поставить
     // шаг регулятора температуры 0.5 / 0.1, например, для котла.
     return (
-      <Field label={field.label} hint={field.hint}>
+      <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
         <input
           type="number"
           inputMode="decimal"
@@ -419,7 +424,7 @@ function ParamInput({
   }
   if (field.kind === 'boolean') {
     return (
-      <Field label="" hint={field.hint}>
+      <Field label="" hint={field.hint ? t(field.hint) : undefined}>
         <label className="flex items-center gap-2 text-sm cursor-pointer">
           <input
             type="checkbox"
@@ -427,18 +432,18 @@ function ParamInput({
             onChange={(e) => onChange(e.target.checked)}
             className="w-4 h-4 accent-emerald-500"
           />
-          <span>{field.label}</span>
+          <span>{t(field.label)}</span>
         </label>
       </Field>
     );
   }
   return (
-    <Field label={field.label} hint={field.hint}>
+    <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
       <input
         type="text"
         value={value ?? field.default ?? ''}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={field.placeholder ?? field.default ?? ''}
+        placeholder={(field.placeholder ? t(field.placeholder) : '') || field.default || ''}
         className="w-full px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary"
       />
     </Field>
@@ -484,6 +489,7 @@ function SelectField({
   options: { value: string; label: string }[];
   onChange: (v: string) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const selected = options.find((o) => o.value === value);
@@ -518,7 +524,7 @@ function SelectField({
         className="w-full px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-left flex items-center justify-between gap-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
       >
         <span className={selected ? '' : 'text-text-tertiary'}>
-          {selected ? selected.label : '— выбери —'}
+          {selected ? selected.label : t('cfg.select.placeholder')}
         </span>
         <ChevronDown
           size={16}
@@ -598,6 +604,7 @@ function EntityPicker({
   value: string | undefined;
   onChange: (v: string) => void;
 }) {
+  const t = useT();
   const states = useStates();
   const { registries } = useConnection();
   const [search, setSearch] = useState('');
@@ -630,8 +637,13 @@ function EntityPicker({
 
   const selectedDisplay = value ? getEntityDisplay(states[value], registries, value) : null;
 
+  const domainLabel = domain ? domain.replace(/\.$/, '').replace(/,\s*/g, '/') : '';
+  const searchPlaceholder = domainLabel
+    ? t('cfg.entityPicker.searchPlaceholder', { domain: domainLabel })
+    : t('cfg.entityPicker.searchPlaceholderAny');
+
   return (
-    <Field label={field.label + (field.required ? ' *' : '')}>
+    <Field label={t(field.label) + (field.required ? ' *' : '')}>
       <PickerToggle
         open={open}
         onToggle={() => setOpen((v) => !v)}
@@ -645,7 +657,7 @@ function EntityPicker({
               )}
             </>
           ) : (
-            <>— выбери сенсор —</>
+            <>{t('cfg.entityPicker.placeholder')}</>
           )
         }
       />
@@ -661,14 +673,14 @@ function EntityPicker({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={domain ? `поиск (${domain.replace('.', '')})…` : 'поиск…'}
-              aria-label="Поиск сенсора"
+              placeholder={searchPlaceholder}
+              aria-label={t('cfg.entityPicker.searchAriaLabel')}
               className="w-full pl-8 pr-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm"
             />
           </div>
           <div className="max-h-72 overflow-auto rounded-md border border-black/10 dark:border-white/10 bg-black/2 dark:bg-white/2">
             {groups.length === 0 ? (
-              <div className="text-text-tertiary text-xs p-3 text-center">ничего не найдено</div>
+              <div className="text-text-tertiary text-xs p-3 text-center">{t('cfg.entityPicker.notFound')}</div>
             ) : (
               groups.map((g) => (
                 <div key={g.areaId ?? '__no_area__'}>
@@ -731,6 +743,7 @@ function MultiEntityCombinedPicker({
   onEntitiesChange: (v: string[]) => void;
   onIconsChange: (v: Record<string, string>) => void;
 }) {
+  const t = useT();
   const states = useStates();
   const { registries } = useConnection();
   const [adding, setAdding] = useState(false);
@@ -775,8 +788,13 @@ function MultiEntityCombinedPicker({
     }
   }
 
+  const domainLabel = domain ? domain.replace(/\.$/, '').replace(/,\s*/g, '/') : '';
+  const searchPlaceholder = domainLabel
+    ? t('cfg.entityPicker.searchPlaceholder', { domain: domainLabel })
+    : t('cfg.entityPicker.searchPlaceholderAny');
+
   return (
-    <Field label={`${entitiesField.label} (${entities.length})`} hint={entitiesField.hint}>
+    <Field label={`${t(entitiesField.label)} (${entities.length})`} hint={entitiesField.hint ? t(entitiesField.hint) : undefined}>
       <div className="flex flex-col gap-1.5">
         {entities.map((id) => {
           const display = getEntityDisplay(states[id], registries, id);
@@ -791,14 +809,14 @@ function MultiEntityCombinedPicker({
               <button
                 type="button"
                 onClick={() => setPickingIconFor(id)}
-                aria-label={`Иконка для ${display.name}`}
+                aria-label={`${t('cfg.iconPicker.selectAriaLabel')} ${display.name}`}
                 className="w-10 h-10 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70"
-                title="Сменить иконку"
+                title={t('cfg.iconPicker.selectAriaLabel')}
               >
                 {showIcon && getMdiPath(showIcon) ? (
                   <MdiIcon name={showIcon} size={22} className="text-accent" />
                 ) : (
-                  <span className="text-text-tertiary text-[10px]">иконка</span>
+                  <span className="text-text-tertiary text-[10px]">icon</span>
                 )}
               </button>
               <div className="flex-1 min-w-0">
@@ -811,8 +829,8 @@ function MultiEntityCombinedPicker({
               <button
                 type="button"
                 onClick={() => remove(id)}
-                aria-label={`Убрать ${display.name}`}
-                title="Убрать из списка"
+                aria-label={`${t('common.delete')} ${display.name}`}
+                title={t('common.delete')}
                 className="text-text-tertiary hover:text-red-400 shrink-0 w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-400/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400/50"
               >
                 <X size={14} aria-hidden="true" />
@@ -827,7 +845,7 @@ function MultiEntityCombinedPicker({
             onClick={() => setAdding(true)}
             className="px-3 py-2.5 rounded-md border border-dashed border-black/20 dark:border-white/20 text-sm text-text-secondary hover:border-accent/60 hover:text-accent hover:bg-accent/5 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 transition"
           >
-            + Добавить {entities.length === 0 ? '' : 'ещё'}
+            {entities.length === 0 ? t('cfg.multiEntity.addFirst') : t('cfg.multiEntity.addMore')}
           </button>
         )}
 
@@ -844,15 +862,15 @@ function MultiEntityCombinedPicker({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={domain ? `поиск (${domain.replace('.', '')})…` : 'поиск…'}
-                aria-label="Поиск"
+                placeholder={searchPlaceholder}
+                aria-label={t('cfg.multiEntity.searchAriaLabel')}
                 className="w-full pl-8 pr-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm"
               />
             </div>
             <div className="max-h-64 overflow-auto rounded-md bg-black/2 dark:bg-white/2">
               {groups.length === 0 ? (
                 <div className="text-text-tertiary text-xs p-3 text-center">
-                  {entities.length > 0 ? 'Все доступные уже добавлены' : 'Ничего не найдено'}
+                  {entities.length > 0 ? t('cfg.multiEntity.allAdded') : t('cfg.multiEntity.notFound')}
                 </div>
               ) : (
                 groups.map((g) => (
@@ -892,7 +910,7 @@ function MultiEntityCombinedPicker({
                 }}
                 className="text-xs text-text-secondary hover:text-text-primary px-2 py-1"
               >
-                Закрыть
+                {t('cfg.multiEntity.close')}
               </button>
             </div>
           </div>
@@ -924,22 +942,23 @@ function EntityIconsPicker({
   value: Record<string, string>;
   onChange: (v: Record<string, string>) => void;
 }) {
+  const t = useT();
   const states = useStates();
   const { registries } = useConnection();
   const [pickingFor, setPickingFor] = useState<string | null>(null);
 
   if (entities.length === 0) {
     return (
-      <Field label={field.label} hint={field.hint}>
+      <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
         <div className="text-text-tertiary text-xs px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 italic">
-          Сначала выбери сущности выше
+          {t('cfg.entityIcons.pickFirst')}
         </div>
       </Field>
     );
   }
 
   return (
-    <Field label={field.label} hint={field.hint}>
+    <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
       <div className="flex flex-col gap-1.5">
         {entities.map((id) => {
           const display = getEntityDisplay(states[id], registries, id);
@@ -954,9 +973,9 @@ function EntityIconsPicker({
               <button
                 type="button"
                 onClick={() => setPickingFor(id)}
-                aria-label={`Выбрать иконку для ${display.name}`}
+                aria-label={`${t('cfg.iconPicker.selectAriaLabel')} ${display.name}`}
                 className="w-10 h-10 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
-                title="Выбрать иконку"
+                title={t('cfg.iconPicker.selectAriaLabel')}
               >
                 {showIcon && getMdiPath(showIcon) ? (
                   <MdiIcon name={showIcon} size={22} className="text-accent" />
@@ -972,7 +991,7 @@ function EntityIconsPicker({
                   ) : haIcon ? (
                     <span>из HA: <code className="font-mono">{haIcon}</code></span>
                   ) : (
-                    <span className="italic">по умолчанию</span>
+                    <span className="italic">{t('cfg.iconPicker.isDefault')}</span>
                   )}
                 </div>
               </div>
@@ -984,9 +1003,9 @@ function EntityIconsPicker({
                     delete next[id];
                     onChange(next);
                   }}
-                  aria-label={`Сбросить иконку для ${display.name}`}
+                  aria-label={`${t('cfg.iconPicker.resetAriaLabel')} ${display.name}`}
                   className="text-text-tertiary hover:text-text-primary shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 rounded-xs"
-                  title="Сбросить иконку"
+                  title={t('cfg.iconPicker.resetAriaLabel')}
                 >
                   <X size={14} aria-hidden="true" />
                 </button>
@@ -1026,6 +1045,7 @@ function EntityNumbersPicker({
   value: Record<string, number>;
   onChange: (v: Record<string, number>) => void;
 }) {
+  const t = useT();
   const states = useStates();
   const { registries } = useConnection();
   const stepAttr = field.step ?? 'any';
@@ -1036,9 +1056,9 @@ function EntityNumbersPicker({
 
   if (entities.length === 0) {
     return (
-      <Field label={field.label} hint={field.hint}>
+      <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
         <div className="text-text-tertiary text-xs px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 italic">
-          Сначала выбери сущности выше
+          {t('cfg.entityNumbers.pickFirst')}
         </div>
       </Field>
     );
@@ -1056,7 +1076,7 @@ function EntityNumbersPicker({
   };
 
   return (
-    <Field label={field.label} hint={field.hint}>
+    <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
       <div className="flex flex-col gap-1.5">
         {entities.map((id) => {
           const display = getEntityDisplay(states[id], registries, id);
@@ -1079,7 +1099,7 @@ function EntityNumbersPicker({
                 value={current ?? ''}
                 placeholder={defaultText}
                 onChange={(e) => update(id, e.target.value)}
-                aria-label={`Значение для ${display.name}`}
+                aria-label={`${t(field.label)} ${display.name}`}
                 className="w-20 px-2 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm text-right"
               />
             </div>
@@ -1108,14 +1128,15 @@ function EntityColorsPicker({
   value: Record<string, string>;
   onChange: (v: Record<string, string>) => void;
 }) {
+  const t = useT();
   const states = useStates();
   const { registries } = useConnection();
 
   if (entities.length === 0) {
     return (
-      <Field label={field.label} hint={field.hint}>
+      <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
         <div className="text-text-tertiary text-xs px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 italic">
-          Сначала выбери сущности выше
+          {t('cfg.entityColors.pickFirst')}
         </div>
       </Field>
     );
@@ -1131,7 +1152,7 @@ function EntityColorsPicker({
   };
 
   return (
-    <Field label={field.label} hint={field.hint}>
+    <Field label={t(field.label)} hint={field.hint ? t(field.hint) : undefined}>
       <div className="flex flex-col gap-1.5">
         {entities.map((id) => {
           const display = getEntityDisplay(states[id], registries, id);
@@ -1145,21 +1166,21 @@ function EntityColorsPicker({
                 type="color"
                 value={current ?? '#888888'}
                 onChange={(e) => updateColor(id, e.target.value)}
-                aria-label={`Цвет для ${display.name}`}
+                aria-label={`${t(field.label)} ${display.name}`}
                 className="w-10 h-10 rounded-md bg-transparent border border-black/10 dark:border-white/10 shrink-0 cursor-pointer p-0.5"
               />
               <div className="flex-1 min-w-0">
                 <div className="text-sm truncate">{display.name}</div>
                 <div className="text-[10px] text-text-tertiary truncate font-mono">
-                  {current ? current : 'по умолчанию'}
+                  {current ? current : t('cfg.entityColors.default')}
                 </div>
               </div>
               {current && (
                 <button
                   type="button"
                   onClick={() => resetColor(id)}
-                  aria-label={`Сбросить цвет для ${display.name}`}
-                  title="Сбросить цвет"
+                  aria-label={`${t('cfg.iconPicker.resetAriaLabel')} ${display.name}`}
+                  title={t('cfg.iconPicker.resetAriaLabel')}
                   className="text-text-tertiary hover:text-text-primary shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 rounded-xs"
                 >
                   <X size={14} aria-hidden="true" />
@@ -1182,17 +1203,18 @@ function IconPicker({
   value: string | undefined;
   onChange: (v: string) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const isMdi = !!value && !!getMdiPath(value);
   return (
-    <Field label={field.label} hint={field.hint || 'Иконка из набора Material Design Icons (как в HA), либо эмодзи'}>
+    <Field label={t(field.label)} hint={field.hint ? t(field.hint) : t('cfg.iconPicker.hint')}>
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label="Выбрать иконку"
+          aria-label={t('cfg.iconPicker.selectAriaLabel')}
           className="w-12 h-12 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-secondary"
-          title="Выбрать иконку"
+          title={t('cfg.iconPicker.selectAriaLabel')}
         >
           {value ? (
             <GlanceIcon value={value} size={26} className="text-accent" fallback={field.default} />
@@ -1205,17 +1227,17 @@ function IconPicker({
             type="text"
             value={value ?? ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={field.default || 'lightbulb или 💡'}
-            aria-label="Имя иконки или эмодзи"
+            placeholder={field.default || t('cfg.iconPicker.placeholder')}
+            aria-label={t('cfg.iconPicker.inputAriaLabel')}
             className="w-full px-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm font-mono"
           />
           <div className="text-[11px] text-text-tertiary mt-1">
             {isMdi ? (
-              <>MDI: <code>{value}</code></>
+              <>{t('cfg.iconPicker.isMdi')} <code>{value}</code></>
             ) : value ? (
-              <>Эмодзи</>
+              <>{t('cfg.iconPicker.isEmoji')}</>
             ) : (
-              <>Дефолтная иконка</>
+              <>{t('cfg.iconPicker.isDefault')}</>
             )}
           </div>
         </div>
@@ -1223,9 +1245,9 @@ function IconPicker({
           <button
             type="button"
             onClick={() => onChange('')}
-            aria-label="Сбросить иконку"
+            aria-label={t('cfg.iconPicker.resetAriaLabel')}
             className="text-text-tertiary hover:text-text-primary shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 rounded-xs"
-            title="Сбросить"
+            title={t('cfg.iconPicker.resetAriaLabel')}
           >
             <X size={14} aria-hidden="true" />
           </button>
@@ -1254,6 +1276,7 @@ function MdiPickerModal({
   onPick: (name: string) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const [search, setSearch] = useState(current);
   const [results, setResults] = useState<string[]>([]);
   useEffect(() => {
@@ -1273,7 +1296,7 @@ function MdiPickerModal({
       position="center"
       zIndex={60}
       title="Material Design Icons"
-      subtitle="Выбор иконки"
+      subtitle={t('cfg.mdiModal.subtitle')}
       className="w-full max-w-2xl rounded-2xl bg-bg-secondary border border-black/10 dark:border-white/10 p-5 max-h-[80vh] flex flex-col"
     >
       <div className="relative mb-3">
@@ -1288,7 +1311,7 @@ function MdiPickerModal({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="lightbulb, switch, thermometer…"
-          aria-label="Поиск иконки"
+          aria-label={t('cfg.mdiModal.searchAriaLabel')}
           className="w-full pl-8 pr-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary"
         />
       </div>
@@ -1313,7 +1336,7 @@ function MdiPickerModal({
       </div>
       {results.length === 0 && (
         <div className="text-text-tertiary text-sm text-center py-8">
-          Ничего не найдено
+          {t('cfg.mdiModal.notFound')}
         </div>
       )}
     </ModalSheet>
@@ -1329,6 +1352,7 @@ function MultiEntityPicker({
   value: string[] | undefined;
   onChange: (v: string[]) => void;
 }) {
+  const t = useT();
   const states = useStates();
   const { registries } = useConnection();
   const [search, setSearch] = useState('');
@@ -1369,8 +1393,13 @@ function MultiEntityPicker({
     onChange(selected.filter((x) => x !== id));
   }
 
+  const domainLabel = domain ? domain.replace(/\.$/, '').replace(/,\s*/g, '/') : '';
+  const searchPlaceholder = domainLabel
+    ? t('cfg.entityPicker.searchPlaceholder', { domain: domainLabel })
+    : t('cfg.entityPicker.searchPlaceholderAny');
+
   return (
-    <Field label={`${field.label} (${selected.length})`} hint={field.hint}>
+    <Field label={`${t(field.label)} (${selected.length})`} hint={field.hint ? t(field.hint) : undefined}>
       <div className="flex flex-col gap-1.5">
         {/* Выбранные — отдельными строками с крестиком: убрать можно сразу,
             не открывая общий каталог. Раньше был свёрнутый список с
@@ -1393,8 +1422,8 @@ function MultiEntityPicker({
               <button
                 type="button"
                 onClick={() => remove(id)}
-                aria-label={`Убрать ${display.name}`}
-                title="Убрать из списка"
+                aria-label={`${t('common.delete')} ${display.name}`}
+                title={t('common.delete')}
                 className="text-text-tertiary hover:text-red-400 shrink-0 w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-400/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400/50"
               >
                 <X size={14} aria-hidden="true" />
@@ -1409,7 +1438,7 @@ function MultiEntityPicker({
             onClick={() => setAdding(true)}
             className="px-3 py-2.5 rounded-md border border-dashed border-black/20 dark:border-white/20 text-sm text-text-secondary hover:border-accent/60 hover:text-accent hover:bg-accent/5 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 transition"
           >
-            + Добавить {selected.length === 0 ? '' : 'ещё'}
+            {selected.length === 0 ? t('cfg.multiEntity.addFirst') : t('cfg.multiEntity.addMore')}
           </button>
         )}
 
@@ -1426,15 +1455,15 @@ function MultiEntityPicker({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={domain ? `поиск (${domain.replace('.', '')})…` : 'поиск…'}
-                aria-label="Поиск"
+                placeholder={searchPlaceholder}
+                aria-label={t('cfg.multiEntity.searchAriaLabel')}
                 className="w-full pl-8 pr-3 py-2 rounded-md bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-text-primary text-sm"
               />
             </div>
             <div className="max-h-64 overflow-auto rounded-md bg-black/2 dark:bg-white/2">
               {groups.length === 0 ? (
                 <div className="text-text-tertiary text-xs p-3 text-center">
-                  {selected.length > 0 ? 'Все доступные уже добавлены' : 'Ничего не найдено'}
+                  {selected.length > 0 ? t('cfg.multiEntity.allAdded') : t('cfg.multiEntity.notFound')}
                 </div>
               ) : (
                 groups.map((g) => (
@@ -1474,7 +1503,7 @@ function MultiEntityPicker({
                 }}
                 className="text-xs text-text-secondary hover:text-text-primary px-2 py-1"
               >
-                Закрыть
+                {t('cfg.multiEntity.close')}
               </button>
             </div>
           </div>
