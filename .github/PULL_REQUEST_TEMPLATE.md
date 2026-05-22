@@ -1,25 +1,25 @@
-<!-- Спасибо за вклад! Заполните разделы — это ускорит ревью. -->
+<!-- Thanks for contributing! Filling in the sections speeds up review. -->
 
-## Что было / что стало
+## What changed
 
-<!-- Опишите изменение в одном-двух предложениях. -->
+<!-- Describe the change in one or two sentences. -->
 
-## Почему
+## Why
 
-<!-- Мотивация. Какую проблему решает / какую возможность добавляет. -->
+<!-- Motivation. What problem it solves / what capability it adds. -->
 
-## Скриншоты (для UI-изменений)
+## Screenshots (for UI changes)
 
-<!-- До / после, если можно — анимация или GIF. -->
+<!-- Before / after, ideally an animation or GIF. -->
 
-## Чек-лист
+## Checklist
 
-- [ ] `bun typecheck` проходит без ошибок
-- [ ] `bun run build` успешный
-- [ ] Если добавлен виджет — его meta в `src/components/widgets/meta.ts`, регистрация в `src/components/widgets/index.tsx`
-- [ ] Если меняется UI — проверено в светлой и тёмной теме, на mobile и desktop
-- [ ] Если меняется хранилище — учтена миграция со старого формата
+- [ ] `bun typecheck` passes with no errors
+- [ ] `bun run build` succeeds
+- [ ] If a widget was added — its meta is in `src/components/widgets/meta.ts` and it is registered in `src/components/widgets/index.tsx`
+- [ ] If the UI changed — verified in light and dark themes, on mobile and desktop
+- [ ] If storage changed — migration from the old format is handled
 
-## Связанные issues
+## Related issues
 
 <!-- Closes #X / Refs #Y -->

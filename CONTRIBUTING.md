@@ -1,80 +1,82 @@
 # Contributing to Homeglance
 
-Спасибо, что хотите помочь! Homeglance — open-source проект под MIT, контрибьюторы welcome.
+Thanks for wanting to help! Homeglance is an open-source MIT project, and
+contributors are welcome.
 
-## Стек
+## Stack
 
 - **TypeScript** strict
 - **React 18** (functional components, hooks)
 - **Tailwind CSS 4**
-- **Bun** (пакетный менеджер и runtime для разработки)
+- **Bun** (package manager and development runtime)
 - **Next.js 14** App Router
 
-## Как начать
+## Getting started
 
-1. **Fork** репозитория на GitHub
-2. Clone fork локально: `git clone https://github.com/<your-username>/homeglance`
-3. Установить зависимости: `bun install`
-4. Скопировать `.env.example` → `.env.local`
-5. Запустить dev-режим: `bun dev`
-6. Открыть `http://localhost:3040` → подключиться к HA
-7. Создать ветку: `git checkout -b feat/my-feature`
+1. **Fork** the repository on GitHub
+2. Clone your fork locally: `git clone https://github.com/<your-username>/homeglance`
+3. Install dependencies: `bun install`
+4. Copy `.env.example` → `.env.local`
+5. Start dev mode: `bun dev`
+6. Open `http://localhost:3040` → connect to HA
+7. Create a branch: `git checkout -b feat/my-feature`
 
-## Какие задачи брать
+## Which tasks to pick
 
-- Issues с лейблом **`good-first-issue`** — простые, для первых вкладов
-- **`help-wanted`** — задачи, на которые мейнтейнеры ждут помощи
-- **`bug`** — починить баг (надо уметь воспроизвести и исправить)
-- **`feature`** — новая функциональность (обсудите в issue заранее)
-- Свои идеи — открой issue с `[proposal]`-префиксом, обсудим
+- Issues labeled **`good-first-issue`** — easy ones, for first contributions
+- **`help-wanted`** — tasks the maintainers are hoping for help with
+- **`bug`** — fix a bug (you should be able to reproduce and fix it)
+- **`feature`** — new functionality (discuss it in an issue first)
+- Your own ideas — open an issue with a `[proposal]` prefix and let's discuss
 
-## Создание нового виджета
+## Creating a new widget
 
-Самый простой способ контрибьютнуть.
+The easiest way to contribute.
 
-1. Создать `src/components/widgets/MyWidget.tsx` с named export `MyWidget` (компонент)
-2. Добавить `MY_WIDGET_META: WidgetMeta` в `src/components/widgets/meta.ts`
-3. Зарегистрировать в `src/components/widgets/index.tsx` (lazy через `next/dynamic`)
-4. Открыть PR со скриншотом
+1. Create `src/components/widgets/MyWidget.tsx` with a named export `MyWidget` (the component)
+2. Add `MY_WIDGET_META: WidgetMeta` to `src/components/widgets/meta.ts`
+3. Register it in `src/components/widgets/index.tsx` (lazily via `next/dynamic`)
+4. Open a PR with a screenshot
 
-Если делаете виджет, который подключается отдельным `.js`-файлом без сборки
-проекта — см. [docs/sdk.md](docs/sdk.md).
+If you are making a widget that loads as a standalone `.js` file without
+building the project — see [docs/sdk.md](docs/sdk.md).
 
-## Стиль кода
+## Code style
 
 ### TypeScript
 
-- Strict mode включён
-- Без `any` (используйте `unknown` если тип неизвестен; `any` допустим только в реестре виджетов где диспетчеризация рантайм)
-- Public функции с явным return type
+- Strict mode is on
+- No `any` (use `unknown` when the type is unknown; `any` is acceptable only in the widget registry, where dispatch is runtime)
+- Public functions have an explicit return type
 
 ### React
 
 - Functional components only
-- Hooks для логики
-- `React.memo` для тяжёлых виджетов
-- Props через interface
+- Hooks for logic
+- `React.memo` for heavy widgets
+- Props via an interface
 
-### Стили
+### Styles
 
 - Tailwind utility classes
-- CSS-variables для тем (`bg-bg-primary`, `text-text-primary`, `accent` и т.п.)
-- `style={{}}` только для динамических значений (свечения, размеры)
+- CSS variables for themes (`bg-bg-primary`, `text-text-primary`, `accent`, etc.)
+- `style={{}}` only for dynamic values (glows, sizes)
 
-### Файлы
+### Files
 
-- Один React-компонент = один файл
-- Helpers в отдельных модулях
-- Имена файлов = имена main-export
+- One React component = one file
+- Helpers in separate modules
+- File names match the main export name
 
-## Перед PR
+## Before a PR
 
 ```bash
 bun typecheck  # tsc --noEmit
-bun run build  # production build должен пройти
+bun run build  # the production build must pass
 ```
 
-(Тесты появятся позже — пока их нет, проверка живая в браузере.)
+(Tests will come later — there are none yet, verification is done live in
+the browser.)
 
 ## Pull Request
 
@@ -90,25 +92,28 @@ bun run build  # production build должен пройти
 
 ### Body
 
-- **Что было / что стало**
-- **Why** (мотивация)
-- Скриншоты (если UI)
-- `Closes #X` (если фиксит issue)
+- **What changed**
+- **Why** (motivation)
+- Screenshots (if UI)
+- `Closes #X` (if it fixes an issue)
 
-### Размер
+### Size
 
-Предпочитаем **маленькие PR** — лучше 5 PR по одной фиче, чем 1 большой. Если PR > 500 строк — обсудите в issue заранее.
+We prefer **small PRs** — five PRs of one feature each beats one large PR.
+If a PR is larger than 500 lines, discuss it in an issue first.
 
 ## Code Review
 
-- Минимум 1 approval от мейнтейнера
-- Все комментарии должны быть resolved
+- At least 1 approval from a maintainer
+- All comments must be resolved
 - typecheck / build — green
 
 ## Code of Conduct
 
-См. [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Кратко: будь дружелюбен, конструктивная критика only, без токсичности и дискриминации.
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). In short: be friendly,
+constructive criticism only, no toxicity or discrimination.
 
 ## License
 
-Контрибьютя в Homeglance, ты соглашаешься, что твой код будет лицензирован под [MIT](LICENSE).
+By contributing to Homeglance, you agree that your code will be licensed
+under [MIT](LICENSE).

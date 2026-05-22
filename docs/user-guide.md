@@ -1,160 +1,162 @@
-# Руководство пользователя
+# User guide
 
-Как пользоваться Glance каждый день: редактировать дашборд, работать со
-страницами, профилями и темами.
+How to use Glance day to day: edit the dashboard, work with pages, profiles
+and themes.
 
-Только что установили? Начните с [«Установка и первый запуск»](getting-started.md).
+Just installed? Start with [Getting started](getting-started.md).
 
-## Главный экран
+## The main screen
 
-Дашборд — это набор **страниц**, на каждой — плитки-**виджеты** (лампы,
-датчики, плеер, погода). Внизу экрана — **нижняя панель** для переключения
-между страницами. В обычном режиме тап по виджету сразу управляет
-устройством: тап по лампе включает свет, тап по плееру — ставит на паузу.
+The dashboard is a set of **pages**, each holding **widget** tiles (lights,
+sensors, the media player, weather). At the bottom of the screen is the
+**dock bar** for switching between pages. In normal mode, tapping a widget
+controls the device right away: tapping a light turns it on, tapping the
+player pauses it.
 
-В правом верхнем углу — кнопка **Редактировать** и аватар профиля.
+In the top-right corner are the **Edit** button and the profile avatar.
 
-## Режим редактирования
+## Edit mode
 
-Чтобы перестроить дашборд, нажмите **Редактировать** в правом верхнем углу.
-Кнопка превратится в **Готово** — нажмите её, когда закончите. Изменения
-сохраняются автоматически.
+To rearrange the dashboard, tap **Edit** in the top-right corner. The button
+turns into **Done** — tap it when you are finished. Changes are saved
+automatically.
 
-В режиме редактирования становятся доступны:
+In edit mode the following become available:
 
-- **Виджет** — добавить новую плитку;
-- **Страницы** — управление страницами;
-- **Настройки** — общие настройки приложения;
-- перетаскивание и изменение размера виджетов.
+- **Widget** — add a new tile;
+- **Pages** — manage pages;
+- **Settings** — general app settings;
+- dragging and resizing widgets.
 
-## Виджеты
+## Widgets
 
-### Добавить виджет
+### Add a widget
 
-1. Войдите в режим редактирования → нажмите **Виджет**.
-2. Откроется каталог «Добавить виджет», виджеты сгруппированы по
-   категориям (Свет, Сенсоры, Климат, Медиа и т.д.).
-3. Тапните на нужный — плитка появится на странице.
-4. Сразу откроется окно настройки.
+1. Enter edit mode → tap **Widget**.
+2. The "Add widget" catalog opens, with widgets grouped by category
+   (Lights, Sensors, Climate, Media, and so on).
+3. Tap the one you want — the tile appears on the page.
+4. The configuration sheet opens immediately.
 
-Полный список плиток — в [справочнике виджетов](widgets.md).
+The full list of tiles is in the [widget reference](widgets.md).
 
-### Настроить виджет
+### Configure a widget
 
-В окне **«Настроить виджет»** задаются параметры плитки. Главное поле у
-большинства виджетов — **сущность** (entity): конкретное устройство Home
-Assistant. Glance показывает список подходящих устройств — выбирать
-технический ID вручную не нужно.
+The **"Configure widget"** sheet is where a tile's parameters are set. The
+main field for most widgets is the **entity** — a specific Home Assistant
+device. Glance shows a list of matching devices, so you never have to type a
+technical ID by hand.
 
-Остальные поля зависят от виджета: название, иконка, цвет свечения, единицы
-измерения и т.п. У каждого поля есть подсказка.
+The remaining fields depend on the widget: name, icon, glow color, units,
+and so on. Each field has a hint.
 
-Чтобы открыть настройку у уже стоящего виджета — **долгое нажатие** на
-плитку (удерживайте около полсекунды) → в меню выберите **Настроить**.
+To open the configuration of a widget that is already placed, **long-press**
+the tile (hold for about half a second) → choose **Configure** from the menu.
 
-### Переместить и изменить размер
+### Move and resize
 
-В режиме редактирования:
+In edit mode:
 
-- **перетащите** плитку, чтобы переместить её;
-- **потяните за угол**, чтобы изменить размер.
+- **drag** a tile to move it;
+- **pull a corner** to resize it.
 
-Виджеты адаптивные: на маленьком размере плитка показывает только
-самое важное (иконку и значение), на большом — раскрывается в полную
-карточку с деталями. У каждого виджета есть минимальный размер — меньше
-него ужать не получится.
+Widgets are adaptive: at a small size a tile shows only the essentials (an
+icon and a value), and at a large size it expands into a full card with
+details. Every widget has a minimum size below which it cannot be shrunk.
 
-### Дублировать и удалить
+### Duplicate and delete
 
-**Долгое нажатие** на виджет открывает меню:
+A **long-press** on a widget opens a menu:
 
-- **Настроить** — открыть параметры;
-- **Дублировать** — создать копию плитки рядом;
-- **Удалить** — убрать плитку (Glance переспросит для подтверждения).
+- **Configure** — open its parameters;
+- **Duplicate** — create a copy of the tile next to it;
+- **Delete** — remove the tile (Glance asks for confirmation).
 
-## Страницы и нижняя панель
+## Pages and the dock bar
 
-Дашборд можно разбить на несколько страниц — например, «Дом», «Кухня»,
-«Камеры», «Климат». Переключаться между ними удобно одной рукой.
+The dashboard can be split into several pages — for example "Home",
+"Kitchen", "Cameras", "Climate". Switching between them is comfortable with
+one hand.
 
-- **Переключить страницу** — тап по иконке в нижней панели или свайп
-  влево/вправо по экрану.
-- **Управление страницами** — в режиме редактирования нажмите **Страницы**.
+- **Switch page** — tap an icon in the dock bar, or swipe left/right on the
+  screen.
+- **Manage pages** — in edit mode, tap **Pages**.
 
-В окне «Страницы» можно:
+In the "Pages" sheet you can:
 
-- **создать** новую страницу — задать название, иконку и тип
-  (обычный дашборд или специальная страница «Погода»);
-- **изменить** название и иконку существующей;
-- **поменять порядок** страниц;
-- **удалить** страницу (вместе со всеми её виджетами);
-- **экспортировать** одну страницу или все сразу в файл — и **импортировать**
-  такой файл на другом устройстве;
-- **импортировать из HA Lovelace** — Glance прочитает вашу стандартную
-  панель Home Assistant и соберёт из её устройств новую страницу.
+- **create** a new page — set its title, icon and type (a regular dashboard
+  or a special "Weather" page);
+- **edit** the title and icon of an existing page;
+- **reorder** pages;
+- **delete** a page (along with all of its widgets);
+- **export** one page or all of them to a file — and **import** such a file
+  on another device;
+- **import from HA Lovelace** — Glance reads your standard Home Assistant
+  panel and builds a new page from its devices.
 
-Пустую страницу Glance предложит **собрать автоматически** из устройств
-соответствующей зоны Home Assistant — или заполнить вручную.
+For an empty page, Glance offers to **fill it automatically** from the
+devices of the corresponding Home Assistant area — or you can fill it by
+hand.
 
-## Профили
+## Profiles
 
-Glance поддерживает несколько профилей — у каждого члена семьи свой набор
-страниц и своя раскладка. Профиль выбирается при первом запуске и потом
-запоминается на устройстве.
+Glance supports multiple profiles — each member of the household gets their
+own set of pages and their own layout. A profile is chosen on first launch
+and then remembered on the device.
 
-- **Сменить профиль** — тап по аватару в правом верхнем углу.
-- **Создать профиль** — на экране выбора профиля нажмите «Добавить профиль»,
-  укажите имя, аватар-эмодзи и при желании PIN-код.
+- **Switch profile** — tap the avatar in the top-right corner.
+- **Create a profile** — on the profile-picker screen tap "Add profile",
+  then set a name, an emoji avatar and, optionally, a PIN.
 
-### PIN-код и защита
+### PIN and protection
 
-Профилю можно задать **PIN из 4 цифр**. Тогда:
+A profile can be given a **4-digit PIN**. Then:
 
-- вход в профиль требует ввода PIN;
-- опасные действия (удаление профиля, отключение от Home Assistant) тоже
-  требуют PIN.
+- entering the profile requires the PIN;
+- dangerous actions (deleting a profile, disconnecting from Home Assistant)
+  also require the PIN.
 
-Это удобно, например, для настенного планшета: «гостевой» профиль открыт, а
-основной — под PIN.
+This is handy, for example, for a wall-mounted tablet: a "guest" profile is
+open while the main one is behind a PIN.
 
-**Чтобы задать или сменить PIN:** тап по аватару в правом верхнем углу →
-выйдите из профиля → на экране входа в карточке профиля нажмите иконку 🔒.
+**To set or change a PIN:** tap the avatar in the top-right corner → sign
+out of the profile → on the sign-in screen, tap the 🔒 icon on the profile
+card.
 
-## Темы и оформление
+## Themes and appearance
+
+Open **Settings** (in edit mode) — there you will find:
 
 <p align="center">
-  <img src="screenshots/settings-light.webp" alt="Экран настроек Glance" width="300" />
+  <img src="screenshots/settings-light.webp" alt="Glance settings screen" width="300" />
 </p>
 
-Откройте **Настройки** (в режиме редактирования) — там:
+- **Theme** — Light, Dark or Auto (follows the device's system theme);
+- **Accent color** — emerald, indigo, sky, rose or amber; it highlights
+  active elements;
+- **Language** — Russian or English.
 
-- **Тема** — Светлая, Тёмная или Авто (следует за системной темой
-  устройства);
-- **Цвет акцента** — изумрудный, индиго, голубой, розовый или янтарный;
-  им подсвечиваются активные элементы;
-- **Язык** — русский или английский.
+## Other settings
 
-## Прочие настройки
+In the same **Settings** section:
 
-В том же разделе **Настройки**:
+- **Notifications** — Glance can show notifications when Home Assistant
+  creates a `persistent_notification` (via an automation). They work while
+  the tab is open or the panel is installed as an app.
+- **Sync with Home Assistant** — layouts and profiles can be stored inside
+  HA. Then on another device with the same HA login you see them right
+  away. The **Push to HA** and **Pull from HA** buttons.
+- **Home Assistant** — the current connection; you can also disconnect and
+  reconnect here.
+- **External widgets** — adding third-party widgets by URL (see the
+  [developer guide](sdk.md)).
 
-- **Уведомления** — Glance может показывать уведомления, когда Home
-  Assistant создаёт `persistent_notification` (через автоматизацию).
-  Работают, пока вкладка открыта или панель установлена как приложение.
-- **Синхронизация с Home Assistant** — раскладки и профили можно хранить
-  внутри HA. Тогда на другом устройстве с тем же логином HA вы увидите их
-  сразу. Кнопки **Выгрузить в HA** и **Загрузить из HA**.
-- **Home Assistant** — текущее подключение; здесь же можно отключиться и
-  настроить заново.
-- **Внешние виджеты** — подключение сторонних виджетов по URL
-  (см. [руководство для разработчиков](sdk.md)).
+## Install as an app
 
-## Установить как приложение
+Glance is a PWA (Progressive Web App). It can be installed on a phone or
+computer like a regular app — with an icon on the home screen and no browser
+address bar:
 
-Glance — это PWA (прогрессивное веб-приложение). Его можно установить на
-телефон или компьютер как обычное приложение — с иконкой на рабочем столе и
-без адресной строки браузера:
-
-- **iPhone/iPad (Safari):** кнопка «Поделиться» → «На экран „Домой“».
-- **Android (Chrome):** меню браузера → «Установить приложение».
-- **Компьютер (Chrome/Edge):** значок установки в адресной строке.
+- **iPhone/iPad (Safari):** the "Share" button → "Add to Home Screen".
+- **Android (Chrome):** the browser menu → "Install app".
+- **Desktop (Chrome/Edge):** the install icon in the address bar.

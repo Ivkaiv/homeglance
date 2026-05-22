@@ -1,74 +1,76 @@
-# Установка и первый запуск
+# Getting started
 
-Этот документ — про то, что происходит после установки: как Glance
-подключается к Home Assistant и как собрать первый дашборд. Сами способы
-установки подробно расписаны в [README](../README.md#установка).
+This document covers what happens after installation: how Glance connects
+to Home Assistant and how to build your first dashboard. The installation
+methods themselves are described in detail in the
+[README](../README.md#installation).
 
-## Коротко про установку
+## Installation in brief
 
-Способ зависит от того, какой у вас Home Assistant:
+The method depends on which kind of Home Assistant you run:
 
-| Ваш HA | Рекомендуемый способ |
+| Your HA | Recommended method |
 |---|---|
-| Home Assistant OS / Supervised | **HA Add-on** — установка в один клик через Add-on Store |
-| HA Container / HA Core | **Docker Compose** — отдельный контейнер |
-| Любой | **Docker** на отдельном компьютере в сети |
+| Home Assistant OS / Supervised | **HA Add-on** — one-click install via the Add-on Store |
+| HA Container / HA Core | **Docker Compose** — a separate container |
+| Any | **Docker** on a separate machine on the network |
 
-Полные пошаговые инструкции для каждого варианта — в
-[README](../README.md#установка).
+Full step-by-step instructions for each option are in the
+[README](../README.md#installation).
 
-## Подключение к Home Assistant
+## Connecting to Home Assistant
 
-При первом открытии Glance предложит подключиться к вашему Home Assistant.
+The first time you open Glance, it offers to connect to your Home Assistant.
 
-### Если Glance установлен как HA Add-on
+### If Glance is installed as an HA Add-on
 
-Подключение происходит **автоматически** — ничего вводить не нужно. Add-on
-работает рядом с Home Assistant и авторизуется через него сам. Токен при
-этом не покидает сервер.
+The connection happens **automatically** — there is nothing to enter. The
+add-on runs next to Home Assistant and authenticates through it on its own.
+The token never leaves the server.
 
-### Во всех остальных случаях
+### In all other cases
 
-Понадобится две вещи:
+You need two things:
 
-1. **Адрес Home Assistant** — например `http://192.168.1.10:8123` или
-   `https://ha.example.com`.
-2. **Долгоживущий токен** (Long-Lived Access Token) — ключ, по которому
-   Glance общается с HA.
+1. **Your Home Assistant address** — for example `http://192.168.1.10:8123`
+   or `https://ha.example.com`.
+2. **A Long-Lived Access Token** — the key Glance uses to talk to HA.
 
-#### Как создать токен
+#### How to create a token
 
-1. Откройте Home Assistant и кликните на свой аватар внизу слева.
-2. Прокрутите страницу до раздела **Long-lived access tokens**.
-3. Нажмите **CREATE TOKEN**, назовите его «Glance» и скопируйте.
-4. Вставьте токен в Glance и нажмите **Подключить**.
+1. Open Home Assistant and click your avatar at the bottom-left.
+2. Scroll down to the **Long-lived access tokens** section.
+3. Click **CREATE TOKEN**, name it "Glance", and copy it.
+4. Paste the token into Glance and click **Connect**.
 
-Токен хранится только у вас — на сервере Glance или в браузере — и
-отправляется исключительно вашему Home Assistant. У Glance нет никаких
-«своих серверов», куда что-то уходит.
+The token stays with you — on the Glance server or in your browser — and is
+sent only to your own Home Assistant. Glance has no "servers of its own"
+that anything is sent to.
 
-> **Если подключение не удаётся.** Проверьте, что адрес HA доступен с этого
-> устройства и токен скопирован полностью. Если Glance открыт по `https`, а
-> HA доступен только по `http` — браузер может блокировать соединение;
-> в этом случае проще поставить Glance как Add-on или в Docker рядом с HA.
+> **If the connection fails.** Check that the HA address is reachable from
+> this device and that the token was copied in full. If Glance is opened
+> over `https` while HA is only available over `http`, the browser may
+> block the connection; in that case it is easier to install Glance as an
+> Add-on or in Docker next to HA.
 
-## Мастер первой настройки
+## The first-run setup wizard
 
-После подключения Glance предложит собрать дашборд. Есть три пути:
+After connecting, Glance offers to build your dashboard. There are three
+paths:
 
-- **🪄 Собери всё за меня.** Glance прочитает ваш Home Assistant и сам
-  создаст несколько страниц: главную с погодой и сценами, отдельную
-  страницу на каждую комнату, информационную. Самый быстрый старт.
-- **📐 Готовые шаблоны.** Выбор из готовых раскладок — минимальная,
-  семейная, студия, спальня, мониторинг. Потом всё можно подкрутить.
-- **✏️ Начну с пустой.** Чистый лист — виджеты добавляются вручную через
-  «+ Виджет» в режиме редактирования.
+- **🪄 Build it all for me.** Glance reads your Home Assistant and creates
+  several pages for you: a home page with weather and scenes, a separate
+  page for each room, and an info page. The fastest start.
+- **📐 Ready-made templates.** Pick one of the prebuilt layouts — minimal,
+  family, studio, bedroom, monitoring. You can tweak everything afterwards.
+- **✏️ Start from blank.** A clean slate — widgets are added by hand via
+  "+ Widget" in edit mode.
 
-Любой вариант — это только отправная точка. Дальше дашборд полностью в
-ваших руках: см. [руководство пользователя](user-guide.md).
+Any of these is just a starting point. From there the dashboard is fully
+yours: see the [user guide](user-guide.md).
 
-## Что дальше
+## What's next
 
-- [Руководство пользователя](user-guide.md) — как редактировать дашборд,
-  работать со страницами, профилями и темами.
-- [Справочник виджетов](widgets.md) — все доступные плитки.
+- [User guide](user-guide.md) — how to edit the dashboard and work with
+  pages, profiles and themes.
+- [Widget reference](widgets.md) — every available tile.

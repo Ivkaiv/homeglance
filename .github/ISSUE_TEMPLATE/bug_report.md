@@ -1,31 +1,31 @@
 ---
 name: Bug Report
-about: Что-то сломалось
+about: Something is broken
 title: "[BUG] "
 labels: bug
 ---
 
-## Что произошло
+## What happened
 
-<!-- Опишите проблему. Что вы делали? Что вы ожидали? Что получилось? -->
+<!-- Describe the problem. What were you doing? What did you expect? What did you get? -->
 
-## Шаги воспроизведения
+## Steps to reproduce
 
 1.
 2.
 3.
 
-## Окружение
+## Environment
 
-- **Способ установки:** HACS plugin / Docker / standalone
-- **Версия Homeglance:** (видно в Settings)
-- **Версия Home Assistant:**
-- **Браузер / устройство:** (Chrome 130 / iPhone 15 Safari / ...)
+- **Install method:** HA Add-on / HACS plugin / Docker / standalone
+- **Homeglance version:** (shown in Settings)
+- **Home Assistant version:**
+- **Browser / device:** (Chrome 130 / iPhone 15 Safari / ...)
 
-## Скриншоты / логи
+## Screenshots / logs
 
-<!-- По возможности приложите скриншот и/или вывод DevTools Console -->
+<!-- If possible, attach a screenshot and/or the DevTools Console output -->
 
-## Дополнительный контекст
+## Additional context
 
-<!-- Что-то ещё, что может помочь? -->
+<!-- Anything else that might help? -->

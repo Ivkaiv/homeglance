@@ -1,197 +1,199 @@
-# Справочник виджетов
+# Widget reference
 
-Виджет — это плитка на дашборде: лампа, датчик, плеер, погода. Каждую плитку
-можно двигать, менять размер и настраивать. Как это делать — в
-[руководстве пользователя](user-guide.md). Здесь — список всех встроенных
-виджетов и что им нужно из Home Assistant.
+A widget is a tile on the dashboard: a light, a sensor, the player, the
+weather. Every tile can be moved, resized and configured — see the
+[user guide](user-guide.md) for how. This page lists all built-in widgets
+and what each one needs from Home Assistant.
 
-Виджеты в каталоге «+ Виджет» сгруппированы по категориям: **Свет**,
-**Переключатели**, **Сенсоры**, **Климат**, **Медиа**, **Камеры**,
-**Комнаты**, **Здоровье**, **Прочее**.
+In the "+ Widget" catalog, widgets are grouped by category: **Lights**,
+**Switches**, **Sensors**, **Climate**, **Media**, **Cameras**, **Rooms**,
+**Health**, **Misc**.
 
-Почти каждому виджету нужно указать **сущность** (entity) Home Assistant —
-это конкретное устройство или показатель в вашем HA, например `light.kitchen`
-или `sensor.outdoor_temperature`. При настройке Glance показывает список
-подходящих сущностей — выбирать ID вручную не нужно.
-
----
-
-## Свет
-
-### 💡 Кнопка света
-Включает и выключает лампу или группу освещения одним тапом. Когда лампа
-горит — плитка светится выбранным цветом.
-**Нужно:** сущность `light.*`. **Настройки:** название, иконка, цвет свечения.
-
-### 🌈 Свет (цвет + яркость)
-Лампа с управлением яркостью и цветом. Плитка подстраивается под размер: на
-маленькой — просто кнопка, на средней — со слайдером яркости, на широкой —
-с быстрыми цветами. Тап открывает полноэкранное окно с цветовым кругом.
-**Нужно:** сущность `light.*` с поддержкой яркости или цвета.
+Almost every widget needs an **entity** of Home Assistant — a specific
+device or reading in your HA, such as `light.kitchen` or
+`sensor.outdoor_temperature`. When configuring, Glance shows a list of
+matching entities, so there is no need to type IDs by hand.
 
 ---
 
-## Переключатели
+## Lights
 
-### 🔌 Переключатель
-Розетка, реле, вентилятор — всё, что просто включается и выключается.
-**Нужно:** сущность `switch.*`. **Настройки:** название, иконка, цвет свечения
-(зелёный по умолчанию; голубой уместен для вентилятора, оранжевый — для котла).
+### 💡 Light toggle
+Turns a lamp or a light group on and off with a single tap. When the light
+is on, the tile glows in the chosen color.
+**Needs:** a `light.*` entity. **Settings:** name, icon, glow color.
 
-### 🔒 Замок
-Запирает и отпирает умный замок. Когда дверь не заперта — плитка
-подсвечивается янтарным как мягкое напоминание.
-**Нужно:** сущность `lock.*`.
-
----
-
-## Сенсоры
-
-### 📊 Датчик
-Универсальный виджет для любого показателя. Сам распознаёт тип —
-температура, влажность, давление, освещённость, мощность, CO₂, а также
-двери, окна, движение, присутствие. Если автоопределение ошиблось — тип
-можно задать вручную.
-**Нужно:** сущность `sensor.*` (число) или `binary_sensor.*` (да/нет).
-
-### 📊 Несколько сенсоров
-Компактный блок из нескольких датчиков сразу — каждый показан чипом с
-иконкой и значением. Тап по числовому датчику открывает график.
-**Нужно:** несколько сущностей `sensor.*` / `binary_sensor.*`.
-
-### ⚡ Энергопотребление
-Крупно показывает текущую мощность, при желании — расход за день и месяц и
-примерную стоимость по вашему тарифу.
-**Нужно:** датчик мощности (Вт). **Дополнительно:** датчики кВт·ч за день и
-месяц, цена за кВт·ч.
+### 🌈 Light (color + brightness)
+A lamp with brightness and color control. The tile adapts to its size: small
+— just a button, medium — with a brightness slider, wide — with quick color
+presets. Tapping it opens a full-screen sheet with a color wheel.
+**Needs:** a `light.*` entity that supports brightness or color.
 
 ---
 
-## Климат
+## Switches
 
-### 🌡 Климат
-Термостат: текущая температура и кнопки регулировки задания. Подходит для
-тёплого пола, бойлера, кондиционера.
-**Нужно:** сущность `climate.*`. **Настройки:** шаг кнопок −/+ (котлы и тёплые
-полы часто используют 0.1°, кондиционеры — 0.5–1°).
+### 🔌 Switch
+A socket, relay or fan — anything that simply turns on and off.
+**Needs:** a `switch.*` entity. **Settings:** name, icon, glow color (green
+by default; sky blue suits a fan, orange suits a boiler).
 
----
-
-## Медиа
-
-### 🎵 Медиа-плеер
-Плеер с обложкой, кнопками play/pause, перемоткой и громкостью. Тап
-открывает полноэкранное окно. Можно включить опциональную секцию радио
-Zaycev FM.
-**Нужно:** сущность `media_player.*` (Яндекс.Станция, Sonos, AirPlay и т.п.).
-
-### 🎶 Музыка (Music Assistant)
-Плеер на базе отдельного сервера [Music Assistant](https://www.music-assistant.io/):
-показывает, что играет, управление, громкость и выбор колонки. Источники
-музыки и устройства вывода настраиваются в самом Music Assistant.
+### 🔒 Lock
+Locks and unlocks a smart lock. When the door is unlocked, the tile is
+highlighted in amber as a gentle reminder.
+**Needs:** a `lock.*` entity.
 
 ---
 
-## Камеры
+## Sensors
 
-### 📹 Камера
-Живое видео с камеры Home Assistant. Если видеопоток недоступен — показывает
-снимок. Тап разворачивает на весь экран.
-**Нужно:** сущность `camera.*`. **Настройки:** режим (авто / только видео /
-только снимок), звук, период обновления снимка.
+### 📊 Sensor
+A universal widget for any reading. It recognizes the type on its own —
+temperature, humidity, pressure, illuminance, power, CO₂, as well as doors,
+windows, motion, occupancy. If auto-detection gets it wrong, the type can be
+set manually.
+**Needs:** a `sensor.*` entity (a number) or a `binary_sensor.*` entity
+(yes/no).
 
----
+### 📊 Multi-sensor
+A compact block of several sensors at once — each shown as a chip with an
+icon and a value. Tapping a numeric sensor opens a chart.
+**Needs:** several `sensor.*` / `binary_sensor.*` entities.
 
-## Комнаты
-
-### 🏠 Комната
-Хаб одной комнаты в одной плитке: температура и влажность в шапке, кнопки
-ламп и переключателей, регулятор тёплого пола, встроенный плеер,
-дополнительные датчики (двери, окна, освещённость). Удобно собрать всю
-комнату вместо десятка отдельных плиток.
-
-### 🌤 Комната «Погода»
-Большой настраиваемый виджет погоды: выбор провайдера прогноза, единиц
-измерения (°C/°F, м/с или км/ч, мм рт. ст. или гПа), набора метрик и
-прогноза на несколько дней вперёд.
-**Нужно:** сущность `weather.*`.
+### ⚡ Energy
+Shows the current power draw in large type, and optionally consumption for
+the day and month plus an estimated cost based on your tariff.
+**Needs:** a power sensor (W). **Optionally:** kWh sensors for the day and
+month, and the price per kWh.
 
 ---
 
-## Здоровье
+## Climate
 
-Виджеты для непрерывного мониторинга глюкозы (CGM) — например, при работе с
-Nightscout или Juggluco.
-
-### 🩸 Глюкоза
-Большая карточка: текущее значение, стрелка тренда, изменение, цвет фона по
-зоне (низко / норма / выше нормы / высоко). Тап открывает график за 6 часов.
-**Нужно:** датчик глюкозы. **Настройки:** целевые границы в ммоль/л.
-
-### 📈 График глюкозы
-График за 3 / 6 / 12 / 24 часа с подсветкой целевой зоны.
-
-### 📊 Статистика глюкозы
-Время в норме (TIR) с прогресс-баром, среднее значение, GMI/HbA1c, доли
-времени выше и ниже нормы — за 24 часа или за 7 дней.
+### 🌡 Climate
+A thermostat: the current temperature and buttons to adjust the target. Fits
+underfloor heating, a boiler, an air conditioner.
+**Needs:** a `climate.*` entity. **Settings:** the −/+ button step (boilers
+and underfloor heating often use 0.1°, air conditioners 0.5–1°).
 
 ---
 
-## Прочее
+## Media
 
-### 🕐 Часы
-Текущее время и дата. Настройки: 24-часовой формат, секунды, показ даты.
+### 🎵 Media player
+A player with cover art, play/pause buttons, seeking and volume. Tapping it
+opens a full-screen sheet. An optional Zaycev FM radio section can be
+enabled.
+**Needs:** a `media_player.*` entity (a smart speaker, Sonos, AirPlay, etc.).
 
-### 📝 Заметка
-Текстовая памятка с эмодзи и цветной полоской слева. Не интерактивная —
-просто напоминание на дашборде.
-
-### ☀️ Погода
-Погода с адаптивным наполнением — от иконки до 5-дневного прогноза с
-давлением, ветром и УФ-индексом. Что показывать — выбирается галочками.
-**Нужно:** сущность `weather.*`.
-
-### ⚡ Кнопка действия
-Запускает сцену, скрипт, автоматизацию или кнопку Home Assistant одним
-нажатием.
-**Нужно:** сущность сцены / скрипта / автоматизации / кнопки.
-
-### 🪟 Шторы / жалюзи
-Открывает, закрывает и останавливает шторы, жалюзи или ворота.
-**Нужно:** сущность `cover.*`.
-
-### 👤 Человек
-Показывает, дома человек или нет, с аватаром.
-**Нужно:** сущность `person.*`.
-
-### 🎛 Панель управления
-Гибкая сетка из ламп, переключателей, сцен, скриптов, кнопок и автоматизаций
-без привязки к комнате. Удобно собрать, например, блок «Сцены» или «Свет».
-
-### 🔔 Уведомления HA
-Лента активных уведомлений Home Assistant (persistent notifications).
-Уведомление можно закрыть прямо из виджета.
-
-### 🔗 Webhook-кнопка
-Дёргает webhook Home Assistant — удобно для запуска автоматизаций.
-**Нужно:** Webhook ID. **Настройки:** HTTP-метод, JSON-тело запроса.
-
-### 🗺️ Карта
-Положение человека или трекера на карте OpenStreetMap.
-**Нужно:** сущность `person.*` или `device_tracker.*` с координатами.
-
-### 🌐 Встроенный сайт
-Показывает произвольную веб-страницу прямо в плитке — например, дашборд
-Grafana. Сайт должен разрешать встраивание в iframe.
-
-### 📅 Календарь
-События из календаря Home Assistant — сегодняшние и на несколько дней вперёд.
-**Нужно:** сущность `calendar.*`.
+### 🎶 Music (Music Assistant)
+A player built on the separate [Music Assistant](https://www.music-assistant.io/)
+server: it shows what is playing, controls, volume and the output speaker.
+Music sources and output devices are configured in Music Assistant itself.
 
 ---
 
-## Своих виджетов мало?
+## Cameras
 
-Glance умеет подключать **сторонние виджеты** — отдельные `.js`-файлы,
-которые добавляются по URL в **Настройки → Внешние виджеты**. Как написать
-свой виджет — см. [руководство для разработчиков](sdk.md).
+### 📹 Camera
+Live video from a Home Assistant camera. If the video stream is unavailable,
+it shows a snapshot. Tapping it expands to full screen.
+**Needs:** a `camera.*` entity. **Settings:** mode (auto / video only /
+snapshot only), sound, snapshot refresh interval.
+
+---
+
+## Rooms
+
+### 🏠 Room
+A hub for one room in a single tile: temperature and humidity in the header,
+buttons for lights and switches, an underfloor-heating control, an embedded
+player, extra sensors (doors, windows, illuminance). Handy for collecting a
+whole room instead of a dozen separate tiles.
+
+### 🌤 Weather room
+A large, configurable weather widget: choice of forecast provider, units
+(°C/°F, m/s or km/h, mmHg or hPa), the set of metrics, and a forecast for
+several days ahead.
+**Needs:** a `weather.*` entity.
+
+---
+
+## Health
+
+Widgets for continuous glucose monitoring (CGM) — for example, when using
+Nightscout or Juggluco.
+
+### 🩸 Glucose
+A large card: the current value, a trend arrow, the change, and a background
+color by zone (low / in range / above range / high). Tapping it opens a
+6-hour chart.
+**Needs:** a glucose sensor. **Settings:** target thresholds in mmol/L.
+
+### 📈 Glucose chart
+A chart over 3 / 6 / 12 / 24 hours with the target zone highlighted.
+
+### 📊 Glucose stats
+Time in range (TIR) with a progress bar, the average value, GMI/HbA1c, and
+the share of time above and below range — over 24 hours or 7 days.
+
+---
+
+## Misc
+
+### 🕐 Clock
+The current time and date. Settings: 24-hour format, seconds, show the date.
+
+### 📝 Note
+A text reminder with an emoji and a colored stripe on the left. Not
+interactive — just a note on the dashboard.
+
+### ☀️ Weather
+Weather with adaptive content — from an icon up to a 5-day forecast with
+pressure, wind and the UV index. What to show is chosen with checkboxes.
+**Needs:** a `weather.*` entity.
+
+### ⚡ Quick action
+Runs a Home Assistant scene, script, automation or button with a single tap.
+**Needs:** a scene / script / automation / button entity.
+
+### 🪟 Cover
+Opens, closes and stops shades, blinds or gates.
+**Needs:** a `cover.*` entity.
+
+### 👤 Person
+Shows whether a person is home, with an avatar.
+**Needs:** a `person.*` entity.
+
+### 🎛 Control panel
+A flexible grid of lights, switches, scenes, scripts, buttons and
+automations, not tied to a room. Handy for assembling, say, a "Scenes" or
+"Lights" block.
+
+### 🔔 HA notifications
+A feed of active Home Assistant persistent notifications. A notification can
+be dismissed straight from the widget.
+
+### 🔗 Webhook button
+Triggers a Home Assistant webhook — handy for launching automations.
+**Needs:** a Webhook ID. **Settings:** HTTP method, the JSON request body.
+
+### 🗺️ Map
+The location of a person or tracker on an OpenStreetMap map.
+**Needs:** a `person.*` or `device_tracker.*` entity with coordinates.
+
+### 🌐 Embedded site
+Shows an arbitrary web page right inside the tile — for example, a Grafana
+dashboard. The site must allow embedding in an iframe.
+
+### 📅 Calendar
+Events from a Home Assistant calendar — today's and a few days ahead.
+**Needs:** a `calendar.*` entity.
+
+---
+
+## Need more widgets?
+
+Glance can load **third-party widgets** — standalone `.js` files added by URL
+under **Settings → External widgets**. To write your own widget, see the
+[developer guide](sdk.md).

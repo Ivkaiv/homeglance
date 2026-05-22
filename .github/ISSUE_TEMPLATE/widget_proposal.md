@@ -1,30 +1,30 @@
 ---
 name: Widget Proposal
-about: Предложить новый встроенный виджет
+about: Propose a new built-in widget
 title: "[WIDGET] "
 labels: widget, feature
 ---
 
-## Тип виджета
+## Widget type
 
-<!-- Например: «Умный замок», «Робот-пылесос», «Календарь». -->
+<!-- For example: "Smart lock", "Robot vacuum", "Calendar". -->
 
-## Какая HA-сущность(и) обслуживается
+## Which HA entity / entities it serves
 
 <!-- light.*, switch.*, climate.*, lock.*, vacuum.*, calendar.*, ... -->
 
-## Что должно быть видно в виджете
+## What should be visible in the widget
 
-<!-- Иконка, текущее состояние, кнопки, графики, списки... -->
+<!-- Icon, current state, buttons, charts, lists... -->
 
-## Какие параметры конфигурируются
+## Which parameters are configurable
 
-<!-- entity_id (обязательно), label, icon, color, шаги, интервалы и т.п. -->
+<!-- entity_id (required), label, icon, color, steps, intervals, etc. -->
 
-## Размер по умолчанию / минимальный
+## Default / minimum size
 
-<!-- Например: default 4×3, min 2×2. -->
+<!-- For example: default 4×3, min 2×2. -->
 
-## Mock-up / референсы
+## Mock-up / references
 
-<!-- Скриншот / mockup / ссылка на похожий виджет в другой панели. -->
+<!-- A screenshot / mock-up / link to a similar widget in another dashboard. -->

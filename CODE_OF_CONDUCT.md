@@ -1,43 +1,59 @@
 # Contributor Covenant Code of Conduct
 
-## Наша клятва
+## Our Pledge
 
-Мы как члены, контрибьюторы и лидеры обещаем, что участие в нашем сообществе будет свободно от харассмента для всех, независимо от возраста, размера тела, видимой или невидимой инвалидности, этнической принадлежности, половых характеристик, гендерной идентичности и выражения, уровня опыта, образования, социально-экономического статуса, национальности, внешности, расы, касты, цвета кожи, религии, сексуальной ориентации.
+We as members, contributors, and leaders pledge to make participation in our
+community a harassment-free experience for everyone, regardless of age, body
+size, visible or invisible disability, ethnicity, sex characteristics, gender
+identity and expression, level of experience, education, socio-economic
+status, nationality, personal appearance, race, caste, color, religion, or
+sexual identity and orientation.
 
-Мы обещаем действовать так, чтобы создавать открытое, дружелюбное, разнообразное, инклюзивное и здоровое сообщество.
+We pledge to act and interact in ways that contribute to an open, welcoming,
+diverse, inclusive, and healthy community.
 
-## Наши стандарты
+## Our Standards
 
-Поведение, способствующее здоровому сообществу:
+Examples of behavior that contributes to a positive environment:
 
-- Демонстрация эмпатии и доброжелательности к другим людям
-- Уважение к разным мнениям, взглядам и опыту
-- Конструктивная обратная связь — давать и получать с благодарностью
-- Признание собственных ошибок, извинения и усвоение уроков
-- Фокус на том, что лучше для всего сообщества, а не для себя
+- Demonstrating empathy and kindness toward other people
+- Being respectful of differing opinions, viewpoints, and experiences
+- Giving and gracefully accepting constructive feedback
+- Accepting responsibility and apologizing to those affected by our mistakes, and learning from the experience
+- Focusing on what is best not just for us as individuals, but for the overall community
 
-Неприемлемое поведение:
+Examples of unacceptable behavior:
 
-- Сексуализированные комментарии или образы, нежелательное сексуальное внимание
-- Троллинг, оскорбления, личные или политические нападки
-- Публичный или приватный харассмент
-- Публикация личной информации других людей (например, физический или email-адрес) без их разрешения
-- Любое другое поведение, неуместное в профессиональной среде
+- The use of sexualized language or imagery, and sexual attention or advances of any kind
+- Trolling, insulting or derogatory comments, and personal or political attacks
+- Public or private harassment
+- Publishing others' private information, such as a physical or email address, without their explicit permission
+- Other conduct which could reasonably be considered inappropriate in a professional setting
 
-## Ответственность мейнтейнеров
+## Enforcement Responsibilities
 
-Мейнтейнеры отвечают за разъяснение и применение наших стандартов и предпринимают надлежащие и справедливые корректирующие действия в ответ на любое поведение, которое они считают неуместным.
+Maintainers are responsible for clarifying and enforcing our standards and
+will take appropriate and fair corrective action in response to any behavior
+that they deem inappropriate.
 
-Мейнтейнеры имеют право и обязаны удалять, редактировать или отклонять комментарии, коммиты, код, правки wiki, issues и другие вклады, не соответствующие этому Кодексу.
+Maintainers have the right and responsibility to remove, edit, or reject
+comments, commits, code, wiki edits, issues, and other contributions that are
+not aligned with this Code of Conduct.
 
-## Область применения
+## Scope
 
-Этот Кодекс применяется во всех пространствах сообщества и публичных представлениях. Включает: GitHub issues, PR, Discussions, чаты в мессенджерах, мероприятия онлайн и офлайн.
+This Code of Conduct applies within all community spaces and public
+representations. It includes: GitHub issues, PRs, Discussions, messenger
+chats, and online and offline events.
 
-## Применение
+## Enforcement
 
-О случаях оскорбительного, харассментного или иного неприемлемого поведения сообщайте мейнтейнерам через GitHub (`@<maintainer-handle>` в issue или email). Все жалобы будут рассмотрены оперативно и справедливо.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be
+reported to the maintainers via GitHub (`@<maintainer-handle>` in an issue,
+or by email). All complaints will be reviewed and investigated promptly and
+fairly.
 
-## Источник
+## Attribution
 
-Адаптация [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).
+Adapted from the
+[Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).

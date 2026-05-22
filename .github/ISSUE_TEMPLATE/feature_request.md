@@ -1,22 +1,22 @@
 ---
 name: Feature Request
-about: Идея для новой возможности
+about: An idea for a new capability
 title: "[FEATURE] "
 labels: feature
 ---
 
-## Какая проблема решается
+## What problem does it solve
 
-<!-- Что неудобно сейчас? В каком сценарии это всплывает? -->
+<!-- What is inconvenient right now? In which scenario does it come up? -->
 
-## Предлагаемое решение
+## Proposed solution
 
-<!-- Как это могло бы работать? Mock-up / описание UX. -->
+<!-- How could it work? A mock-up / a UX description. -->
 
-## Альтернативы
+## Alternatives
 
-<!-- Какие ещё подходы рассмотрены и почему они хуже? -->
+<!-- What other approaches were considered, and why are they worse? -->
 
-## Дополнительный контекст
+## Additional context
 
-<!-- Скриншоты, ссылки, аналоги в других продуктах. -->
+<!-- Screenshots, links, similar features in other products. -->

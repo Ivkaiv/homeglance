@@ -1,12 +1,12 @@
-# Документация Homeglance
+# Homeglance documentation
 
-- **[Установка и первый запуск](getting-started.md)** — подключение к Home
-  Assistant, создание токена, мастер первой настройки.
-- **[Руководство пользователя](user-guide.md)** — как редактировать дашборд,
-  работать со страницами, виджетами, профилями и темами.
-- **[Справочник виджетов](widgets.md)** — все встроенные плитки и что им
-  нужно из Home Assistant.
-- **[Свои виджеты (SDK)](sdk.md)** — для разработчиков: как написать
-  собственный виджет.
+- **[Getting started](getting-started.md)** — connecting to Home Assistant,
+  creating a token, the first-run setup wizard.
+- **[User guide](user-guide.md)** — editing the dashboard, working with
+  pages, widgets, profiles and themes.
+- **[Widget reference](widgets.md)** — every built-in tile and what it needs
+  from Home Assistant.
+- **[Custom widgets (SDK)](sdk.md)** — for developers: how to write your own
+  widget.
 
-Способы установки расписаны в [главном README](../README.md#установка).
+Installation methods are covered in the [main README](../README.md#installation).

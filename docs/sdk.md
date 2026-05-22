@@ -1,21 +1,24 @@
-# Свои виджеты — SDK для разработчиков
+# Custom widgets — developer SDK
 
-Homeglance принимает кастомные виджеты — отдельные `.js`-файлы, которые регистрируют новый тип виджета через глобальный SDK. Файл хостится где угодно (GitHub Pages, личный сервер, npm CDN типа jsDelivr) — пользователь добавляет URL в Settings → External widgets.
+Homeglance accepts custom widgets — standalone `.js` files that register a
+new widget type through a global SDK. The file can be hosted anywhere
+(GitHub Pages, your own server, an npm CDN such as jsDelivr) — the user adds
+its URL under Settings → External widgets.
 
-## Минимальный пример
+## Minimal example
 
-Создайте `my-clock.js`:
+Create `my-clock.js`:
 
 ```js
-// Подождать пока SDK будет инициализирован — он появляется после загрузки
-// первого React-рендера Homeglance.
+// Wait until the SDK is initialized — it appears after the first React
+// render of Homeglance.
 function init() {
   if (!window.Homeglance) return setTimeout(init, 100);
 
   const { React, registerWidget, hooks } = window.Homeglance;
 
-  // Виджет — обычный React-компонент. Принимает props.params с типом
-  // вашей схемы.
+  // A widget is an ordinary React component. It receives props.params
+  // typed by your schema.
   function ClockWidget({ params }) {
     const [now, setNow] = React.useState(new Date());
     React.useEffect(() => {
@@ -26,7 +29,7 @@ function init() {
       'div',
       { className: 'glass h-full w-full p-4 flex flex-col items-center justify-center' },
       React.createElement('div', { className: 'text-3xl font-light tabular-nums' },
-        now.toLocaleTimeString(params.format24h ? 'ru-RU' : 'en-US', {
+        now.toLocaleTimeString(undefined, {
           hour: '2-digit', minute: '2-digit', second: params.showSeconds ? '2-digit' : undefined,
           hour12: !params.format24h
         })
@@ -36,16 +39,16 @@ function init() {
 
   registerWidget({
     meta: {
-      type: 'my_clock',                  // должен быть уникальный
+      type: 'my_clock',                  // must be unique
       name: 'My Clock',
       emoji: '⏱',
-      description: 'Простой таймер с миллисекундной точностью',
-      category: 'misc',                  // одна из: lights, switches, sensors, climate, media, cameras, rooms, misc
+      description: 'A simple timer with millisecond precision',
+      category: 'misc',                  // one of: lights, switches, sensors, climate, media, cameras, rooms, misc
       defaultSize: { w: 4, h: 3 },
       minSize: { w: 2, h: 2 },
       paramSchema: [
-        { key: 'format24h', label: '24-часовой формат', kind: 'boolean', default: true },
-        { key: 'showSeconds', label: 'Показывать секунды', kind: 'boolean', default: false },
+        { key: 'format24h', label: '24-hour format', kind: 'boolean', default: true },
+        { key: 'showSeconds', label: 'Show seconds', kind: 'boolean', default: false },
       ],
     },
     Component: ClockWidget,
@@ -55,22 +58,23 @@ function init() {
 init();
 ```
 
-После того как пользователь:
+Once the user has:
 
-1. Захостит этот файл (например, `https://example.com/my-clock.js`)
-2. Откроет Glance → Settings → Внешние виджеты → введёт URL → Добавить
-3. Перезагрузит страницу
+1. Hosted this file (for example, `https://example.com/my-clock.js`)
+2. Opened Glance → Settings → External widgets → entered the URL → Add
+3. Reloaded the page
 
-— виджет появится в каталоге «+ Виджет» под названием «My Clock» и сможет добавляться на любую страницу.
+— the widget appears in the "+ Widget" catalog under the name "My Clock" and
+can be added to any page.
 
-## API глобального объекта
+## The global object API
 
-После загрузки Homeglance объявляет `window.Homeglance`:
+After loading, Homeglance declares `window.Homeglance`:
 
 ```ts
 interface HomeglanceSDK {
-  version: '1';                                     // мажорная версия SDK
-  React: typeof React;                              // та же копия React что и у Glance
+  version: '1';                                     // SDK major version
+  React: typeof React;                              // the same React copy Glance uses
   registerWidget(entry: WidgetEntry): void;
   hooks: {
     useEntity(entityId?: string): HAState | undefined;
@@ -85,11 +89,15 @@ interface HomeglanceSDK {
 
 ### `registerWidget(entry)`
 
-Регистрирует тип виджета. Если такой `meta.type` уже зарегистрирован — будет warning в консоли и старая регистрация перезапишется.
+Registers a widget type. If a widget with that `meta.type` is already
+registered, a warning is logged to the console and the old registration is
+overwritten.
 
 ### `hooks.useEntity`
 
-Подписывается на одну сущность HA. Возвращает текущий state или undefined. Перерисовывает компонент только когда меняется state именно этой сущности (не других).
+Subscribes to a single HA entity. Returns the current state, or undefined.
+Re-renders the component only when the state of that specific entity changes
+(not others).
 
 ```js
 const { useEntity } = window.Homeglance.hooks;
@@ -101,29 +109,29 @@ function MyWidget({ params }) {
 
 ### `hooks.useCallService`
 
-Возвращает функцию для вызова сервиса HA — например, переключения лампы:
+Returns a function for calling an HA service — for example, toggling a light:
 
 ```js
 const callService = useCallService();
 await callService('light', 'toggle', 'light.bedroom');
 ```
 
-## WidgetEntry — формат регистрации
+## WidgetEntry — the registration format
 
 ```ts
 interface WidgetEntry {
   meta: {
-    type: string;                       // обязательно уникальный (рекомендация: префикс типа `myorg_clock`)
-    name: string;                       // отображаемое имя в каталоге
-    emoji: string;                      // эмодзи рядом с именем
-    description: string;                // короткое описание
+    type: string;                       // must be unique (recommended: a prefix like `myorg_clock`)
+    name: string;                       // display name in the catalog
+    emoji: string;                      // emoji next to the name
+    description: string;                // short description
     category: 'lights' | 'switches' | 'sensors' | 'climate' | 'media' | 'cameras' | 'rooms' | 'misc';
-    defaultSize: { w: number; h: number };  // размер при добавлении
-    minSize: { w: number; h: number };      // минимальный размер при ресайзе
-    paramSchema: ParamField[];          // поля настройки (см. ниже)
+    defaultSize: { w: number; h: number };  // size when added
+    minSize: { w: number; h: number };      // minimum size when resizing
+    paramSchema: ParamField[];          // configuration fields (see below)
   };
   Component: React.ComponentType<{ params: Record<string, any> }>;
-  computeMinSize?(params): { w: number; h: number };  // динамический minSize
+  computeMinSize?(params): { w: number; h: number };  // dynamic minSize
 }
 ```
 
@@ -131,47 +139,53 @@ interface WidgetEntry {
 
 ```ts
 interface ParamField {
-  key: string;                          // ключ в params
-  label: string;                        // подпись в форме
+  key: string;                          // key in params
+  label: string;                        // label in the form
   kind: 'entity' | 'multi-entity' | 'text' | 'number' | 'boolean'
       | 'color' | 'select' | 'multi-select' | 'icon' | 'entity-icons';
-  domain?: string;                      // фильтр для kind=entity (например 'light.')
-  options?: { value: string; label: string }[];  // для kind=select / multi-select
+  domain?: string;                      // filter for kind=entity (e.g. 'light.')
+  options?: { value: string; label: string }[];  // for kind=select / multi-select
   required?: boolean;
   default?: any;
   placeholder?: string;
-  hint?: string;                        // подсказка под полем
-  group?: string;                       // группа полей (несколько в одной — раскладываются вместе)
+  hint?: string;                        // hint shown under the field
+  group?: string;                       // field group (fields sharing one are laid out together)
 }
 ```
 
-## Стилизация
+## Styling
 
-Используйте Tailwind-классы Homeglance — встроенные виджеты тоже на них:
+Use Homeglance's Tailwind classes — the built-in widgets are built on them
+too:
 
-- `glass` — фон-плашка с blur
-- `text-text-primary`, `text-text-secondary`, `text-text-tertiary` — иерархия текста
-- `text-accent`, `bg-accent/20`, `border-accent/40` — акцент (меняется в Settings)
-- `bg-bg-primary`, `bg-bg-secondary` — фоны
+- `glass` — a frosted background panel with blur
+- `text-text-primary`, `text-text-secondary`, `text-text-tertiary` — text hierarchy
+- `text-accent`, `bg-accent/20`, `border-accent/40` — the accent (changes in Settings)
+- `bg-bg-primary`, `bg-bg-secondary` — backgrounds
 
-Все классы автоматически подстраиваются под dark/light тему.
+All classes adapt to the dark/light theme automatically.
 
-## Безопасность
+## Security
 
-- Внешний скрипт выполняется в обычном контексте страницы — он имеет доступ к localStorage, к токену HA и ко всему DOM.
-- Подключайте только проверенные источники.
-- На стороне Homeglance нет sandbox-изоляции.
+- An external script runs in the normal page context — it has access to
+  localStorage, to the HA token and to the whole DOM.
+- Only add sources you trust.
+- There is no sandbox isolation on the Homeglance side.
 
-## Версии SDK
+## SDK versions
 
-- `1` — текущая (Homeglance v0.1.x). API стабилен в рамках 1.x. Breaking-changes — только при `version: '2'`.
+- `1` — current (Homeglance v0.1.x). The API is stable within 1.x. Breaking
+  changes only come with `version: '2'`.
 
-## Публикация
+## Publishing
 
-Самый простой способ:
+The simplest options:
 
-1. GitHub Pages: push в репо `username.github.io/my-widget` файла `my-widget.js`. URL: `https://username.github.io/my-widget/my-widget.js`.
-2. jsDelivr: если виджет в npm-пакете — `https://cdn.jsdelivr.net/npm/my-widget@1/dist/index.js`.
-3. Личный сервер с HTTPS.
+1. GitHub Pages: push `my-widget.js` to a `username.github.io/my-widget`
+   repo. URL: `https://username.github.io/my-widget/my-widget.js`.
+2. jsDelivr: if the widget is in an npm package —
+   `https://cdn.jsdelivr.net/npm/my-widget@1/dist/index.js`.
+3. Your own server with HTTPS.
 
-Сообщество может публиковать виджеты, открывая PR в основной репозиторий с добавлением в раздел README «Community widgets».
+The community can publish widgets by opening a PR to the main repository
+that adds them to the README's "Community widgets" section.

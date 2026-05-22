@@ -1,77 +1,85 @@
 # Homeglance
 
+**English** · [Русский](README.ru.md)
+
 > A modern, mobile-first dashboard for Home Assistant. No YAML, no compromise.
 
-**Homeglance** (внутри приложения — просто **Glance**) — это PWA-панель для Home Assistant, которая работает рядом со стандартным Lovelace, не заменяя его. Цель: дать обычному пользователю опыт уровня iOS-«рабочего стола» — drag-and-drop виджеты, плавные анимации, эффекты «жидкого стекла», темы, многопользовательский режим. Без YAML, без правок HA-конфига.
+**Homeglance** (just **Glance** inside the app) is a PWA dashboard for Home
+Assistant that runs alongside the standard Lovelace UI instead of replacing
+it. The goal: give an ordinary user an iOS-home-screen-class experience —
+drag-and-drop widgets, smooth animations, glassmorphism, themes, multi-user
+support. No YAML, no changes to your HA config.
 
 <p align="center">
-  <img src="docs/screenshots/home-dark.webp" alt="Главный экран Homeglance" width="250" />
-  <img src="docs/screenshots/music-light.webp" alt="Музыкальный плеер" width="250" />
-  <img src="docs/screenshots/weather-dark.webp" alt="Страница погоды" width="250" />
+  <img src="docs/screenshots/home-dark.webp" alt="Homeglance home screen" width="250" />
+  <img src="docs/screenshots/music-light.webp" alt="Music player" width="250" />
+  <img src="docs/screenshots/weather-dark.webp" alt="Weather page" width="250" />
 </p>
 
-## Возможности
+## Features
 
-- **Drag-and-drop сетка** — плитки можно двигать, ресайзить, удалять
-- **28 виджетов** — свет, переключатели, замки, сенсоры, климат, медиа, камеры, шторы, погода, человек, карта, календарь, энергопотребление, заметки, часы, действия (скрипты/сцены/webhook), панели управления, хабы комнат, мониторинг глюкозы
-- **Несколько страниц** с dock-bar внизу — переключение свайпом
-- **Multi-user** — несколько профилей с PIN-защитой, каждый со своей раскладкой
-- **PWA** — устанавливается как нативное приложение на iOS, Android, desktop
-- **Темы dark / light / auto** — следуют системе
-- **Подключение к HA через WebSocket** — никаких изменений в HA-конфиге
+- **Drag-and-drop grid** — tiles can be moved, resized and removed
+- **28 widgets** — lights, switches, locks, sensors, climate, media, cameras, covers, weather, person, map, calendar, energy, notes, clock, actions (scripts/scenes/webhooks), control panels, room hubs, glucose monitoring
+- **Multiple pages** with a bottom dock bar — swipe to switch
+- **Multi-user** — several PIN-protected profiles, each with its own layout
+- **PWA** — installs as a native-like app on iOS, Android and desktop
+- **Dark / light / auto themes** — follow the system
+- **English and Russian interface** — switchable in settings
+- **Connects to HA over WebSocket** — no changes to your HA config
 
-## Скриншоты
+## Screenshots
 
-Glance в светлой и тёмной теме — она переключается в настройках или следует
-за системной.
+Glance in light and dark themes — switchable in settings or following the
+system.
 
-| | ☀️ Светлая | 🌙 Тёмная |
+| | ☀️ Light | 🌙 Dark |
 |---|---|---|
-| **Главная** | <img src="docs/screenshots/home-light.webp" width="240" /> | <img src="docs/screenshots/home-dark.webp" width="240" /> |
-| **Комната** | <img src="docs/screenshots/kitchen-light.webp" width="240" /> | <img src="docs/screenshots/kitchen-dark.webp" width="240" /> |
-| **Погода** | <img src="docs/screenshots/weather-light.webp" width="240" /> | <img src="docs/screenshots/weather-dark.webp" width="240" /> |
-| **Музыка** | <img src="docs/screenshots/music-light.webp" width="240" /> | <img src="docs/screenshots/music-dark.webp" width="240" /> |
-| **Мониторинг глюкозы** | <img src="docs/screenshots/glucose-light.webp" width="240" /> | <img src="docs/screenshots/glucose-dark.webp" width="240" /> |
+| **Home** | <img src="docs/screenshots/home-light.webp" width="240" /> | <img src="docs/screenshots/home-dark.webp" width="240" /> |
+| **Room** | <img src="docs/screenshots/kitchen-light.webp" width="240" /> | <img src="docs/screenshots/kitchen-dark.webp" width="240" /> |
+| **Weather** | <img src="docs/screenshots/weather-light.webp" width="240" /> | <img src="docs/screenshots/weather-dark.webp" width="240" /> |
+| **Music** | <img src="docs/screenshots/music-light.webp" width="240" /> | <img src="docs/screenshots/music-dark.webp" width="240" /> |
+| **Glucose monitoring** | <img src="docs/screenshots/glucose-light.webp" width="240" /> | <img src="docs/screenshots/glucose-dark.webp" width="240" /> |
 
-## Установка
+## Installation
 
-Четыре пути в зависимости от типа вашего HA.
+Four paths depending on your type of Home Assistant.
 
-### 1. HA Add-on (для HA OS / Supervised — самый простой)
+### 1. HA Add-on (for HA OS / Supervised — the easiest)
 
-Если у вас Home Assistant OS или Home Assistant Supervised — это самый простой путь. HA сам поднимет Homeglance-сервер и будет им управлять.
+If you run Home Assistant OS or Home Assistant Supervised, this is the
+simplest path. HA itself starts and manages the Homeglance server.
 
-1. **Settings** → **Add-ons** → **Add-on Store** → ⋮ (три точки) → **Repositories**
-2. Добавить URL `https://github.com/Ivkaiv/homeglance` → **Add**
-3. Найти **Homeglance** → **Install** → **Start**
-4. В боковой панели HA появится **Homeglance** — открыть.
+1. **Settings** → **Add-ons** → **Add-on Store** → ⋮ (three dots) → **Repositories**
+2. Add the URL `https://github.com/Ivkaiv/homeglance` → **Add**
+3. Find **Homeglance** → **Install** → **Start**
+4. **Homeglance** appears in the HA sidebar — open it.
 
-**Zero-config авторизация.** Под HA Ingress add-on автоматически
-подключается к HA через `SUPERVISOR_TOKEN` — никаких токенов вручную
-создавать не нужно. WS- и REST-запросы к HA проксируются server-side,
-токен не покидает контейнер.
+**Zero-config authentication.** Under HA Ingress the add-on connects to HA
+automatically via `SUPERVISOR_TOKEN` — there are no tokens to create by
+hand. WS and REST requests to HA are proxied server-side, and the token
+never leaves the container.
 
-**Persistent storage.** Профили, виджеты, темы хранятся в `/data` mount,
-который Supervisor сохраняет между рестартами, обновлениями и
-переустановками add-on'а. На любой версии HA Supervisor.
+**Persistent storage.** Profiles, widgets and themes are kept in the
+`/data` mount, which the Supervisor preserves across restarts, updates and
+reinstalls of the add-on — on any HA Supervisor version.
 
-Подробнее: [`homeglance-addon/README.md`](homeglance-addon/README.md).
+More details: [`homeglance-addon/README.md`](homeglance-addon/README.md).
 
-### 2. HACS plugin (иконка в сайдбаре HA)
+### 2. HACS plugin (icon in the HA sidebar)
 
-> **Когда нужен.** HACS plugin **не нужен**, если вы используете HA Add-on
-> (вариант 1) — он уже добавляет Homeglance в боковую панель HA через
-> Ingress автоматически. Plugin предназначен для случая, когда сервер
-> Homeglance запущен **снаружи** HA: на другом компьютере в сети, в
-> Docker (вариант 3) или в HA Core/Container, где Add-on'ы недоступны.
+> **When you need it.** The HACS plugin is **not needed** if you use the HA
+> Add-on (option 1) — it already adds Homeglance to the HA sidebar via
+> Ingress. The plugin is for the case when the Homeglance server runs
+> **outside** HA: on another machine on the network, in Docker (option 3),
+> or on HA Core/Container where add-ons are unavailable.
 
-Сам по себе plugin не запускает сервер — это iframe-обёртка для уже
-запущенного Homeglance. После установки Glance появляется в боковой
-панели HA как нативный пункт меню.
+The plugin itself does not start a server — it is an iframe wrapper for an
+already-running Homeglance. After installation, Glance appears in the HA
+sidebar as a native menu item.
 
-1. В HACS → Frontend → Custom repositories → добавить `https://github.com/Ivkaiv/homeglance`, тип **Plugin**
-2. Найти **Homeglance** → Install
-3. Добавить в `configuration.yaml`:
+1. In HACS → Frontend → Custom repositories → add `https://github.com/Ivkaiv/homeglance`, type **Plugin**
+2. Find **Homeglance** → Install
+3. Add to `configuration.yaml`:
    ```yaml
    panel_custom:
      - name: homeglance-panel
@@ -80,16 +88,17 @@ Glance в светлой и тёмной теме — она переключа�
        url_path: homeglance
        module_url: /hacsfiles/homeglance/homeglance.js
        config:
-         url: "http://homeassistant.local:3040"  # адрес вашего Homeglance-сервера
+         url: "http://homeassistant.local:3040"  # address of your Homeglance server
    ```
-4. Перезагрузить HA → в боковой панели появится **Homeglance**
+4. Restart HA → **Homeglance** appears in the sidebar
 
-> **Важно:** plugin требует, чтобы где-то в сети уже был запущен
-> Homeglance-сервер — Docker (3) или процесс на другом хосте.
+> **Important:** the plugin requires a Homeglance server already running
+> somewhere on the network — Docker (3) or a process on another host.
 
-### 3. Docker / Docker Compose (любой HA-сценарий)
+### 3. Docker / Docker Compose (any HA setup)
 
-Подходит для HA Container, HA Core или для вынесения панели на отдельный сервер.
+Works for HA Container, HA Core, or for running the dashboard on a separate
+server.
 
 ```yaml
 # docker-compose.yml
@@ -107,15 +116,16 @@ volumes:
   homeglance-data:
 ```
 
-Запуск:
+Start it:
 
 ```bash
 docker compose up -d
 ```
 
-Открыть `http://server-ip:3040`, ввести URL HA и Long-Lived Access Token, готово.
+Open `http://server-ip:3040`, enter your HA URL and a Long-Lived Access
+Token, and you are done.
 
-### 4. Локальный запуск из исходников (для разработки)
+### 4. Run from source (for development)
 
 ```bash
 git clone https://github.com/Ivkaiv/homeglance.git
@@ -124,58 +134,62 @@ bun install
 bun dev
 ```
 
-Открыть `http://localhost:3040`.
+Open `http://localhost:3040`.
 
-## Подключение к Home Assistant
+## Connecting to Home Assistant
 
-При первом запуске Homeglance спросит:
+On first launch Homeglance asks for:
 
-1. **URL Home Assistant** — например `http://192.168.1.10:8123` или `https://ha.example.com`
-2. **Long-Lived Access Token** — создать в HA Profile → Security → Long-Lived Access Tokens
+1. **Home Assistant URL** — e.g. `http://192.168.1.10:8123` or `https://ha.example.com`
+2. **Long-Lived Access Token** — create one in HA Profile → Security → Long-Lived Access Tokens
 
-Токен хранится локально (на сервере Homeglance в `data/connection.json`, если используется server-storage; либо в localStorage браузера).
+The token is stored locally (on the Homeglance server in
+`data/connection.json` when server storage is used, or in the browser's
+localStorage otherwise).
 
-## Конфигурация
+## Configuration
 
-Все настройки — через UI. По умолчанию никакие env-vars не нужны. Если хочется переопределить:
+Everything is configured through the UI. No environment variables are
+required by default. If you want to override something:
 
-| Переменная                | По умолчанию | Описание                                     |
-|---------------------------|--------------|----------------------------------------------|
-| `PORT`                    | `3040`       | Порт сервера                                 |
-| `NEXT_TELEMETRY_DISABLED` | `1`          | Отключить телеметрию Next.js                 |
+| Variable                  | Default | Description                  |
+|---------------------------|---------|------------------------------|
+| `PORT`                    | `3040`  | Server port                  |
+| `NEXT_TELEMETRY_DISABLED` | `1`     | Disable Next.js telemetry    |
 
-См. `.env.example`.
+See `.env.example`.
 
-## Документация
+## Documentation
 
-Руководства для пользователя — в директории [`docs/`](docs/):
+User guides live in the [`docs/`](docs/) directory:
 
-- [Установка и первый запуск](docs/getting-started.md) — подключение к Home Assistant, создание токена, мастер настройки
-- [Руководство пользователя](docs/user-guide.md) — редактирование дашборда, страницы, профили, темы
-- [Справочник виджетов](docs/widgets.md) — все встроенные плитки
-- [Свои виджеты (SDK)](docs/sdk.md) — для разработчиков
+- [Getting started](docs/getting-started.md) — connecting to Home Assistant, creating a token, the setup wizard
+- [User guide](docs/user-guide.md) — editing the dashboard, pages, profiles, themes
+- [Widget reference](docs/widgets.md) — every built-in tile
+- [Custom widgets (SDK)](docs/sdk.md) — for developers
 
-## Технологии
+## Tech stack
 
 - **Next.js 14** (App Router, standalone build)
 - **React 18** + **TypeScript** strict
 - **Tailwind CSS 4**
-- **Framer Motion** — анимации
+- **Framer Motion** — animations
 - **react-grid-layout** — drag/drop
-- **Bun** — пакетный менеджер и runtime для разработки
+- **Bun** — package manager and development runtime
 
-## Статус
+## Status
 
-**Alpha.** Работает у автора в продакшене, активно развивается. Возможны
-изменения и шероховатости. Баг-репорты и предложения — через
-[GitHub Issues](https://github.com/Ivkaiv/homeglance/issues).
+**Alpha.** Running in the author's home in production and under active
+development. Expect changes and rough edges. Bug reports and ideas are
+welcome via [GitHub Issues](https://github.com/Ivkaiv/homeglance/issues).
 
 ## Contributing
 
-Любые вклады welcome. Перед PR прочитайте [CONTRIBUTING.md](CONTRIBUTING.md) и [Code of Conduct](CODE_OF_CONDUCT.md).
+All contributions are welcome. Before opening a PR, please read
+[CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Если хотите добавить новый виджет — см. [docs/sdk.md](docs/sdk.md).
+To add a new widget, see [docs/sdk.md](docs/sdk.md).
 
 ## License
 
-[MIT](LICENSE) — стандарт для HA-экосистемы.
+[MIT](LICENSE) — the standard for the HA ecosystem.
