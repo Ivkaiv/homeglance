@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import type { CSSProperties, ReactNode } from 'react';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { PressButton } from '@/components/ui/PressButton';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 export interface EntityToggleShellProps {
   on: boolean;
@@ -48,6 +49,7 @@ export function EntityToggleShell({
   glowOverride,
   cornerButton,
 }: EntityToggleShellProps) {
+  const t = useT();
   const glow =
     glowOverride ??
     (on
@@ -55,7 +57,7 @@ export function EntityToggleShell({
       : undefined);
 
   const ariaLabel = `${label}: ${
-    isBad ? statusText.bad ?? 'Нет связи' : on ? statusText.on : statusText.off
+    isBad ? statusText.bad ?? t('w.noConnection') : on ? statusText.on : statusText.off
   }`;
 
   const iconColor = on ? color : undefined;
@@ -96,7 +98,7 @@ export function EntityToggleShell({
         >
           <GlanceIcon value={iconValue} size={28} />
           <div className="hidden @[140px]:block text-sm text-text-primary">
-            {isBad ? statusText.bad ?? 'Нет связи' : on ? statusText.on : statusText.off}
+            {isBad ? statusText.bad ?? t('w.noConnection') : on ? statusText.on : statusText.off}
           </div>
         </div>
 

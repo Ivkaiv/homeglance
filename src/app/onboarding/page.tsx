@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Key, Globe, ExternalLink } from 'lucide-react';
 import { useConnection } from '@/lib/ha/ConnectionProvider';
-import { useT } from '@/lib/i18n/I18nProvider';
+import { useI18n } from '@/lib/i18n/I18nProvider';
+import { LOCALES, LOCALE_NAMES } from '@/lib/i18n/types';
 
 export default function OnboardingPage() {
-  const t = useT();
+  const { t, locale, setLocale } = useI18n();
   const { connectTo } = useConnection();
   const [url, setUrl] = useState('');
   const [token, setToken] = useState('');
@@ -108,6 +109,22 @@ export default function OnboardingPage() {
             >
               {t('onboarding.welcome.connectButton')} <ChevronRight size={16} />
             </button>
+
+            <div className="mt-6 flex items-center justify-center gap-2">
+              {LOCALES.map((code) => (
+                <button
+                  key={code}
+                  onClick={() => setLocale(code)}
+                  className={`px-3 py-1.5 rounded-full text-xs transition border ${
+                    locale === code
+                      ? 'bg-accent/20 border-accent/40 text-accent'
+                      : 'bg-white/5 border-white/10 text-text-secondary hover:bg-white/10'
+                  }`}
+                >
+                  {LOCALE_NAMES[code]}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

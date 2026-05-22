@@ -2,6 +2,7 @@
 
 import { useEntity } from '@/lib/ha/ConnectionProvider';
 import { GlanceIcon } from '@/components/icons/MdiIcon';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -11,11 +12,12 @@ interface Params {
 
 export function PersonWidget({ params }: { params: Params }) {
   const e = useEntity(params.entity);
+  const t = useT();
 
   const isBad = !e || e.state === 'unavailable';
-  const label = params.label ?? e?.attributes.friendly_name ?? 'Человек';
+  const label = params.label ?? e?.attributes.friendly_name ?? t('w.person.label');
   const home = e?.state === 'home';
-  const stateText = home ? 'Дома' : e?.state === 'not_home' ? 'Нет дома' : (e?.state ?? '—');
+  const stateText = home ? t('w.person.home') : e?.state === 'not_home' ? t('w.person.away') : (e?.state ?? '—');
   const picture: string | undefined = e?.attributes.entity_picture;
   const dotColor = home ? '#34d399' : isBad ? 'rgba(255,255,255,0.18)' : '#fbbf24';
   const iconValue = params.icon || 'account';
@@ -32,7 +34,7 @@ export function PersonWidget({ params }: { params: Params }) {
         {picture ? (
           <img
             src={picture}
-            alt={`Аватар: ${label}`}
+            alt={t('w.avatarAlt', { name: label })}
             width={32}
             height={32}
             loading="lazy"
@@ -48,7 +50,7 @@ export function PersonWidget({ params }: { params: Params }) {
         {picture ? (
           <img
             src={picture}
-            alt={`Аватар: ${label}`}
+            alt={t('w.avatarAlt', { name: label })}
             width={48}
             height={48}
             loading="lazy"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   showSeconds?: boolean;
@@ -10,6 +11,7 @@ interface Params {
 
 export function TimeWidget({ params }: { params: Params }) {
   const [now, setNow] = useState(() => new Date());
+  const { locale } = useI18n();
 
   useEffect(() => {
     const tick = params.showSeconds ? 1000 : 30_000;
@@ -46,7 +48,7 @@ export function TimeWidget({ params }: { params: Params }) {
   const mm = String(now.getMinutes()).padStart(2, '0');
   const ss = String(now.getSeconds()).padStart(2, '0');
   const time = params.showSeconds ? `${hh}:${mm}:${ss}` : `${hh}:${mm}`;
-  const dateStr = now.toLocaleDateString('ru-RU', {
+  const dateStr = now.toLocaleDateString(locale, {
     weekday: 'short',
     day: 'numeric',
     month: 'long',

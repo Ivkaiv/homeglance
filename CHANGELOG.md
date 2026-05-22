@@ -7,6 +7,24 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.82] — 2026-05-22
+
+### Changed
+- **Documentation switched to English.** The README, the `docs/` guides,
+  CONTRIBUTING, the Code of Conduct and the issue/PR templates are now in
+  English. A Russian README stays available via a language switcher in the
+  header. The old design-spec docs (roadmap, architecture, vision) were
+  replaced with task-oriented user guides.
+- **Localization, part 1.** The clock widget now formats its date using the
+  app's language. Status text of the interactive widgets (light, switch,
+  lock, cover, person, color light) moved to the i18n dictionary and now
+  follows the selected language.
+
+### Added
+- **Language picker on the first-run screen** — the interface language can
+  be chosen before connecting to Home Assistant.
+- New README screenshots in light and dark themes.
+
 ## [0.1.0-alpha.81] — 2026-05-20
 
 ### Fixed

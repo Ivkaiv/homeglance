@@ -214,4 +214,44 @@ export const ru: Dictionary = {
   'error.global.reload': 'Перезагрузить',
   'error.widget.title': 'Виджет «{type}» сломался',
   'error.widget.restart': 'Перезапустить',
+
+  // ── Виджеты: runtime-строки (статусы, дефолтные подписи) ──────────────────
+  'w.noConnection': 'Нет связи',
+  'w.emptyHint': 'Откройте настройки виджета',
+  'w.openControls': 'открыть управление',
+  'w.avatarAlt': 'Аватар: {name}',
+  'w.brightness': 'Яркость',
+  'w.turnOn': 'Включить',
+  'w.turnOff': 'Выключить',
+
+  'w.person.label': 'Человек',
+  'w.person.home': 'Дома',
+  'w.person.away': 'Нет дома',
+
+  'w.switch.label': 'Переключатель',
+  'w.switch.configure': '⚙️ Настрой переключатель',
+  'w.switch.on': 'Включено',
+  'w.switch.off': 'Выключено',
+
+  'w.light.label': 'Свет',
+  'w.light.on': 'Включён',
+  'w.light.off': 'Выключен',
+  'w.light.offFem': 'Выключена',
+  'w.light.colorBrightness': 'Цвет и яркость',
+  'w.light.colorSwatch': 'Цвет {color}',
+
+  'w.lock.label': 'Замок',
+  'w.lock.configure': '⚙️ Настрой замок',
+  'w.lock.locked': 'Заперто',
+  'w.lock.unlocked': 'Открыто',
+  'w.lock.jammed': 'Заклинило',
+
+  'w.cover.label': 'Шторы',
+  'w.cover.open': 'Открыты',
+  'w.cover.closed': 'Закрыты',
+  'w.cover.opening': 'Открываются',
+  'w.cover.closing': 'Закрываются',
+  'w.cover.openAction': 'Открыть',
+  'w.cover.stopAction': 'Стоп',
+  'w.cover.closeAction': 'Закрыть',
 };

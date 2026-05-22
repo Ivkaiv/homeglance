@@ -6,6 +6,7 @@ import { GlanceIcon } from '@/components/icons/MdiIcon';
 import { PressButton } from '@/components/ui/PressButton';
 import { ChevronUp, ChevronDown, Square } from 'lucide-react';
 import { CoverSheet } from './CoverSheet';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -17,23 +18,24 @@ export function CoverWidget({ params }: { params: Params }) {
   const e = useEntity(params.entity);
   const callService = useCallService();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const t = useT();
 
   const isBad = !e || e.state === 'unavailable';
-  const label = params.label ?? e?.attributes.friendly_name ?? 'Шторы';
+  const label = params.label ?? e?.attributes.friendly_name ?? t('w.cover.label');
   const position = e?.attributes.current_position;
   const state = e?.state;
 
   const stateText =
     state === 'open'
-      ? 'Открыты'
+      ? t('w.cover.open')
       : state === 'closed'
-        ? 'Закрыты'
+        ? t('w.cover.closed')
         : state === 'opening'
-          ? 'Открываются'
+          ? t('w.cover.opening')
           : state === 'closing'
-            ? 'Закрываются'
+            ? t('w.cover.closing')
             : isBad
-              ? 'Нет связи'
+              ? t('w.noConnection')
               : '—';
 
   const cmd = (service: string) => callService('cover', service, params.entity);
@@ -49,7 +51,7 @@ export function CoverWidget({ params }: { params: Params }) {
           onClick={openSheet}
           disabled={isBad}
           title={label}
-          aria-label={`${label}: ${stateText}, открыть управление`}
+          aria-label={`${label}: ${stateText}, ${t('w.openControls')}`}
           className="@[140px]:hidden h-full w-full flex items-center justify-center disabled:opacity-40"
         >
           <GlanceIcon value={iconValue} size={28} />
@@ -60,7 +62,7 @@ export function CoverWidget({ params }: { params: Params }) {
           type="button"
           onClick={openSheet}
           disabled={isBad}
-          aria-label={`${label}: открыть управление`}
+          aria-label={`${label}: ${t('w.openControls')}`}
           className="hidden @[140px]:block text-left disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 rounded-md"
         >
           <div className="flex items-start justify-between">
@@ -80,7 +82,7 @@ export function CoverWidget({ params }: { params: Params }) {
             disabled={isBad}
             onClick={() => cmd('open_cover')}
             className="flex-1 h-9"
-            ariaLabel="Открыть"
+            ariaLabel={t('w.cover.openAction')}
           >
             <ChevronUp size={16} />
           </PressButton>
@@ -88,7 +90,7 @@ export function CoverWidget({ params }: { params: Params }) {
             disabled={isBad}
             onClick={() => cmd('stop_cover')}
             size={36}
-            ariaLabel="Стоп"
+            ariaLabel={t('w.cover.stopAction')}
           >
             <Square size={12} />
           </PressButton>
@@ -96,7 +98,7 @@ export function CoverWidget({ params }: { params: Params }) {
             disabled={isBad}
             onClick={() => cmd('close_cover')}
             className="flex-1 h-9"
-            ariaLabel="Закрыть"
+            ariaLabel={t('w.cover.closeAction')}
           >
             <ChevronDown size={16} />
           </PressButton>

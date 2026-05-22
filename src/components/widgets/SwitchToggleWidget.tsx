@@ -2,6 +2,7 @@
 
 import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { EntityToggleShell } from './EntityToggleShell';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -18,18 +19,19 @@ const DEFAULT_COLOR = '#34d399';
 export function SwitchToggleWidget({ params }: { params: Params }) {
   const e = useEntity(params.entity);
   const callService = useCallService();
+  const t = useT();
 
   if (!params.entity) {
     return (
       <div className="glass h-full w-full p-3 flex items-center justify-center text-text-tertiary text-xs text-center">
-        ⚙️ Настрой переключатель
+        {t('w.switch.configure')}
       </div>
     );
   }
 
   const on = e?.state === 'on';
   const isBad = !e || e.state === 'unavailable';
-  const label = params.label ?? e?.attributes.friendly_name ?? 'Переключатель';
+  const label = params.label ?? e?.attributes.friendly_name ?? t('w.switch.label');
   const haIcon = e?.attributes.icon as string | undefined;
   const iconValue = params.icon || haIcon || '🔌';
   const color = params.color || DEFAULT_COLOR;
@@ -45,7 +47,7 @@ export function SwitchToggleWidget({ params }: { params: Params }) {
       label={label}
       iconValue={iconValue}
       color={color}
-      statusText={{ on: 'Включено', off: 'Выключено', bad: 'Нет связи' }}
+      statusText={{ on: t('w.switch.on'), off: t('w.switch.off'), bad: t('w.noConnection') }}
       onClick={onClick}
     />
   );

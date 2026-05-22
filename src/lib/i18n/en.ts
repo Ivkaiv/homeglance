@@ -214,4 +214,44 @@ export const en: Dictionary = {
   'error.global.reload': 'Reload',
   'error.widget.title': 'Widget “{type}” crashed',
   'error.widget.restart': 'Restart',
+
+  // ── Widgets: runtime strings (statuses, default labels) ───────────────────
+  'w.noConnection': 'No connection',
+  'w.emptyHint': 'Open widget settings',
+  'w.openControls': 'open controls',
+  'w.avatarAlt': 'Avatar: {name}',
+  'w.brightness': 'Brightness',
+  'w.turnOn': 'Turn on',
+  'w.turnOff': 'Turn off',
+
+  'w.person.label': 'Person',
+  'w.person.home': 'Home',
+  'w.person.away': 'Away',
+
+  'w.switch.label': 'Switch',
+  'w.switch.configure': '⚙️ Set up the switch',
+  'w.switch.on': 'On',
+  'w.switch.off': 'Off',
+
+  'w.light.label': 'Light',
+  'w.light.on': 'On',
+  'w.light.off': 'Off',
+  'w.light.offFem': 'Off',
+  'w.light.colorBrightness': 'Color & brightness',
+  'w.light.colorSwatch': 'Color {color}',
+
+  'w.lock.label': 'Lock',
+  'w.lock.configure': '⚙️ Set up the lock',
+  'w.lock.locked': 'Locked',
+  'w.lock.unlocked': 'Unlocked',
+  'w.lock.jammed': 'Jammed',
+
+  'w.cover.label': 'Cover',
+  'w.cover.open': 'Open',
+  'w.cover.closed': 'Closed',
+  'w.cover.opening': 'Opening',
+  'w.cover.closing': 'Closing',
+  'w.cover.openAction': 'Open',
+  'w.cover.stopAction': 'Stop',
+  'w.cover.closeAction': 'Close',
 };

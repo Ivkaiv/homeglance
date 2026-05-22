@@ -1,6 +1,7 @@
 'use client';
 
 import { Settings } from 'lucide-react';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 /** Шейр-обёртка для пустого виджета (нет привязок).
  *  Показывает иконку шестерёнки и подсказку «настройте через ⚙». */
@@ -11,12 +12,13 @@ export function WidgetEmptyState({
   emoji?: string;
   hint?: string;
 }) {
+  const t = useT();
   return (
     <div className="glass h-full w-full p-3 flex flex-col items-center justify-center text-text-tertiary gap-1.5 select-none">
       <Settings size={18} className="opacity-50" aria-hidden="true" />
       {emoji && <div className="text-2xl opacity-60">{emoji}</div>}
       <div className="text-[11px] text-center max-w-[80%] leading-tight">
-        {hint || 'Откройте настройки виджета'}
+        {hint || t('w.emptyHint')}
       </div>
     </div>
   );

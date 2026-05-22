@@ -6,6 +6,7 @@ import { useEntity, useCallService } from '@/lib/ha/ConnectionProvider';
 import { useWidgetSize } from '@/lib/widgets/useWidgetSize';
 import { LightColorSheet } from './LightColorSheet';
 import { EntityToggleShell } from './EntityToggleShell';
+import { useT } from '@/lib/i18n/I18nProvider';
 
 interface Params {
   entity: string;
@@ -62,6 +63,7 @@ export function LightColorWidget({ params }: { params: Params }) {
   const [ref, size] = useWidgetSize();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pendingBrightness, setPendingBrightness] = useState<number | null>(null);
+  const t = useT();
 
   if (!params.entity) {
     return (
@@ -77,7 +79,7 @@ export function LightColorWidget({ params }: { params: Params }) {
 
   const on = e?.state === 'on';
   const isBad = !e || e.state === 'unavailable';
-  const label = params.label ?? e?.attributes.friendly_name ?? 'Свет';
+  const label = params.label ?? e?.attributes.friendly_name ?? t('w.light.label');
   const supported: string[] = e?.attributes.supported_color_modes ?? [];
   const hasColor = supported.some((m) => ['rgb', 'rgbw', 'rgbww', 'hs', 'xy'].includes(m));
   const hasBrightness = supported.length > 0 && !supported.every((m) => m === 'onoff');
@@ -86,7 +88,7 @@ export function LightColorWidget({ params }: { params: Params }) {
     pendingBrightness ?? (brightnessHa ? Math.round((brightnessHa / 255) * 100) : 0);
   const rgbHa = e?.attributes.rgb_color as number[] | undefined;
   const colorHex = rgbToHex(rgbHa);
-  const status = isBad ? 'нет связи' : on ? `${brightnessPct}%` : 'выключена';
+  const status = isBad ? t('w.noConnection') : on ? `${brightnessPct}%` : t('w.light.offFem');
 
   const toggle = () => !isBad && callService('light', on ? 'turn_off' : 'turn_on', params.entity);
   const sendBrightness = (pct: number) => {
@@ -148,7 +150,7 @@ export function LightColorWidget({ params }: { params: Params }) {
             label={label}
             iconValue={iconValue}
             color={colorHex}
-            statusText={{ on: `${brightnessPct}%`, off: 'Выключена', bad: 'Нет связи' }}
+            statusText={{ on: `${brightnessPct}%`, off: t('w.light.offFem'), bad: t('w.noConnection') }}
             onClick={toggle}
             cornerButton={
               <button
@@ -158,8 +160,8 @@ export function LightColorWidget({ params }: { params: Params }) {
                   setSheetOpen(true);
                 }}
                 disabled={isBad}
-                aria-label={`Цвет и яркость: ${label}`}
-                title="Цвет и яркость"
+                aria-label={`${t('w.light.colorBrightness')}: ${label}`}
+                title={t('w.light.colorBrightness')}
                 className="w-6 h-6 rounded-full ring-2 ring-white/70 dark:ring-black/40 shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-accent"
                 style={{
                   // Когда лампа включена — кнопка светится её цветом.
@@ -205,7 +207,7 @@ export function LightColorWidget({ params }: { params: Params }) {
             onClick={toggle}
             disabled={isBad}
             className="no-drag shrink-0"
-            aria-label={on ? 'Выключить' : 'Включить'}
+            aria-label={on ? t('w.turnOff') : t('w.turnOn')}
           >
             {IconBlock}
           </button>
@@ -215,7 +217,7 @@ export function LightColorWidget({ params }: { params: Params }) {
             onClick={() => setSheetOpen(true)}
             disabled={isBad}
             className="no-drag min-w-0 flex-1 text-left disabled:opacity-40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/70 rounded-md"
-            aria-label={`Открыть управление: ${label}`}
+            aria-label={`${t('w.light.colorBrightness')}: ${label}`}
           >
             <div className="text-xs font-medium truncate">{label}</div>
             <div className="text-[10px] text-text-tertiary truncate">{status}</div>
@@ -231,7 +233,7 @@ export function LightColorWidget({ params }: { params: Params }) {
             value={brightnessPct}
             onChange={(ev) => sendBrightness(Number(ev.target.value))}
             disabled={isBad || !on}
-            aria-label="Яркость"
+            aria-label={t('w.brightness')}
             className="no-drag w-full h-2 cursor-pointer shrink-0"
             style={{ accentColor: colorHex }}
           />
@@ -253,7 +255,7 @@ export function LightColorWidget({ params }: { params: Params }) {
                       : ''
                   }`}
                   style={{ backgroundColor: c }}
-                  aria-label={`Цвет ${c}`}
+                  aria-label={t('w.light.colorSwatch', { color: c })}
                 />
               );
             })}
